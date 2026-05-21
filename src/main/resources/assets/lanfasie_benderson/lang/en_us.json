@@ -1,0 +1,13 @@
+{
+  "itemGroup.lanfasie_benderson": "Example Mod Tab",
+  "block.lanfasie_benderson.example_block": "Example Block",
+  "item.lanfasie_benderson.example_item": "Example Item",
+
+  "lanfasie_benderson.configuration.title": "Lanfasie: Benderson Configs",
+  "lanfasie_benderson.configuration.section.lanfasie_benderson.common.toml": "Lanfasie: Benderson Configs",
+  "lanfasie_benderson.configuration.section.lanfasie_benderson.common.toml.title": "Lanfasie: Benderson Configs",
+  "lanfasie_benderson.configuration.items": "Item List",
+  "lanfasie_benderson.configuration.logDirtBlock": "Log Dirt Block",
+  "lanfasie_benderson.configuration.magicNumberIntroduction": "Magic Number Text",
+  "lanfasie_benderson.configuration.magicNumber": "Magic Number"
+}
