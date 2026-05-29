@@ -25,8 +25,8 @@ import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.entity.IEntityWithComplexSpawn;
-import org.jspecify.annotations.Nullable;
 
+import javax.annotation.Nullable;
 import java.util.Iterator;
 import java.util.List;
 
@@ -71,9 +71,10 @@ public class DelayedAttackMarker extends Entity implements TraceableEntity, IEnt
         super(type, level);
     }
 
-    public static DelayedAttackMarker createBlackCatSmash(Level level, Vec3 arenaCenter, float arenaRange, int column, float damage, int castTick){
+    public static DelayedAttackMarker createBlackCatSmash(Level level, Vec3 arenaCenter, @Nullable LivingEntity owner, float arenaRange, int column, float damage, int castTick){
         var instance = new DelayedAttackMarker(AllEntityTypes.DELAYED_ATTACK_MARKER.get(), level);
         instance.setAttackType(AttackType.BLACK_CAT_SMASH);
+        instance.owner = EntityReference.of(owner);
         int columnCentered = column - 1;
         float bandWidth = arenaRange * 2 / 3f;
         float offset = columnCentered * bandWidth;
@@ -87,9 +88,10 @@ public class DelayedAttackMarker extends Entity implements TraceableEntity, IEnt
         return instance;
     }
 
-    public static DelayedAttackMarker createFireballMeteor(Level level, Vec3 location, float range, float damage, int castTick){
+    public static DelayedAttackMarker createFireballMeteor(Level level, Vec3 location, @Nullable LivingEntity owner, float range, float damage, int castTick){
         var instance = new DelayedAttackMarker(AllEntityTypes.DELAYED_ATTACK_MARKER.get(), level);
         instance.setAttackType(AttackType.FIREBALL_METEOR);
+        instance.owner = EntityReference.of(owner);
         instance.setPos(location);
         instance.setRange(range);
         instance.damage = damage;
@@ -118,7 +120,7 @@ public class DelayedAttackMarker extends Entity implements TraceableEntity, IEnt
                         associatedTargetMarker = new TargetMarker(level(), position(), TargetMarker.MarkerArgs.complexRange(TargetMarker.MarkerType.LINEAR_AOE, getRange2(), getRange() * 2, getMaxLifeTick() - catMoveTotalTime - CAT_LEAVE_TIME));
                         this.level().addFreshEntity(associatedTargetMarker);
                     }
-                    if(remainingLife == catMoveTotalTime + CAT_LEAVE_TIME){
+                    if(remainingLife == catMoveTotalTime + CAT_LEAVE_TIME && getOwner() != null && getOwner().isAlive()){
                         var aabb = AABB.ofSize(position(), getRange2(), 10, getRange() * 2);
                         this.snapshotAttackEntities = level().getEntitiesOfClass(Player.class, aabb).stream()
                                 .filter(Player::canBeSeenAsEnemy)
@@ -249,7 +251,7 @@ public class DelayedAttackMarker extends Entity implements TraceableEntity, IEnt
     }
 
     @Override
-    public @Nullable Entity getOwner() {
+    public @Nullable LivingEntity getOwner() {
         return EntityReference.getLivingEntity(this.owner, level());
     }
 }

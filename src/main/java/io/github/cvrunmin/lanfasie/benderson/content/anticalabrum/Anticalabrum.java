@@ -1,11 +1,13 @@
 package io.github.cvrunmin.lanfasie.benderson.content.anticalabrum;
 
 import com.mojang.serialization.Codec;
+import io.github.cvrunmin.lanfasie.benderson.content.marker.DelayedAttackMarker;
 import io.github.cvrunmin.lanfasie.benderson.index.AllEntityDataSerializers;
 import io.github.cvrunmin.lanfasie.benderson.index.AllEntityTypes;
 import io.github.cvrunmin.lanfasie.benderson.index.AllMobEffects;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.core.Holder;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -19,19 +21,21 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.*;
+import net.minecraft.world.entity.ai.util.RandomPos;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+import net.neoforged.neoforge.entity.IEntityWithComplexSpawn;
 import org.joml.Vector3f;
 import org.joml.Vector3fc;
 
 import javax.annotation.Nullable;
 import java.util.Optional;
 
-public class Anticalabrum extends Entity implements TraceableEntity {
+public class Anticalabrum extends Entity implements TraceableEntity, IEntityWithComplexSpawn {
     public record AnticalabrumTypeInfo(String suffix, @Nullable Holder<MobEffect> mobEffect, int u, int v){
     }
 
@@ -83,12 +87,13 @@ public class Anticalabrum extends Entity implements TraceableEntity {
     private boolean persistent = false;
     private int range = 24;
     private EntityReference<LivingEntity> owner;
+    private RandomSource randomSource;
 
     public Anticalabrum(EntityType<?> type, Level level) {
         super(type, level);
         this.noPhysics = true;
         this.lifeTick = -15; // animation offset
-        RandomSource randomSource = level.getRandom().fork();
+        randomSource = level.getRandom().fork();
         var rho = Math.toRadians(90 - randomSource.nextDouble() * 30);
         var theta = Math.toRadians(randomSource.nextDouble() * 360);
         this.swordOrientation = new Vector3f((float) (Math.cos(rho) * Math.cos(theta)), (float) Math.sin(rho), (float) (Math.cos(rho) * Math.sin(theta)));
@@ -135,14 +140,25 @@ public class Anticalabrum extends Entity implements TraceableEntity {
     private void handleByCurseType(){
         switch (getAnticalabrumType()) {
             case FELIS_INVISIBILIS -> {
-                if (lifeTick == 5 && maxLifeTick > 120) {
+                if (lifeTick == 5 && maxLifeTick > 160) {
                     var safeCol = this.level().getRandom().fork().nextInt(3);
-
+                    for (int i = 0; i < 3; i++) {
+                        if(i == safeCol) continue;
+                        var attacker = DelayedAttackMarker.createBlackCatSmash(level(), position(), getOwner(), range, i, 20, 110);
+                        level().addFreshEntity(attacker);
+                    }
                 }
             }
             case NETHER_CERBERUS -> {
-                if (lifeTick % 200 == 0) {
-
+                if (lifeTick % 40 == 0) {
+                    var minX = position().x - range + 1;
+                    var minZ = position().z - range + 1;
+                    var maxX = minX + range + range - 2;
+                    var maxZ = minZ + range + range - 2;
+                    var x = randomSource.nextDouble() * (maxX - minX) + minX;
+                    var z = randomSource.nextDouble() * (maxZ - minZ) + minZ;
+                    var attacker = DelayedAttackMarker.createFireballMeteor(level(), new Vec3(x, position().y, z), getOwner(), 1.5f, 15, 70);
+                    level().addFreshEntity(attacker);
                 }
             }
             case null, default -> {
@@ -151,7 +167,7 @@ public class Anticalabrum extends Entity implements TraceableEntity {
     }
 
     @Override
-    public Entity getOwner() {
+    public LivingEntity getOwner() {
         return EntityReference.getLivingEntity(this.owner, level());
     }
 
@@ -192,6 +208,16 @@ public class Anticalabrum extends Entity implements TraceableEntity {
         output.putBoolean("Persistent", this.persistent);
         output.putInt("Range", range);
         EntityReference.store(this.owner, output, "Owner");
+    }
+
+    @Override
+    public void writeSpawnData(RegistryFriendlyByteBuf buffer) {
+        buffer.writeInt(lifeTick);
+    }
+
+    @Override
+    public void readSpawnData(RegistryFriendlyByteBuf additionalData) {
+        this.lifeTick = additionalData.readInt();
     }
 
     public int getLifeTick() {

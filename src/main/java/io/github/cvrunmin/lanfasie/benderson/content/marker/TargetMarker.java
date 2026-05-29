@@ -9,6 +9,7 @@ import io.github.cvrunmin.lanfasie.benderson.index.AllSoundEvents;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.UUIDUtil;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -26,11 +27,12 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.phys.Vec3;
+import net.neoforged.neoforge.entity.IEntityWithComplexSpawn;
 
 import java.util.Optional;
 import java.util.UUID;
 
-public class TargetMarker extends Entity {
+public class TargetMarker extends Entity implements IEntityWithComplexSpawn {
     public enum TargetType implements StringRepresentable {
         ENTITY, POS;
 
@@ -256,6 +258,16 @@ public class TargetMarker extends Entity {
         }
         output.store("MarkerArgs", MarkerArgs.CODEC, this.getMarkerArgs());
         output.putBoolean("Persistent", this.isPersistent());
+    }
+
+    @Override
+    public void writeSpawnData(RegistryFriendlyByteBuf buffer) {
+        buffer.writeInt(lifeTick);
+    }
+
+    @Override
+    public void readSpawnData(RegistryFriendlyByteBuf additionalData) {
+        lifeTick = additionalData.readInt();
     }
 
     public TargetType getTargetType() {
