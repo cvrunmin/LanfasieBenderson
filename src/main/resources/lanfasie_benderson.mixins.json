@@ -5,6 +5,7 @@
   "mixins": [
     "EffectCommandsMixin",
     "EnderpearlItemMixin",
+    "FoodPropertiesMixin",
     "TeleportRandomlyCnsumeEffectMixin"
   ],
   "injectors": {
