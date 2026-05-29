@@ -3,6 +3,7 @@ package io.github.cvrunmin.lanfasie.benderson;
 import io.github.cvrunmin.lanfasie.benderson.content.anticalabrum.AnticalabrumModel;
 import io.github.cvrunmin.lanfasie.benderson.content.anticalabrum.AnticalabrumRenderer;
 import io.github.cvrunmin.lanfasie.benderson.content.benderson.BendersonRenderer;
+import io.github.cvrunmin.lanfasie.benderson.content.marker.DelayedAttackMarkerRenderer;
 import io.github.cvrunmin.lanfasie.benderson.content.marker.TargetMarkerRenderer;
 import io.github.cvrunmin.lanfasie.benderson.data.*;
 import io.github.cvrunmin.lanfasie.benderson.index.AllDamageTypes;
@@ -45,6 +46,7 @@ public class LanfasieBendersonClient {
         event.registerEntityRenderer(AllEntityTypes.BENDERSON.get(), BendersonRenderer::new);
         event.registerEntityRenderer(AllEntityTypes.TARGET_MARKER.get(), TargetMarkerRenderer::new);
         event.registerEntityRenderer(AllEntityTypes.ANTICALABRUM.get(), AnticalabrumRenderer::new);
+        event.registerEntityRenderer(AllEntityTypes.DELAYED_ATTACK_MARKER.get(), DelayedAttackMarkerRenderer::new);
     }
 
     @SubscribeEvent

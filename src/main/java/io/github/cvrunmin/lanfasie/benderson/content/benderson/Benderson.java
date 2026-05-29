@@ -122,7 +122,7 @@ public class Benderson extends Monster implements GeoEntity {
         this(AllEntityTypes.BENDERSON.get(), level);
         this.setPos(x, y, z);
         this.arenaCenter = BlockPos.containing(x, y, z);
-        this.arenaHintMarker = new TargetMarker(level, this.arenaCenter, TargetMarker.MarkerArgs.simple(TargetMarker.MarkerType.ARENA_HINT, arenaRadius, 1));
+        this.arenaHintMarker = TargetMarker.byBlockPosLowerCorner(level, this.arenaCenter, TargetMarker.MarkerArgs.simple(TargetMarker.MarkerType.ARENA_HINT, arenaRadius, 1));
         this.arenaHintMarker.setPersistent(true);
         level.addFreshEntity(this.arenaHintMarker);
     }
@@ -148,7 +148,7 @@ public class Benderson extends Monster implements GeoEntity {
                 this.arenaCenter = blockPosition();
             }
             if(this.arenaHintMarker == null){
-                this.arenaHintMarker = new TargetMarker(level(), this.arenaCenter, TargetMarker.MarkerArgs.simple(TargetMarker.MarkerType.ARENA_HINT, arenaRadius, 1));
+                this.arenaHintMarker = TargetMarker.byBlockPosLowerCorner(level(), this.arenaCenter, TargetMarker.MarkerArgs.simple(TargetMarker.MarkerType.ARENA_HINT, arenaRadius, 1));
                 this.arenaHintMarker.setPersistent(true);
                 level().addFreshEntity(this.arenaHintMarker);
             }
@@ -342,7 +342,7 @@ public class Benderson extends Monster implements GeoEntity {
             this.arenaCenter = pos;
             if (!level().isClientSide()) {
                 if (this.arenaHintMarker == null) {
-                    this.arenaHintMarker = new TargetMarker(level(), this.arenaCenter, TargetMarker.MarkerArgs.simple(TargetMarker.MarkerType.ARENA_HINT, arenaRadius, 1));
+                    this.arenaHintMarker = TargetMarker.byBlockPosLowerCorner(level(), this.arenaCenter, TargetMarker.MarkerArgs.simple(TargetMarker.MarkerType.ARENA_HINT, arenaRadius, 1));
                     this.arenaHintMarker.setPersistent(true);
                     level().addFreshEntity(this.arenaHintMarker);
                 }else{

@@ -87,6 +87,7 @@ public class Anticalabrum extends Entity implements TraceableEntity {
     public Anticalabrum(EntityType<?> type, Level level) {
         super(type, level);
         this.noPhysics = true;
+        this.lifeTick = -15; // animation offset
         RandomSource randomSource = level.getRandom().fork();
         var rho = Math.toRadians(90 - randomSource.nextDouble() * 30);
         var theta = Math.toRadians(randomSource.nextDouble() * 360);
@@ -98,7 +99,6 @@ public class Anticalabrum extends Entity implements TraceableEntity {
         this.setPos(pos);
         this.setAnticalabrumType(anticalabrumType);
         this.maxLifeTick = Math.max(0, maxLifeTick);
-        this.lifeTick = -15; // animation offset
         this.range = range;
         this.owner = EntityReference.of(owner);
     }
@@ -135,7 +135,8 @@ public class Anticalabrum extends Entity implements TraceableEntity {
     private void handleByCurseType(){
         switch (getAnticalabrumType()) {
             case FELIS_INVISIBILIS -> {
-                if (lifeTick == 5) {
+                if (lifeTick == 5 && maxLifeTick > 120) {
+                    var safeCol = this.level().getRandom().fork().nextInt(3);
 
                 }
             }

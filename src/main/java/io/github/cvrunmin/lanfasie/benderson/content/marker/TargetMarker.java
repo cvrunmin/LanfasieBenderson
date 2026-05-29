@@ -133,7 +133,7 @@ public class TargetMarker extends Entity {
     private LivingEntity targetEntity;
     private UUID delayedTargetEntityUuid;
     private int delayedTargetEntityGraceTick = 0;
-    private BlockPos targetPos;
+    private Vec3 targetPos;
     private int lifeTick = 0;
 
     public TargetMarker(EntityType<?> type, Level level) {
@@ -149,12 +149,19 @@ public class TargetMarker extends Entity {
         this.entityData.set(TARGET_ENTITY_SYNCER, Optional.of(EntityReference.of(target)));
     }
 
-    public TargetMarker(Level level, BlockPos pos, MarkerArgs markerArgs){
+    public TargetMarker(Level level, Vec3 pos, MarkerArgs markerArgs){
         this(AllEntityTypes.TARGET_MARKER.get(), level);
         setTargetType(TargetType.POS);
-        this.targetPos = pos;
-        this.setPos(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5);
+        this.setPos(pos);
         this.entityData.set(MARKER_ARGS_ACCESSOR, markerArgs);
+    }
+
+    public static TargetMarker byBlockPosBottomCenter(Level level, BlockPos pos, MarkerArgs markerArgs){
+        return new TargetMarker(level, pos.getBottomCenter(), markerArgs);
+    }
+
+    public static TargetMarker byBlockPosLowerCorner(Level level, BlockPos pos, MarkerArgs markerArgs){
+        return new TargetMarker(level, Vec3.atLowerCornerOf(pos), markerArgs);
     }
 
     @Override
@@ -236,8 +243,6 @@ public class TargetMarker extends Entity {
                     this.delayedTargetEntityUuid = uuid.get();
                 }
             }
-        }else{
-            this.targetPos = input.read("TargetPos", BlockPos.CODEC).orElse(this.blockPosition());
         }
         this.entityData.set(MARKER_ARGS_ACCESSOR, input.read("MarkerArgs", MarkerArgs.CODEC).orElse(MarkerArgs.EMPTY));
         this.setPersistent(input.getBooleanOr("Persistent", false));
@@ -248,8 +253,6 @@ public class TargetMarker extends Entity {
         output.store("TargetType", TargetType.CODEC, this.getTargetType());
         if(this.getTargetType() == TargetType.ENTITY && this.targetEntity != null){
             output.store("Entity", UUIDUtil.CODEC, this.targetEntity.getUUID());
-        }else{
-            output.store("TargetPos", BlockPos.CODEC, this.targetPos);
         }
         output.store("MarkerArgs", MarkerArgs.CODEC, this.getMarkerArgs());
         output.putBoolean("Persistent", this.isPersistent());
@@ -275,13 +278,12 @@ public class TargetMarker extends Entity {
         return targetEntity;
     }
 
-    public BlockPos getTargetPos() {
-        return targetPos;
+    public void setTargetPos(BlockPos targetPos) {
+        this.setPos(targetPos.getBottomCenter());
     }
 
-    public void setTargetPos(BlockPos targetPos) {
-        this.targetPos = targetPos;
-        this.setPos(this.targetPos.getBottomCenter());
+    public void setTargetPos(Vec3 targetPos) {
+        this.setPos(targetPos);
     }
 
     public void setPersistent(boolean persistent) {

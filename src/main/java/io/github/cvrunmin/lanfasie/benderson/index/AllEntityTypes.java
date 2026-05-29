@@ -3,6 +3,7 @@ package io.github.cvrunmin.lanfasie.benderson.index;
 import io.github.cvrunmin.lanfasie.benderson.LanfasieBenderson;
 import io.github.cvrunmin.lanfasie.benderson.content.anticalabrum.Anticalabrum;
 import io.github.cvrunmin.lanfasie.benderson.content.benderson.Benderson;
+import io.github.cvrunmin.lanfasie.benderson.content.marker.DelayedAttackMarker;
 import io.github.cvrunmin.lanfasie.benderson.content.marker.TargetMarker;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
@@ -23,6 +24,9 @@ public class AllEntityTypes {
 
     public static final DeferredHolder<EntityType<?>, EntityType<Anticalabrum>> ANTICALABRUM = ENTITY_TYPES.registerEntityType("anticalabrum", Anticalabrum::new, MobCategory.MISC,
             b -> b.sized(0.25f, 2f).noLootTable().clientTrackingRange(8));
+
+    public static final DeferredHolder<EntityType<?>, EntityType<DelayedAttackMarker>> DELAYED_ATTACK_MARKER = ENTITY_TYPES.registerEntityType("delayed_attack_marker", DelayedAttackMarker::new, MobCategory.MISC,
+            b -> b.sized(0, 0).noLootTable().clientTrackingRange(12));
 
     public static void register(IEventBus modBus){
         ENTITY_TYPES.register(modBus);
