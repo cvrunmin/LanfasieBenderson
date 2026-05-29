@@ -8,6 +8,9 @@ public interface IPhaseState {
     boolean tick();
     void end();
     default void inactiveTick(){}
+    default boolean canUse(){
+        return true;
+    }
     default void addAdditionalSaveData(ValueOutput output){}
     default void readAdditionalSaveData(ValueInput input){}
 }

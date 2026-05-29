@@ -40,7 +40,7 @@ authors="cvrunmin"
 
 # The description text for the mod (multi line!) (#mandatory)
 description='''
-Example mod description.
+New threatful boss introduced into the game! With new interesting boss mechanics, can you survive from his attack, and save him from the twisted "deep latent"?
 '''
 
 # The [[mixins]] block allows you to declare your mixin config to FML so that it gets loaded.

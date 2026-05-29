@@ -1,0 +1,14 @@
+{
+  "model": {
+    "type": "minecraft:condition",
+    "on_false": {
+      "type": "minecraft:model",
+      "model": "lanfasie_benderson:item/provoking_stick"
+    },
+    "on_true": {
+      "type": "minecraft:model",
+      "model": "lanfasie_benderson:item/provoking_stick_on"
+    },
+    "property": "lanfasie_benderson:is_provoking"
+  }
+}

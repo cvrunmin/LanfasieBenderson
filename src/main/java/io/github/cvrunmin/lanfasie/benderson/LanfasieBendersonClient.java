@@ -1,10 +1,15 @@
 package io.github.cvrunmin.lanfasie.benderson;
 
+import io.github.cvrunmin.lanfasie.benderson.content.anticalabrum.AnticalabrumModel;
+import io.github.cvrunmin.lanfasie.benderson.content.anticalabrum.AnticalabrumRenderer;
 import io.github.cvrunmin.lanfasie.benderson.content.benderson.BendersonRenderer;
-import io.github.cvrunmin.lanfasie.benderson.content.marker.AttackTargetMarkerRenderer;
-import io.github.cvrunmin.lanfasie.benderson.data.MyLanguageProvider;
+import io.github.cvrunmin.lanfasie.benderson.content.marker.TargetMarkerRenderer;
+import io.github.cvrunmin.lanfasie.benderson.data.*;
+import io.github.cvrunmin.lanfasie.benderson.index.AllDamageTypes;
 import io.github.cvrunmin.lanfasie.benderson.index.AllEntityTypes;
-import net.minecraft.client.Minecraft;
+import net.minecraft.core.RegistrySetBuilder;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.Identifier;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.ModContainer;
@@ -12,6 +17,8 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
+import net.neoforged.neoforge.client.event.ModelEvent;
+import net.neoforged.neoforge.client.event.RegisterConditionalItemModelPropertyEvent;
 import net.neoforged.neoforge.client.gui.ConfigurationScreen;
 import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
 import net.neoforged.neoforge.data.event.GatherDataEvent;
@@ -35,12 +42,31 @@ public class LanfasieBendersonClient {
 
     @SubscribeEvent
     public static void registerEntityRenderers(EntityRenderersEvent.RegisterRenderers event){
-        event.registerEntityRenderer(AllEntityTypes.BENDERSON.get(), ctx -> new BendersonRenderer<>(ctx, AllEntityTypes.BENDERSON.get()));
-        event.registerEntityRenderer(AllEntityTypes.ATTACK_TARGET_MARKER.get(), AttackTargetMarkerRenderer::new);
+        event.registerEntityRenderer(AllEntityTypes.BENDERSON.get(), BendersonRenderer::new);
+        event.registerEntityRenderer(AllEntityTypes.TARGET_MARKER.get(), TargetMarkerRenderer::new);
+        event.registerEntityRenderer(AllEntityTypes.ANTICALABRUM.get(), AnticalabrumRenderer::new);
+    }
+
+    @SubscribeEvent
+    public static void registerStandaloneModel(ModelEvent.RegisterStandalone event){
+        event.register(AnticalabrumModel.MODEL_KEY, AnticalabrumModel.getBaker());
+    }
+
+    @SubscribeEvent
+    public static void registerConditionalModelProperty(RegisterConditionalItemModelPropertyEvent event){
+        event.register(Identifier.fromNamespaceAndPath(LanfasieBenderson.MODID, "is_provoking"), IsProvokingModelProperty.MAP_CODEC);
     }
 
     @SubscribeEvent
     public static void gatherData(GatherDataEvent.Client event){
+        // from server side
+        event.createDatapackRegistryObjects(new RegistrySetBuilder().add(Registries.DAMAGE_TYPE, AllDamageTypes::bootstrap));
+        // client side
+        event.createProvider(MyModelProvider::new);
+        event.createProvider(MyItemTagsProvider::new);
+        event.createProvider(MyEntityTypeTagsProvider::new);
+        event.createProvider(MyDamageTypeTagsProvider::new);
         event.createProvider(MyLanguageProvider::new);
+        event.createProvider(MySoundDefinitionsProvider::new);
     }
 }

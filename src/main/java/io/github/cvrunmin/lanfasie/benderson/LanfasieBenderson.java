@@ -1,7 +1,12 @@
 package io.github.cvrunmin.lanfasie.benderson;
 
+import io.github.cvrunmin.lanfasie.benderson.data.MyDamageTypeTagsProvider;
 import io.github.cvrunmin.lanfasie.benderson.index.*;
+import net.minecraft.core.RegistrySetBuilder;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.item.*;
 import net.neoforged.neoforge.data.event.GatherDataEvent;
+import net.neoforged.neoforge.event.entity.EntityAttributeModificationEvent;
 import org.slf4j.Logger;
 
 import com.mojang.logging.LogUtils;
@@ -10,10 +15,6 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.food.FoodProperties;
-import net.minecraft.world.item.BlockItem;
-import net.minecraft.world.item.CreativeModeTab;
-import net.minecraft.world.item.CreativeModeTabs;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockBehaviour;
@@ -49,17 +50,23 @@ public class LanfasieBenderson {
 
         AllBlocks.register(modEventBus);
         AllItems.register(modEventBus);
+        AllAttributes.register(modEventBus);
         AllEntityTypes.register(modEventBus);
+        AllMobEffects.register(modEventBus);
         AllCreativeModeTabs.register(modEventBus);
-        AllDamageTypes.register(modEventBus);
+        AllEntityDataSerializers.register(modEventBus);
+        AllSoundEvents.register(modEventBus);
 
         // Register ourselves for server and other game events we are interested in.
         // Note that this is necessary if and only if we want *this* class (LanfasieBenderson) to respond directly to events.
         // Do not add this line if there are no @SubscribeEvent-annotated functions in this class, like onServerStarting() below.
-        NeoForge.EVENT_BUS.register(this);
+//        NeoForge.EVENT_BUS.register(this);
 
         // Register the item to a creative tab
         modEventBus.addListener(this::addCreative);
+        modEventBus.addListener(this::modifyDefaultAttribute);
+
+//        modEventBus.addListener(this::gatherData);
 
         // Register our mod's ModConfigSpec so that FML can create and load the config file for us
         modContainer.registerConfig(ModConfig.Type.COMMON, Config.SPEC);
@@ -71,11 +78,24 @@ public class LanfasieBenderson {
 
     // Add the example block item to the building blocks tab
     private void addCreative(BuildCreativeModeTabContentsEvent event) {
-
+        if(CreativeModeTabs.COMBAT.equals(event.getTabKey())){
+            event.accept(new ItemStack(AllItems.SWORD_OF_DAWNWAITER));
+            event.accept(new ItemStack(AllItems.PROVOKING_STICK));
+        }
+        if(CreativeModeTabs.INGREDIENTS.equals(event.getTabKey())){
+            event.accept(new ItemStack(AllItems.OMINOUS_ORB));
+        }
+        if(CreativeModeTabs.FUNCTIONAL_BLOCKS.equals(event.getTabKey())){
+            event.accept(new ItemStack(AllItems.DEEP_LATENT_CALLER));
+        }
     }
 
-    @SubscribeEvent
-    private void gatherData(GatherDataEvent.Server event){
-
+    private void modifyDefaultAttribute(EntityAttributeModificationEvent event){
+        event.add(EntityType.PLAYER, AllAttributes.ENMITY_MULTIPLIER);
     }
+
+//    private void gatherData(GatherDataEvent.Server event){
+//        event.createDatapackRegistryObjects(new RegistrySetBuilder().add(Registries.DAMAGE_TYPE, AllDamageTypes::bootstrap));
+//        event.createProvider(MyDamageTypeTagsProvider::new);
+//    }
 }

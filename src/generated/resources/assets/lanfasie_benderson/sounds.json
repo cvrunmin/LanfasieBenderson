@@ -1,0 +1,21 @@
+{
+  "lethal_attack_sfx": {
+    "sounds": [
+      {
+        "attenuation_distance": 8,
+        "name": "lanfasie_benderson:omen/lethal_attack_sfx",
+        "weight": 5
+      }
+    ],
+    "subtitle": "sound.lanfasie_benderson.lethal_attack.subtitle"
+  },
+  "stack_attack_sfx": {
+    "sounds": [
+      {
+        "name": "lanfasie_benderson:omen/stack_attack_sfx",
+        "weight": 5
+      }
+    ],
+    "subtitle": "sound.lanfasie_benderson.stack_attack.subtitle"
+  }
+}

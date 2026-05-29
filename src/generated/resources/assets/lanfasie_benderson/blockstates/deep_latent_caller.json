@@ -1,0 +1,7 @@
+{
+  "variants": {
+    "": {
+      "model": "lanfasie_benderson:block/deep_latent_caller"
+    }
+  }
+}
