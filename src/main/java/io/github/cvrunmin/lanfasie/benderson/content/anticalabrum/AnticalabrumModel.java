@@ -16,7 +16,6 @@ import net.minecraft.core.Direction;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.ARGB;
 import net.minecraft.util.Tuple;
-import net.minecraft.world.level.Level;
 import net.neoforged.neoforge.client.model.quad.BakedColors;
 import net.neoforged.neoforge.client.model.standalone.StandaloneModelKey;
 import net.neoforged.neoforge.client.model.standalone.UnbakedStandaloneModel;
@@ -41,14 +40,14 @@ public class AnticalabrumModel {
         this.bakedFacesPerSwordType = bakedFacesPerSwordType;
     }
 
-    public List<BakedQuad> getQuadsByState(AnticalabrumRenderState state){
+    public List<BakedQuad> getQuadsByState(Anticalabrum.AnticalabrumType anticalabrumType){
         var quads = new ArrayList<>(this.quads.getAll());
-        if(bakedFacesPerSwordType.containsKey(state.type)){
-            var pair = bakedFacesPerSwordType.get(state.type);
+        if(bakedFacesPerSwordType.containsKey(anticalabrumType)){
+            var pair = bakedFacesPerSwordType.get(anticalabrumType);
             quads.add(pair.getA());
             quads.add(pair.getB());
         }
-        if(state.type != Anticalabrum.AnticalabrumType.EMPTY && bakedFacesPerSwordType.containsKey(Anticalabrum.AnticalabrumType.EMPTY)){
+        if(anticalabrumType != Anticalabrum.AnticalabrumType.EMPTY && bakedFacesPerSwordType.containsKey(Anticalabrum.AnticalabrumType.EMPTY)){
             var pair = bakedFacesPerSwordType.get(Anticalabrum.AnticalabrumType.EMPTY);
             quads.add(pair.getA());
             quads.add(pair.getB());

@@ -2,10 +2,14 @@ package io.github.cvrunmin.lanfasie.benderson.content.benderson;
 
 import io.github.cvrunmin.lanfasie.benderson.content.marker.TargetMarker;
 import io.github.cvrunmin.lanfasie.benderson.index.AllDamageTypes;
+import io.github.cvrunmin.lanfasie.benderson.index.AllSoundEvents;
 import io.github.cvrunmin.lanfasie.benderson.utils.VulnerabilityHelper;
 import net.minecraft.commands.arguments.EntityAnchorArgument;
 import net.minecraft.core.UUIDUtil;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.entity.EntityTypeTest;
@@ -49,22 +53,31 @@ public class CircleAoeSelfPhaseState implements IPhaseState{
 
     @Override
     public boolean tick() {
-        if(trackingMarker.isRemoved()) return false;
+        if(trackingMarker == null || trackingMarker.isRemoved()) return false;
         currentTick--;
-        if(maxTicks - currentTick == 5){
+        int pastTicks = maxTicks - currentTick;
+        if(pastTicks == 5){
             this.owner.setAnimateState(ANIMATE_STATE_CIRCLE_AOE_LOOP);
-        } else if (maxTicks - currentTick == 110) {
+        } else if (pastTicks == 110) {
             this.owner.setAnimateState(ANIMATE_STATE_CIRCLE_AOE_END);
-        } else if (maxTicks - currentTick == 114) {
-            if(!this.owner.level().isClientSide()){
-                var acceptingTargets = this.owner.level().getEntities(EntityTypeTest.forClass(Player.class),
-                        AABB.ofSize(this.owner.position(), this.range, 10, this.range),
-                        player -> player.isAlive() && player.position().subtract(this.owner.position()).horizontalDistance() <= this.range * 0.5f);
-                for (Player acceptingTarget : acceptingTargets) {
-                    acceptingTarget.hurtServer(((ServerLevel) this.owner.level()),
-                            this.owner.damageSources().source(AllDamageTypes.BOSS_ABILITY_ATTACK, this.owner),
-                            attackDamage);
-                    VulnerabilityHelper.addVulnerabilityUp(acceptingTarget);
+        } else if(pastTicks > 110 && pastTicks <= 120){
+            if(pastTicks % 2 == 1){
+                double dx = -Mth.sin(this.owner.getYRot() * (float) (Math.PI / 180.0));
+                double dz = Mth.cos(this.owner.getYRot() * (float) (Math.PI / 180.0));
+                this.owner.level().playSound(null, this.owner.getX(), this.owner.getY(), this.owner.getZ(), AllSoundEvents.BOSS_SWEEP_SFX.get(), SoundSource.HOSTILE, 1, 1);
+                ((ServerLevel) this.owner.level()).sendParticles(ParticleTypes.SWEEP_ATTACK, this.owner.getX() + dx, this.owner.getY(0.5), this.owner.getZ() + dz, 0, dx, 0.0, dz, 0.0);
+            }
+            if (pastTicks == 114) {
+                if(!this.owner.level().isClientSide()){
+                    var acceptingTargets = this.owner.level().getEntities(EntityTypeTest.forClass(Player.class),
+                            AABB.ofSize(this.owner.position(), this.range, 10, this.range),
+                            player -> player.isAlive() && player.position().subtract(this.owner.position()).horizontalDistance() <= this.range * 0.5f);
+                    for (Player acceptingTarget : acceptingTargets) {
+                        acceptingTarget.hurtServer(((ServerLevel) this.owner.level()),
+                                this.owner.damageSources().source(AllDamageTypes.BOSS_ABILITY_ATTACK, this.owner),
+                                attackDamage);
+                        VulnerabilityHelper.addVulnerabilityUp(acceptingTarget);
+                    }
                 }
             }
         } else if(currentTick == 0){

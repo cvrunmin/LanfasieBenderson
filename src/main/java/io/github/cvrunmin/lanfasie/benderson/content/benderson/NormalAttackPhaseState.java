@@ -35,10 +35,11 @@ public class NormalAttackPhaseState implements IPhaseState{
 
     @Override
     public boolean tick() {
-        if(this.currentTarget == null) return false;
         currentTick++;
         if(currentTick == 7){
-            this.owner.doHurtTarget(((ServerLevel) this.owner.level()), this.currentTarget);
+            if(this.currentTarget != null) {
+                this.owner.doHurtTarget(((ServerLevel) this.owner.level()), this.currentTarget);
+            }
         } else if (currentTick >= 30) {
             currentTarget = null;
             return false;

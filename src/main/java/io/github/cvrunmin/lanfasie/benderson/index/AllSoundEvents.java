@@ -12,6 +12,7 @@ public class AllSoundEvents {
 
     public static final DeferredHolder<SoundEvent, SoundEvent> LETHAL_ATTACK_SFX = SOUND_EVENTS.register("lethal_attack_sfx", SoundEvent::createVariableRangeEvent);
     public static final DeferredHolder<SoundEvent, SoundEvent> STACK_ATTACK_SFX = SOUND_EVENTS.register("stack_attack_sfx", SoundEvent::createVariableRangeEvent);
+    public static final DeferredHolder<SoundEvent, SoundEvent> BOSS_SWEEP_SFX = SOUND_EVENTS.register("boss_sweep", SoundEvent::createVariableRangeEvent);
 
     public static void register(IEventBus modBus){
         SOUND_EVENTS.register(modBus);

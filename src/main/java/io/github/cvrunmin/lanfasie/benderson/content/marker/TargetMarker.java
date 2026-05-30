@@ -247,6 +247,7 @@ public class TargetMarker extends Entity implements IEntityWithComplexSpawn {
             }
         }
         this.entityData.set(MARKER_ARGS_ACCESSOR, input.read("MarkerArgs", MarkerArgs.CODEC).orElse(MarkerArgs.EMPTY));
+        input.getInt("LifeTick").ifPresent(v -> lifeTick = v);
         this.setPersistent(input.getBooleanOr("Persistent", false));
     }
 
@@ -257,6 +258,7 @@ public class TargetMarker extends Entity implements IEntityWithComplexSpawn {
             output.store("Entity", UUIDUtil.CODEC, this.targetEntity.getUUID());
         }
         output.store("MarkerArgs", MarkerArgs.CODEC, this.getMarkerArgs());
+        output.putInt("LifeTick", this.lifeTick);
         output.putBoolean("Persistent", this.isPersistent());
     }
 

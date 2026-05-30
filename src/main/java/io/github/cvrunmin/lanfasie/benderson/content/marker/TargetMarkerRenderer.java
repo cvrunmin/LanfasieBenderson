@@ -175,6 +175,7 @@ public class TargetMarkerRenderer extends EntityRenderer<TargetMarker, TargetMar
         submitNodeCollector.submitCustomGeometry(poseStack, TRIANGLE_STRIP_RENDER_TYPE.apply(COLOR_SCHEME_MARKER_TEXTURE), (inPose, buffer) -> {
             var innerStack = new PoseStack();
             var halfRange = state.range * 0.5f;
+            buffer.addVertex(inPose, Math.max(0, halfRange - 0.25f), 1e-3f, 0).setColor(1f, 1f, 1f, alpha).setUv(0.9999f, 0f).setUv1(0, 0).setUv2(0, 0).setNormal(0, 1, 0);
             for (int i = 0; i < 361; i++) {
                 var rad = Math.PI * i / 180f;
                 var cr = (float)Math.cos(rad);
@@ -189,10 +190,12 @@ public class TargetMarkerRenderer extends EntityRenderer<TargetMarker, TargetMar
                 buffer.addVertex(inPose, 0, 1e-3f, 0).setColor(1f, 1f, 1f, alpha).setUv(0.999f, 0f).setUv1(0, 0).setUv2(0, 0).setNormal(0, 1, 0);
                 buffer.addVertex(inPose, Math.max(0, halfRange - 0.25f) * cr, 1e-3f, Math.max(0, halfRange - 0.25f) * sr).setColor(1f, 1f, 1f, alpha).setUv(0.999f, 0f).setUv1(0, 0).setUv2(0, 0).setNormal(0, 1, 0);
             }
+            buffer.addVertex(inPose, Math.max(0, halfRange - 0.25f), 1e-3f, 0).setColor(1f, 1f, 1f, alpha).setUv(0.999f, 0f).setUv1(0, 0).setUv2(0, 0).setNormal(0, 1, 0);
         });
         submitNodeCollector.submitCustomGeometry(poseStack, TRIANGLE_STRIP_RENDER_TYPE.apply(COLOR_SCHEME_MARKER_TEXTURE), (inPose, buffer) -> {
             var innerStack = new PoseStack();
             var halfRange = state.range * 0.5f * (t1 / 20f);
+            buffer.addVertex(inPose, Math.max(0, halfRange - 0.125f), 2e-3f, 0).setColor(1f, 1f, 1f, alpha * a1).setUv(0f, 0f).setUv1(0, 0).setUv2(0, 0).setNormal(0, 1, 0);
             for (int i = 0; i < 361; i++) {
                 var rad = Math.PI * i / 180f;
                 var cr = (float)Math.cos(rad);
@@ -200,6 +203,7 @@ public class TargetMarkerRenderer extends EntityRenderer<TargetMarker, TargetMar
                 buffer.addVertex(inPose, Math.max(0, halfRange - 0.125f) * cr, 2e-3f, Math.max(0, halfRange - 0.125f) * sr).setColor(1f, 1f, 1f, alpha * a1).setUv(0f, 0f).setUv1(0, 0).setUv2(0, 0).setNormal(0, 1, 0);
                 buffer.addVertex(inPose, halfRange * cr, 2e-3f, halfRange * sr).setColor(1f, 1f, 1f, alpha * a1).setUv(0f, 0f).setUv1(0, 0).setUv2(0, 0).setNormal(0, 1, 0);
             }
+            buffer.addVertex(inPose, halfRange, 2e-3f, 0).setColor(1f, 1f, 1f, alpha * a1).setUv(0f, 0f).setUv1(0, 0).setUv2(0, 0).setNormal(0, 1, 0);
         });
     }
 

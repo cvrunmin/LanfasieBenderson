@@ -1,4 +1,5 @@
 {
+  "attributes.lanfasie_benderson.enmity_multiplier": "Enmity multiplier",
   "block.lanfasie_benderson.deep_latent_caller": "Deep Latent Caller",
   "death.attack.boss_ability_attack": "%1$s was one step behind from safe area when dodging attack from %2$s",
   "death.attack.boss_ability_attack.item": "%1$s was one step behind from safe area when dodging attack from %2$s holding %3$s",
@@ -18,12 +19,14 @@
   "entity.lanfasie_benderson.benderson.name.deep_latent": "Team Soul of Deep Latent",
   "entity.lanfasie_benderson.benderson.name.forgiven": "Forgiven Team Soul",
   "entity.lanfasie_benderson.benderson.name.unforgiven": "Unforgiven Team Soul",
+  "entity.lanfasie_benderson.delayed_attack_marker": "Delayed Attack Marker",
   "entity.lanfasie_benderson.target_marker": "Target Marker",
   "item.lanfasie_benderson.ominous_orb": "Ominous Orb of Latent",
   "item.lanfasie_benderson.provoking_stick": "Provoking Stick",
   "item.lanfasie_benderson.sword_of_dawnwaiter": "Sword of Dawnwaiter",
   "item.lanfasie_benderson.sword_of_dawnwaiter_tainted": "Tainted Sword of Dawnwaiter",
-  "sound.lanfasie_benderson.lethal_attack.subtitle": "Omen of lethal attack",
-  "sound.lanfasie_benderson.stack_attack.subtitle": "Omen of stack attack",
+  "subtitles.lanfasie_benderson.enemy_sweep": "Sweeping attack",
+  "subtitles.lanfasie_benderson.lethal_attack": "Omen of lethal attack",
+  "subtitles.lanfasie_benderson.stack_attack": "Omen of stack attack",
   "text.lanfasie_benderson.enmity_bar.aggro": "A"
 }

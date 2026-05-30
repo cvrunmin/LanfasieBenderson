@@ -22,8 +22,10 @@
   "item.lanfasie_benderson.provoking_stick": "挑衅棒",
   "item.lanfasie_benderson.sword_of_dawnwaiter": "晨曦等待者之剑",
   "item.lanfasie_benderson.sword_of_dawnwaiter_tainted": "锈蚀的晨曦等待者之剑",
-  "sound.lanfasie_benderson.lethal_attack.subtitle": "预兆：致命攻击",
-  "sound.lanfasie_benderson.stack_attack.subtitle": "预兆：可分摊攻击",
-  "text.lanfasie_benderson.enmity_bar.aggro": "引战"
-
+  "subtitles.lanfasie_benderson.lethal_attack": "预兆：致命攻击",
+  "subtitles.lanfasie_benderson.stack_attack": "预兆：可分摊攻击",
+  "text.lanfasie_benderson.enmity_bar.aggro": "引战",
+  "attributes.lanfasie_benderson.enmity_multiplier": "仇恨倍率",
+  "entity.lanfasie_benderson.delayed_attack_marker": "延迟攻击标记",
+  "subtitles.lanfasie_benderson.enemy_sweep": "横扫攻击"
 }

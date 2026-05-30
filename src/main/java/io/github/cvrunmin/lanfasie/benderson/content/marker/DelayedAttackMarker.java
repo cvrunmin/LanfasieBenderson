@@ -4,8 +4,11 @@ import com.mojang.serialization.Codec;
 import io.github.cvrunmin.lanfasie.benderson.index.AllDamageTypes;
 import io.github.cvrunmin.lanfasie.benderson.index.AllEntityDataSerializers;
 import io.github.cvrunmin.lanfasie.benderson.index.AllEntityTypes;
+import io.github.cvrunmin.lanfasie.benderson.index.AllSoundEvents;
 import io.github.cvrunmin.lanfasie.benderson.utils.VulnerabilityHelper;
 import io.netty.buffer.ByteBuf;
+import net.minecraft.core.particles.ParticleOptions;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
@@ -13,6 +16,8 @@ import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.util.Tuple;
@@ -27,8 +32,10 @@ import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.entity.IEntityWithComplexSpawn;
 
 import javax.annotation.Nullable;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class DelayedAttackMarker extends Entity implements TraceableEntity, IEntityWithComplexSpawn {
 
@@ -83,7 +90,7 @@ public class DelayedAttackMarker extends Entity implements TraceableEntity, IEnt
         instance.setRange(arenaRange);
         instance.setRange2(bandWidth);
         instance.damage = damage;
-        var catMoveTotalTime = (int)((arenaRange + CAT_HALF_DEPTH * 2) * CAT_MOVE_SPEED);
+        var catMoveTotalTime = (int)((arenaRange + CAT_HALF_DEPTH) * 2 / CAT_MOVE_SPEED);
         instance.setMaxLifeTick(castTick + CAT_ENTER_TIME + catMoveTotalTime + CAT_LEAVE_TIME);
         return instance;
     }
@@ -115,9 +122,9 @@ public class DelayedAttackMarker extends Entity implements TraceableEntity, IEnt
             final int remainingLife = getMaxLifeTick() - lifeTick;
             switch (getAttackType()){
                 case BLACK_CAT_SMASH -> {
-                    var catMoveTotalTime = (int)((getRange() + CAT_HALF_DEPTH * 2) * CAT_MOVE_SPEED);
+                    var catMoveTotalTime = (int)((getRange() + CAT_HALF_DEPTH) * 2 / CAT_MOVE_SPEED);
                     if(lifeTick == CAT_ENTER_TIME){
-                        associatedTargetMarker = new TargetMarker(level(), position(), TargetMarker.MarkerArgs.complexRange(TargetMarker.MarkerType.LINEAR_AOE, getRange2(), getRange() * 2, getMaxLifeTick() - catMoveTotalTime - CAT_LEAVE_TIME));
+                        associatedTargetMarker = new TargetMarker(level(), position().add(0, 0, -getRange()), TargetMarker.MarkerArgs.complexRange(TargetMarker.MarkerType.LINEAR_AOE, getRange2(), getRange() * 2, getMaxLifeTick() - catMoveTotalTime - CAT_LEAVE_TIME));
                         this.level().addFreshEntity(associatedTargetMarker);
                     }
                     if(remainingLife == catMoveTotalTime + CAT_LEAVE_TIME && getOwner() != null && getOwner().isAlive()){
@@ -125,18 +132,25 @@ public class DelayedAttackMarker extends Entity implements TraceableEntity, IEnt
                         this.snapshotAttackEntities = level().getEntitiesOfClass(Player.class, aabb).stream()
                                 .filter(Player::canBeSeenAsEnemy)
                                 .map(player -> new Tuple<>(player, player.position().z - this.position().z + getRange() + CAT_HALF_DEPTH))
-                                .toList();
-                    }else if(remainingLife <= catMoveTotalTime + CAT_LEAVE_TIME && remainingLife > CAT_LEAVE_TIME && !snapshotAttackEntities.isEmpty()){
-                        var catWalkDistance = (float)(catMoveTotalTime - (remainingLife - CAT_LEAVE_TIME)) / CAT_MOVE_SPEED - 1;
-                        for (Iterator<Tuple<Player, Double>> iterator = this.snapshotAttackEntities.iterator(); iterator.hasNext(); ) {
-                            Tuple<Player, Double> tuple = iterator.next();
-                            if(tuple.getB() <= catWalkDistance){
-                                var player = tuple.getA();
-                                if(player.canBeSeenAsEnemy()){
-                                    player.hurtServer(((ServerLevel) level()), this.damageSources().source(AllDamageTypes.BOSS_ABILITY_ATTACK, this, this.getOwner()), damage);
-                                    VulnerabilityHelper.addVulnerabilityUp(player);
+                                .collect(Collectors.toCollection(ArrayList::new));
+                    }else if (remainingLife <= catMoveTotalTime + CAT_LEAVE_TIME && remainingLife > CAT_LEAVE_TIME) {
+                        var catWalkDistance = (float) (catMoveTotalTime - (remainingLife - CAT_LEAVE_TIME)) * CAT_MOVE_SPEED - 1;
+                        if (remainingLife % 2 == 0) {
+                            var emitPos = position().add(0, 0, -getRange() + catWalkDistance);
+                            this.level().playSound(null, emitPos.x, emitPos.y, emitPos.z, SoundEvents.GENERIC_EXPLODE, SoundSource.HOSTILE, 1, 1);
+                            ((ServerLevel) this.level()).sendParticles(ParticleTypes.EXPLOSION_EMITTER, emitPos.x, emitPos.y, emitPos.z, 5, 3, 0, 3, 0);
+                        }
+                        if (snapshotAttackEntities != null && !snapshotAttackEntities.isEmpty()) {
+                            for (Iterator<Tuple<Player, Double>> iterator = this.snapshotAttackEntities.iterator(); iterator.hasNext(); ) {
+                                Tuple<Player, Double> tuple = iterator.next();
+                                if (tuple.getB() <= catWalkDistance) {
+                                    var player = tuple.getA();
+                                    if (player.canBeSeenAsEnemy()) {
+                                        player.hurtServer(((ServerLevel) level()), this.damageSources().source(AllDamageTypes.BOSS_ABILITY_ATTACK, this, this.getOwner()), damage);
+                                        VulnerabilityHelper.addVulnerabilityUp(player);
+                                    }
+                                    iterator.remove();
                                 }
-                                iterator.remove();
                             }
                         }
                     }
@@ -144,6 +158,7 @@ public class DelayedAttackMarker extends Entity implements TraceableEntity, IEnt
                 case FIREBALL_METEOR -> {
                     if(lifeTick == 1){
                         associatedTargetMarker = new TargetMarker(level(), position(), TargetMarker.MarkerArgs.simple(TargetMarker.MarkerType.CIRCLE_AOE, getRange() * 2, getMaxLifeTick() - 10));
+                        this.level().addFreshEntity(associatedTargetMarker);
                     }
                     if(remainingLife == 10){
                         var aabb = AABB.ofSize(position(), getRange() * 2, 10, getRange() * 2);
@@ -152,6 +167,8 @@ public class DelayedAttackMarker extends Entity implements TraceableEntity, IEnt
                                 .map(player -> new Tuple<>(player, 0.0))
                                 .toList();
                     } else if (remainingLife == 8) {
+                        this.level().playSound(null, position().x, position().y, position().z, SoundEvents.GENERIC_EXPLODE, SoundSource.HOSTILE, 1, 1);
+                        ((ServerLevel) this.level()).sendParticles(ParticleTypes.EXPLOSION_EMITTER, position().x, position().y, position().z, 0, 0, 0, 0, 0);
                         for (Tuple<Player, Double> tuple : this.snapshotAttackEntities) {
                             var player = tuple.getA();
                             if(player.canBeSeenAsEnemy()){

@@ -37,6 +37,8 @@ import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.control.FlyingMoveControl;
 import net.minecraft.world.entity.ai.goal.Goal;
+import net.minecraft.world.entity.ai.navigation.FlyingPathNavigation;
+import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.minecraft.world.entity.ai.targeting.TargetingConditions;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.player.Player;
@@ -166,8 +168,8 @@ public class Benderson extends Monster implements GeoEntity {
 
     public static AttributeSupplier.Builder createAttributes() {
         return Mob.createMobAttributes().add(Attributes.MAX_HEALTH, (double)1000.0F)
-                .add(Attributes.MOVEMENT_SPEED, 0.5)
-                .add(Attributes.FLYING_SPEED, 2)
+                .add(Attributes.MOVEMENT_SPEED, 0.4)
+                .add(Attributes.FLYING_SPEED, 1)
                 .add(Attributes.CAMERA_DISTANCE, (double)16.0F)
                 .add(Attributes.FOLLOW_RANGE, 64)
                 .add(Attributes.ATTACK_DAMAGE, 1.0)
@@ -190,26 +192,34 @@ public class Benderson extends Monster implements GeoEntity {
                     return switch (animateState) {
                         case LethalAttackPhaseState.ANIMATE_STATE_LETHAL_ATTACK_START ->
                                 test.setAndContinue(RawAnimation.begin().thenPlay("attack.strong_attack.start"));
+                        case LethalAttackPhaseState.ANIMATE_STATE_LETHAL_ATTACK_LOOP ->
+                                test.setAndContinue(RawAnimation.begin().thenPlay("attack.strong_attack.loop"));
                         case LethalAttackPhaseState.ANIMATE_STATE_LETHAL_ATTACK_END ->
                                 test.setAndContinue(RawAnimation.begin().thenPlay("attack.strong_attack.end"));
-                        case LethalAttackPhaseState.ANIMATE_STATE_LETHAL_ATTACK_LOOP,
-                             CircleAoeSelfPhaseState.ANIMATE_STATE_CIRCLE_AOE_LOOP,
-                             CircleStackAttackPhaseState.ANIMATE_STATE_CIRCLE_STACK_ATTACK_LOOP,
-                             PartialArenaAoePhaseState.ANIMATE_STATE_HALF_ARENA_AOE_SELF_LOOP -> PlayState.CONTINUE;
                         case CircleAoeSelfPhaseState.ANIMATE_STATE_CIRCLE_AOE_START ->
                                 test.setAndContinue(RawAnimation.begin().thenPlay("attack.circular_swing.start"));
+                        case CircleAoeSelfPhaseState.ANIMATE_STATE_CIRCLE_AOE_LOOP ->
+                                test.setAndContinue(RawAnimation.begin().thenPlay("attack.circular_swing.loop"));
                         case CircleAoeSelfPhaseState.ANIMATE_STATE_CIRCLE_AOE_END ->
                                 test.setAndContinue(RawAnimation.begin().thenPlay("attack.circular_swing.end"));
                         case CircleStackAttackPhaseState.ANIMATE_STATE_CIRCLE_STACK_ATTACK_START ->
                                 test.setAndContinue(RawAnimation.begin().thenPlay("cast.magic.start"));
+                        case CircleStackAttackPhaseState.ANIMATE_STATE_CIRCLE_STACK_ATTACK_LOOP ->
+                                test.setAndContinue(RawAnimation.begin().thenPlay("cast.magic.loop"));
                         case CircleStackAttackPhaseState.ANIMATE_STATE_CIRCLE_STACK_ATTACK_END ->
                                 test.setAndContinue(RawAnimation.begin().thenPlay("cast.magic.end"));
                         case PartialArenaAoePhaseState.ANIMATE_STATE_HALF_ARENA_AOE_SELF_START ->
                                 test.setAndContinue(RawAnimation.begin().thenPlay("attack.facing_swing.start"));
+                        case PartialArenaAoePhaseState.ANIMATE_STATE_HALF_ARENA_AOE_SELF_LOOP ->
+                                test.setAndContinue(RawAnimation.begin().thenPlay("attack.facing_swing.loop"));
                         case PartialArenaAoePhaseState.ANIMATE_STATE_HALF_ARENA_AOE_SELF_END ->
                                 test.setAndContinue(RawAnimation.begin().thenPlay("attack.facing_swing.end"));
                         case SummonAnticalabrumPhaseState.ANIMATE_STATE_START ->
                             test.setAndContinue(RawAnimation.begin().thenPlay("cast.sword"));
+                        case "idle" -> {
+                            test.controller().reset();
+                            yield PlayState.STOP;
+                        }
                         default -> PlayState.STOP;
                     };
                 }));
@@ -320,6 +330,14 @@ public class Benderson extends Monster implements GeoEntity {
     @Override
     protected double getDefaultGravity() {
         return 0;
+    }
+
+    @Override
+    protected PathNavigation createNavigation(Level level) {
+        FlyingPathNavigation flyingPathNavigation = new FlyingPathNavigation(this, level);
+        flyingPathNavigation.setCanOpenDoors(false);
+        flyingPathNavigation.setCanFloat(true);
+        return flyingPathNavigation;
     }
 
     @Override

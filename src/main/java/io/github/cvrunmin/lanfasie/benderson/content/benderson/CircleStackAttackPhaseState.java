@@ -4,7 +4,10 @@ import io.github.cvrunmin.lanfasie.benderson.content.marker.TargetMarker;
 import io.github.cvrunmin.lanfasie.benderson.index.AllDamageTypes;
 import net.minecraft.commands.arguments.EntityAnchorArgument;
 import net.minecraft.core.UUIDUtil;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
@@ -13,6 +16,7 @@ import net.minecraft.world.level.entity.EntityTypeTest;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 
 public class CircleStackAttackPhaseState implements IPhaseState{
     public static final String ANIMATE_STATE_CIRCLE_STACK_ATTACK_START = "circle_stack.start";
@@ -51,29 +55,32 @@ public class CircleStackAttackPhaseState implements IPhaseState{
 
     @Override
     public boolean tick() {
-        if(this.currentTarget == null) return false;
-        if(trackingMarker.isRemoved()) return false;
+        if(this.currentTarget == null || this.currentTarget.isDeadOrDying()) return false;
+        if(trackingMarker == null || trackingMarker.isRemoved()) return false;
         currentTick--;
         if(maxTicks - currentTick == 5){
             this.owner.setAnimateState(ANIMATE_STATE_CIRCLE_STACK_ATTACK_LOOP);
         } else if (maxTicks - currentTick == 100) {
             this.owner.setAnimateState(ANIMATE_STATE_CIRCLE_STACK_ATTACK_END);
         } else if (maxTicks - currentTick == 115) {
-            if(!this.owner.level().isClientSide()){
+            if(!this.owner.level().isClientSide() && currentTarget != null){
+                Vec3 position = this.currentTarget.position();
+                this.owner.level().playSound(null, position.x, position.y, position.z, SoundEvents.GENERIC_EXPLODE, SoundSource.HOSTILE, 1, 1);
+                ((ServerLevel) this.owner.level()).sendParticles(ParticleTypes.EXPLOSION_EMITTER, position.x, position.y, position.z, 0, 0, 0, 0, 0);
                 var acceptingTargets = this.owner.level().getEntities(EntityTypeTest.forClass(Player.class),
-                        AABB.ofSize(this.currentTarget.position(), this.range, 10, this.range),
-                        player -> player.isAlive() && player.position().subtract(this.currentTarget.position()).horizontalDistance() <= this.range * 0.5f);
-                float damage;
-                if(this.requiredPlayerToStack <= 1){
-                    damage = 1;
-                }else{
-                    damage = Mth.lerp(Math.max(0, (requiredPlayerToStack - acceptingTargets.size()) / (float) (requiredPlayerToStack - 1)), 1, 10);
-                }
-                for (Player acceptingTarget : acceptingTargets) {
-                    acceptingTarget.hurtServer(((ServerLevel) this.owner.level()),
-                            this.owner.damageSources().source(AllDamageTypes.BOSS_ABILITY_ATTACK, this.owner),
-                            damage);
-
+                        AABB.ofSize(position, this.range, 10, this.range),
+                        player -> player.isAlive() && player.position().subtract(position).horizontalDistance() <= this.range * 0.5f);
+                if(!acceptingTargets.isEmpty()){
+                    float damage = this.damage;
+                    if(this.requiredPlayerToStack < 4){
+                        damage = this.damage * (this.requiredPlayerToStack / 4f + 0.5f);
+                    }
+                    damage = damage / acceptingTargets.size();
+                    for (Player acceptingTarget : acceptingTargets) {
+                        acceptingTarget.hurtServer(((ServerLevel) this.owner.level()),
+                                this.owner.damageSources().source(AllDamageTypes.BOSS_ABILITY_ATTACK, this.owner),
+                                damage);
+                    }
                 }
             }
         } else if(currentTick == 0){

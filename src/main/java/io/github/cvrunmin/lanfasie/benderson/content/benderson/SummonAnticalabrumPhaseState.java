@@ -1,8 +1,11 @@
 package io.github.cvrunmin.lanfasie.benderson.content.benderson;
 
 import io.github.cvrunmin.lanfasie.benderson.content.anticalabrum.Anticalabrum;
+import net.minecraft.world.entity.EntityReference;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
+
+import java.util.Optional;
 
 public class SummonAnticalabrumPhaseState implements IPhaseState{
     public static final String ANIMATE_STATE_START = "summon_anticalabrum.start";
@@ -60,6 +63,9 @@ public class SummonAnticalabrumPhaseState implements IPhaseState{
         output.putInt("Cooldown", this.cooldownTick);
         output.putInt("Tick", this.currentTick);
         output.store("NextType", Anticalabrum.AnticalabrumType.CODEC, this.nextType);
+        if(lastSword != null) {
+            EntityReference.of(lastSword).store(output, "LastSword");
+        }
     }
 
     @Override
@@ -67,5 +73,8 @@ public class SummonAnticalabrumPhaseState implements IPhaseState{
         this.cooldownTick = input.getIntOr("Cooldown", 0);
         this.currentTick = input.getIntOr("Tick", this.currentTick);
         input.read("NextType", Anticalabrum.AnticalabrumType.CODEC).ifPresent(v -> this.nextType = v);
+        Optional.ofNullable(EntityReference.<Anticalabrum>read(input, "LastSword"))
+                .map(ref -> ref.getEntity(this.owner.level(), Anticalabrum.class))
+                .ifPresent(v -> lastSword = v);
     }
 }

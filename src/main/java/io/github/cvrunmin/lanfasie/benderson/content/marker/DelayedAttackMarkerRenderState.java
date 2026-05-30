@@ -1,5 +1,6 @@
 package io.github.cvrunmin.lanfasie.benderson.content.marker;
 
+import net.minecraft.client.renderer.entity.state.CatRenderState;
 import net.minecraft.client.renderer.entity.state.EntityRenderState;
 import net.minecraft.client.renderer.item.ItemStackRenderState;
 
@@ -10,4 +11,5 @@ public class DelayedAttackMarkerRenderState extends EntityRenderState {
     public float range;
     public float range2;
     public ItemStackRenderState itemStackRenderState = new ItemStackRenderState();
+    public CatRenderState catRenderState = new CatRenderState();
 }

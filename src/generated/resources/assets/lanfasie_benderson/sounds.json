@@ -1,4 +1,37 @@
 {
+  "boss_sweep": {
+    "sounds": [
+      {
+        "name": "entity/player/attack/sweep1",
+        "volume": 0.7
+      },
+      {
+        "name": "entity/player/attack/sweep2",
+        "volume": 0.7
+      },
+      {
+        "name": "entity/player/attack/sweep3",
+        "volume": 0.7
+      },
+      {
+        "name": "entity/player/attack/sweep4",
+        "volume": 0.7
+      },
+      {
+        "name": "entity/player/attack/sweep5",
+        "volume": 0.7
+      },
+      {
+        "name": "entity/player/attack/sweep6",
+        "volume": 0.7
+      },
+      {
+        "name": "entity/player/attack/sweep7",
+        "volume": 0.7
+      }
+    ],
+    "subtitle": "subtitles.lanfasie_benderson.enemy_sweep"
+  },
   "lethal_attack_sfx": {
     "sounds": [
       {
@@ -7,7 +40,7 @@
         "weight": 5
       }
     ],
-    "subtitle": "sound.lanfasie_benderson.lethal_attack.subtitle"
+    "subtitle": "subtitles.lanfasie_benderson.lethal_attack"
   },
   "stack_attack_sfx": {
     "sounds": [
@@ -16,6 +49,6 @@
         "weight": 5
       }
     ],
-    "subtitle": "sound.lanfasie_benderson.stack_attack.subtitle"
+    "subtitle": "subtitles.lanfasie_benderson.stack_attack"
   }
 }

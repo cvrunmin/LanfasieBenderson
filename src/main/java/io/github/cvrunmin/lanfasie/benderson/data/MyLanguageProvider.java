@@ -24,9 +24,11 @@ public class MyLanguageProvider extends LanguageProvider {
         this.add("entity.lanfasie_benderson.benderson.name.unforgiven", "Unforgiven Team Soul");
         this.add("entity.lanfasie_benderson.benderson.name.forgiven", "Forgiven Team Soul");
         this.add("entity.lanfasie_benderson.target_marker", "Target Marker");
+        this.add("entity.lanfasie_benderson.delayed_attack_marker", "Delayed Attack Marker");
         this.add("entity.lanfasie_benderson.anticalabrum", "Anticalabrum");
-        this.add("sound.lanfasie_benderson.lethal_attack.subtitle", "Omen of lethal attack");
-        this.add("sound.lanfasie_benderson.stack_attack.subtitle", "Omen of stack attack");
+        this.add("subtitles.lanfasie_benderson.lethal_attack", "Omen of lethal attack");
+        this.add("subtitles.lanfasie_benderson.stack_attack", "Omen of stack attack");
+        this.add("subtitles.lanfasie_benderson.enemy_sweep", "Sweeping attack");
         this.addEffect(AllMobEffects.AGGRO_UP, "Provoking");
         this.addEffect(AllMobEffects.VULNERABILITY_UP, "Vulnerability Up");
         this.addEffect(AllMobEffects.CURSE_BLACK_CAT, "Anticalabrum: Felis Invisibilis");
@@ -41,5 +43,6 @@ public class MyLanguageProvider extends LanguageProvider {
         this.add("death.attack.boss_ability_attack.player", "%1$s was one step behind from safe area when dodging attack from %2$s");
         this.add("death.attack.boss_ability_attack.item", "%1$s was one step behind from safe area when dodging attack from %2$s holding %3$s");
         this.add("text.lanfasie_benderson.enmity_bar.aggro", "A");
+        this.add("attributes.lanfasie_benderson.enmity_multiplier", "Enmity multiplier");
     }
 }

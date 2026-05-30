@@ -18,11 +18,41 @@ public class MySoundDefinitionsProvider extends SoundDefinitionsProvider {
                 .with(sound(Identifier.fromNamespaceAndPath(LanfasieBenderson.MODID, "omen/lethal_attack_sfx"), SoundDefinition.SoundType.SOUND)
                         .volume(1.0f)
                         .pitch(1.0f).weight(5).attenuationDistance(8))
-                .subtitle("sound.%s.lethal_attack.subtitle".formatted(LanfasieBenderson.MODID)));
+                .subtitle("subtitles.%s.lethal_attack".formatted(LanfasieBenderson.MODID)));
         add(AllSoundEvents.STACK_ATTACK_SFX, SoundDefinition.definition()
                 .with(sound(Identifier.fromNamespaceAndPath(LanfasieBenderson.MODID, "omen/stack_attack_sfx"), SoundDefinition.SoundType.SOUND)
                         .volume(1.0f)
                         .pitch(1.0f).weight(5).attenuationDistance(16))
-                .subtitle("sound.%s.stack_attack.subtitle".formatted(LanfasieBenderson.MODID)));
+                .subtitle("subtitles.%s.stack_attack".formatted(LanfasieBenderson.MODID)));
+        add(AllSoundEvents.BOSS_SWEEP_SFX, SoundDefinition.definition()
+                .with(
+                        sound(Identifier.withDefaultNamespace("entity/player/attack/sweep1"), SoundDefinition.SoundType.SOUND)
+                        .volume(.7).attenuationDistance(32)
+                )
+                .with(
+                        sound(Identifier.withDefaultNamespace("entity/player/attack/sweep2"), SoundDefinition.SoundType.SOUND)
+                        .volume(.7).attenuationDistance(32)
+                )
+                .with(
+                        sound(Identifier.withDefaultNamespace("entity/player/attack/sweep3"), SoundDefinition.SoundType.SOUND)
+                        .volume(.7).attenuationDistance(32)
+                )
+                .with(
+                        sound(Identifier.withDefaultNamespace("entity/player/attack/sweep4"), SoundDefinition.SoundType.SOUND)
+                        .volume(.7).attenuationDistance(32)
+                )
+                .with(
+                        sound(Identifier.withDefaultNamespace("entity/player/attack/sweep5"), SoundDefinition.SoundType.SOUND)
+                        .volume(.7).attenuationDistance(32)
+                )
+                .with(
+                        sound(Identifier.withDefaultNamespace("entity/player/attack/sweep6"), SoundDefinition.SoundType.SOUND)
+                        .volume(.7).attenuationDistance(32)
+                )
+                .with(
+                        sound(Identifier.withDefaultNamespace("entity/player/attack/sweep7"), SoundDefinition.SoundType.SOUND)
+                        .volume(.7).attenuationDistance(32)
+                )
+                .subtitle("subtitles.%s.enemy_sweep".formatted(LanfasieBenderson.MODID)));
     }
 }
