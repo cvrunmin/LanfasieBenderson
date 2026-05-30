@@ -41,12 +41,9 @@ public class PartialArenaAoePhaseState implements IPhaseState{
         if(this.owner.level().isClientSide()) return;
         targetPos = this.owner.getCombatArenaCenter().subtract(0, 0, owner.getArenaRadius() * 0.5f);
         this.owner.getMoveControl().setWantedPosition(targetPos.x, targetPos.y, targetPos.z, 1.0f);
-        var marker = new TargetMarker(this.owner.level(), this.owner,
+        var marker = new TargetMarker(this.owner.level(), targetPos,
                 TargetMarker.MarkerArgs.complexRange(TargetMarker.MarkerType.LINEAR_AOE, this.owner.getArenaRadius() * 2, this.owner.getArenaRadius() * 1.5f, 130));
         this.trackingMarker = marker;
-//        this.owner.level().addFreshEntity(marker);
-//        this.owner.lookAt(EntityAnchorArgument.Anchor.FEET, new Vec3(0, 0, 1).add(this.owner.position()));
-//        this.owner.setAnimateState(ANIMATE_STATE_HALF_ARENA_AOE_SELF_START);
         this.currentTick = this.maxTicksWithWaiting;
     }
 
@@ -83,15 +80,17 @@ public class PartialArenaAoePhaseState implements IPhaseState{
             }
             if(pastTicks == 134){
                 if(!this.owner.level().isClientSide()){
-                    var acceptingTargets = this.owner.level().getEntities(EntityTypeTest.forClass(Player.class),
+                    var acceptingTargets = this.owner.level().getEntities(EntityTypeTest.forClass(LivingEntity.class),
                             AABB.ofSize(this.owner.getCombatArenaCenter(), this.owner.getArenaRadius() * 2, 10, this.owner.getArenaRadius() * 2).contract(0, 0, -this.owner.getArenaRadius() * 0.5f),
-                            LivingEntity::isAlive);
-                    for (Player acceptingTarget : acceptingTargets) {
-                        if(acceptingTarget.canBeSeenAsEnemy()){
+                            LivingEntity::canBeSeenByAnyone);
+                    for (LivingEntity acceptingTarget : acceptingTargets) {
+                        if(acceptingTarget.canBeSeenByAnyone()){
                             acceptingTarget.hurtServer(((ServerLevel) this.owner.level()),
                                     this.owner.damageSources().source(AllDamageTypes.BOSS_ABILITY_ATTACK, this.owner),
-                                    attackDamage);
-                            VulnerabilityHelper.addVulnerabilityUp(acceptingTarget);
+                                    acceptingTarget instanceof Player ? attackDamage : attackDamage * 0.2f);
+                            if(acceptingTarget instanceof Player player) {
+                                VulnerabilityHelper.addVulnerabilityUp(player);
+                            }
                         }
                     }
                 }
@@ -136,7 +135,9 @@ public class PartialArenaAoePhaseState implements IPhaseState{
                 output.store("MarkerArgs", TargetMarker.MarkerArgs.CODEC, this.trackingMarker.getMarkerArgs());
             }
         }
-        output.store("TargetPos", Vec3.CODEC, this.targetPos);
+        if(this.targetPos != null) {
+            output.store("TargetPos", Vec3.CODEC, this.targetPos);
+        }
     }
 
     @Override

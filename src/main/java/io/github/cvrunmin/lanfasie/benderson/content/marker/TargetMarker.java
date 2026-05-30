@@ -135,8 +135,10 @@ public class TargetMarker extends Entity implements IEntityWithComplexSpawn {
     private LivingEntity targetEntity;
     private UUID delayedTargetEntityUuid;
     private int delayedTargetEntityGraceTick = 0;
-    private Vec3 targetPos;
     private int lifeTick = 0;
+
+    private LivingEntity sourceEntity;
+    private int sourceEntityFailCount = 0;
 
     public TargetMarker(EntityType<?> type, Level level) {
         super(type, level);
@@ -164,6 +166,14 @@ public class TargetMarker extends Entity implements IEntityWithComplexSpawn {
 
     public static TargetMarker byBlockPosLowerCorner(Level level, BlockPos pos, MarkerArgs markerArgs){
         return new TargetMarker(level, Vec3.atLowerCornerOf(pos), markerArgs);
+    }
+
+    public void setSourceEntity(LivingEntity sourceEntity) {
+        this.sourceEntity = sourceEntity;
+    }
+
+    public LivingEntity getSourceEntity() {
+        return sourceEntity;
     }
 
     @Override
@@ -211,7 +221,16 @@ public class TargetMarker extends Entity implements IEntityWithComplexSpawn {
         if(!isPersistent()){
             lifeTick++;
             if(!this.level().isClientSide() && lifeTick >= getMarkerArgs().expectedLife + 600){
-                this.remove(RemovalReason.DISCARDED);
+                this.discard();
+            }
+        }else{
+            if (!level().isClientSide() && getMarkerArgs().markerType == MarkerType.ARENA_HINT) {
+                if (sourceEntity == null || !sourceEntity.isAlive()) {
+                    sourceEntityFailCount++;
+                    if (sourceEntityFailCount >= 5) this.discard();
+                } else {
+                    sourceEntityFailCount = 0;
+                }
             }
         }
         if(!isRemoved() && !level().isClientSide()){
@@ -249,6 +268,7 @@ public class TargetMarker extends Entity implements IEntityWithComplexSpawn {
         this.entityData.set(MARKER_ARGS_ACCESSOR, input.read("MarkerArgs", MarkerArgs.CODEC).orElse(MarkerArgs.EMPTY));
         input.getInt("LifeTick").ifPresent(v -> lifeTick = v);
         this.setPersistent(input.getBooleanOr("Persistent", false));
+        Optional.ofNullable(EntityReference.<LivingEntity>read(input, "Source")).map(v -> v.getEntity(this.level(), LivingEntity.class)).ifPresent(v -> this.sourceEntity = v);
     }
 
     @Override
@@ -260,6 +280,9 @@ public class TargetMarker extends Entity implements IEntityWithComplexSpawn {
         output.store("MarkerArgs", MarkerArgs.CODEC, this.getMarkerArgs());
         output.putInt("LifeTick", this.lifeTick);
         output.putBoolean("Persistent", this.isPersistent());
+        if(sourceEntity != null){
+            EntityReference.of(sourceEntity).store(output, "Source");
+        }
     }
 
     @Override

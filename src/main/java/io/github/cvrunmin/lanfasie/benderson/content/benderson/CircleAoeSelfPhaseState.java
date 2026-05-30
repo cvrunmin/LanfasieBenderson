@@ -11,6 +11,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.entity.EntityTypeTest;
 import net.minecraft.world.level.storage.ValueInput;
@@ -69,14 +70,16 @@ public class CircleAoeSelfPhaseState implements IPhaseState{
             }
             if (pastTicks == 114) {
                 if(!this.owner.level().isClientSide()){
-                    var acceptingTargets = this.owner.level().getEntities(EntityTypeTest.forClass(Player.class),
+                    var acceptingTargets = this.owner.level().getEntities(EntityTypeTest.forClass(LivingEntity.class),
                             AABB.ofSize(this.owner.position(), this.range, 10, this.range),
-                            player -> player.isAlive() && player.position().subtract(this.owner.position()).horizontalDistance() <= this.range * 0.5f);
-                    for (Player acceptingTarget : acceptingTargets) {
+                            livingEntity -> livingEntity.canBeSeenByAnyone() && livingEntity.position().subtract(this.owner.position()).horizontalDistance() <= this.range * 0.5f);
+                    for (LivingEntity acceptingTarget : acceptingTargets) {
                         acceptingTarget.hurtServer(((ServerLevel) this.owner.level()),
                                 this.owner.damageSources().source(AllDamageTypes.BOSS_ABILITY_ATTACK, this.owner),
-                                attackDamage);
-                        VulnerabilityHelper.addVulnerabilityUp(acceptingTarget);
+                                acceptingTarget instanceof Player ? attackDamage : attackDamage * 0.2f);
+                        if(acceptingTarget instanceof Player player) {
+                            VulnerabilityHelper.addVulnerabilityUp(player);
+                        }
                     }
                 }
             }

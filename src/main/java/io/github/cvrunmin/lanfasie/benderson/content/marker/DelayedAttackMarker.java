@@ -71,7 +71,7 @@ public class DelayedAttackMarker extends Entity implements TraceableEntity, IEnt
     private EntityReference<LivingEntity> owner;
     private float damage = 1;
     private int lifeTick;
-    private List<Tuple<Player, Double>> snapshotAttackEntities;
+    private List<Tuple<LivingEntity, Double>> snapshotAttackEntities;
     private TargetMarker associatedTargetMarker;
 
     public DelayedAttackMarker(EntityType<?> type, Level level) {
@@ -129,9 +129,9 @@ public class DelayedAttackMarker extends Entity implements TraceableEntity, IEnt
                     }
                     if(remainingLife == catMoveTotalTime + CAT_LEAVE_TIME && getOwner() != null && getOwner().isAlive()){
                         var aabb = AABB.ofSize(position(), getRange2(), 10, getRange() * 2);
-                        this.snapshotAttackEntities = level().getEntitiesOfClass(Player.class, aabb).stream()
-                                .filter(Player::canBeSeenAsEnemy)
-                                .map(player -> new Tuple<>(player, player.position().z - this.position().z + getRange() + CAT_HALF_DEPTH))
+                        this.snapshotAttackEntities = level().getEntitiesOfClass(LivingEntity.class, aabb).stream()
+                                .filter(LivingEntity::canBeSeenByAnyone)
+                                .map(livingEntity -> new Tuple<>(livingEntity, livingEntity.position().z - this.position().z + getRange() + CAT_HALF_DEPTH))
                                 .collect(Collectors.toCollection(ArrayList::new));
                     }else if (remainingLife <= catMoveTotalTime + CAT_LEAVE_TIME && remainingLife > CAT_LEAVE_TIME) {
                         var catWalkDistance = (float) (catMoveTotalTime - (remainingLife - CAT_LEAVE_TIME)) * CAT_MOVE_SPEED - 1;
@@ -141,13 +141,17 @@ public class DelayedAttackMarker extends Entity implements TraceableEntity, IEnt
                             ((ServerLevel) this.level()).sendParticles(ParticleTypes.EXPLOSION_EMITTER, emitPos.x, emitPos.y, emitPos.z, 5, 3, 0, 3, 0);
                         }
                         if (snapshotAttackEntities != null && !snapshotAttackEntities.isEmpty()) {
-                            for (Iterator<Tuple<Player, Double>> iterator = this.snapshotAttackEntities.iterator(); iterator.hasNext(); ) {
-                                Tuple<Player, Double> tuple = iterator.next();
+                            for (Iterator<Tuple<LivingEntity, Double>> iterator = this.snapshotAttackEntities.iterator(); iterator.hasNext(); ) {
+                                Tuple<LivingEntity, Double> tuple = iterator.next();
                                 if (tuple.getB() <= catWalkDistance) {
-                                    var player = tuple.getA();
-                                    if (player.canBeSeenAsEnemy()) {
-                                        player.hurtServer(((ServerLevel) level()), this.damageSources().source(AllDamageTypes.BOSS_ABILITY_ATTACK, this, this.getOwner()), damage);
-                                        VulnerabilityHelper.addVulnerabilityUp(player);
+                                    var livingEntity = tuple.getA();
+                                    if (livingEntity.canBeSeenByAnyone()) {
+                                        livingEntity.hurtServer(((ServerLevel) level()),
+                                                this.damageSources().source(AllDamageTypes.BOSS_ABILITY_ATTACK, this, this.getOwner()),
+                                                livingEntity instanceof Player ? damage : damage * 0.2f);
+                                        if(livingEntity instanceof Player player) {
+                                            VulnerabilityHelper.addVulnerabilityUp(player);
+                                        }
                                     }
                                     iterator.remove();
                                 }
@@ -162,18 +166,22 @@ public class DelayedAttackMarker extends Entity implements TraceableEntity, IEnt
                     }
                     if(remainingLife == 10){
                         var aabb = AABB.ofSize(position(), getRange() * 2, 10, getRange() * 2);
-                        this.snapshotAttackEntities = level().getEntitiesOfClass(Player.class, aabb).stream()
-                                .filter(Player::canBeSeenAsEnemy)
-                                .map(player -> new Tuple<>(player, 0.0))
+                        this.snapshotAttackEntities = level().getEntitiesOfClass(LivingEntity.class, aabb).stream()
+                                .filter(livingEntity -> livingEntity.canBeSeenByAnyone() && livingEntity.position().distanceTo(position()) <= getRange())
+                                .map(livingEntity -> new Tuple<>(livingEntity, 0.0))
                                 .toList();
                     } else if (remainingLife == 8) {
                         this.level().playSound(null, position().x, position().y, position().z, SoundEvents.GENERIC_EXPLODE, SoundSource.HOSTILE, 1, 1);
                         ((ServerLevel) this.level()).sendParticles(ParticleTypes.EXPLOSION_EMITTER, position().x, position().y, position().z, 0, 0, 0, 0, 0);
-                        for (Tuple<Player, Double> tuple : this.snapshotAttackEntities) {
-                            var player = tuple.getA();
-                            if(player.canBeSeenAsEnemy()){
-                                player.hurtServer(((ServerLevel) level()), this.damageSources().source(AllDamageTypes.BOSS_ABILITY_ATTACK, this, this.getOwner()), damage);
-                                VulnerabilityHelper.addVulnerabilityUp(player);
+                        for (Tuple<LivingEntity, Double> tuple : this.snapshotAttackEntities) {
+                            var livingEntity = tuple.getA();
+                            if(livingEntity.canBeSeenByAnyone()){
+                                livingEntity.hurtServer(((ServerLevel) level()),
+                                        this.damageSources().source(AllDamageTypes.BOSS_ABILITY_ATTACK, this, this.getOwner()),
+                                        livingEntity instanceof Player ? damage : damage * 0.2f);
+                                if(livingEntity instanceof Player player) {
+                                    VulnerabilityHelper.addVulnerabilityUp(player);
+                                }
                             }
                         }
                     }

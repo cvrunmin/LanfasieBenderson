@@ -7,6 +7,7 @@ import net.minecraft.core.UUIDUtil;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.ExperienceOrb;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.component.BlocksAttacks;
 import net.minecraft.world.level.storage.ValueInput;
@@ -51,7 +52,7 @@ public class LethalAttackPhaseState implements IPhaseState{
         } else if (maxTicks - currentTick == 110) {
             this.owner.setAnimateState(ANIMATE_STATE_LETHAL_ATTACK_END);
         } else if (maxTicks - currentTick == 112) {
-            if(!this.owner.level().isClientSide() && this.currentTarget.canBeSeenAsEnemy()){
+            if(!this.owner.level().isClientSide() && this.currentTarget.canBeSeenByAnyone()){
                 var maybeShieldLike = currentTarget.getItemBlockingWith();
                 var reductionFactor = 0f;
                 if(maybeShieldLike != null){
@@ -59,6 +60,7 @@ public class LethalAttackPhaseState implements IPhaseState{
                     if(blocksAttacks != null){
                         blocksAttacks.disable(((ServerLevel) this.owner.level()), currentTarget, 2.0f, maybeShieldLike);
                         reductionFactor = 0.8f;
+                        ExperienceOrb.award((ServerLevel) this.owner.level(), currentTarget.position(), 20);
                     }
                 }
                 currentTarget.hurtServer(((ServerLevel) this.owner.level()),

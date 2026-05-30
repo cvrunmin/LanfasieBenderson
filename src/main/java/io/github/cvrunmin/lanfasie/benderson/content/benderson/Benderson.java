@@ -10,10 +10,7 @@ import com.geckolib.constant.DataTickets;
 import com.geckolib.constant.DefaultAnimations;
 import com.geckolib.util.GeckoLibUtil;
 import io.github.cvrunmin.lanfasie.benderson.content.marker.TargetMarker;
-import io.github.cvrunmin.lanfasie.benderson.index.AllAttributes;
-import io.github.cvrunmin.lanfasie.benderson.index.AllDamageTypes;
-import io.github.cvrunmin.lanfasie.benderson.index.AllEntityDataSerializers;
-import io.github.cvrunmin.lanfasie.benderson.index.AllEntityTypes;
+import io.github.cvrunmin.lanfasie.benderson.index.*;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.UUIDUtil;
@@ -89,6 +86,7 @@ public class Benderson extends Monster implements GeoEntity {
 
     public Benderson(EntityType<? extends Benderson> type, Level level) {
         super(type, level);
+        this.xpReward = 2000;
         this.moveControl = new FlyingMoveControl(this, 180, true);
         transitioner = new PhaseStateTransitioner(this);
         transitioner.addPhaseStateInstance("idle", idlePhaseState)
@@ -126,6 +124,7 @@ public class Benderson extends Monster implements GeoEntity {
         this.arenaCenter = BlockPos.containing(x, y, z);
         this.arenaHintMarker = TargetMarker.byBlockPosLowerCorner(level, this.arenaCenter, TargetMarker.MarkerArgs.simple(TargetMarker.MarkerType.ARENA_HINT, arenaRadius, 1));
         this.arenaHintMarker.setPersistent(true);
+        this.arenaHintMarker.setSourceEntity(this);
         level.addFreshEntity(this.arenaHintMarker);
     }
 
@@ -152,6 +151,7 @@ public class Benderson extends Monster implements GeoEntity {
             if(this.arenaHintMarker == null){
                 this.arenaHintMarker = TargetMarker.byBlockPosLowerCorner(level(), this.arenaCenter, TargetMarker.MarkerArgs.simple(TargetMarker.MarkerType.ARENA_HINT, arenaRadius, 1));
                 this.arenaHintMarker.setPersistent(true);
+                this.arenaHintMarker.setSourceEntity(this);
                 level().addFreshEntity(this.arenaHintMarker);
             }
         }
@@ -299,9 +299,18 @@ public class Benderson extends Monster implements GeoEntity {
     }
 
     @Override
-    public void setTarget(@org.jspecify.annotations.Nullable LivingEntity target) {
+    public void setTarget(@Nullable LivingEntity target) {
         super.setTarget(target);
         this.entityData.set(TARGET_SYNCER, Optional.ofNullable(EntityReference.of(target)));
+    }
+
+    @Override
+    protected @Nullable LivingEntity asValidTarget(@Nullable LivingEntity target) {
+        if (target instanceof Player player && ((player.isCreative() && !player.hasEffect(AllMobEffects.AGGRO_UP)) || player.isSpectator())) {
+            return null;
+        } else {
+            return target != null && !this.canAttack(target) ? null : target;
+        }
     }
 
     public boolean isPlayerTargeted(UUID uuid){
@@ -362,6 +371,7 @@ public class Benderson extends Monster implements GeoEntity {
                 if (this.arenaHintMarker == null) {
                     this.arenaHintMarker = TargetMarker.byBlockPosLowerCorner(level(), this.arenaCenter, TargetMarker.MarkerArgs.simple(TargetMarker.MarkerType.ARENA_HINT, arenaRadius, 1));
                     this.arenaHintMarker.setPersistent(true);
+                    this.arenaHintMarker.setSourceEntity(this);
                     level().addFreshEntity(this.arenaHintMarker);
                 }else{
                     this.arenaHintMarker.setTargetPos(this.arenaCenter);
@@ -396,7 +406,7 @@ public class Benderson extends Monster implements GeoEntity {
     @Override
     public void onRemoval(RemovalReason reason) {
         super.onRemoval(reason);
-        if(arenaHintMarker != null) {
+        if(reason != RemovalReason.UNLOADED_TO_CHUNK && reason != RemovalReason.UNLOADED_WITH_PLAYER && arenaHintMarker != null) {
             arenaHintMarker.discard();
         }
     }
@@ -432,6 +442,7 @@ public class Benderson extends Monster implements GeoEntity {
         } else if (source.is(DamageTypeTags.IS_FIRE)) {
             return false;
         }
+        if(!source.is(DamageTypeTags.BYPASSES_INVULNERABILITY) && !(source.getEntity() instanceof Player)) return false;
         this.damageContainers.push(new DamageContainer(source, damage));
         if (CommonHooks.onEntityIncomingDamage(this, this.damageContainers.peek())) return false;
         if (this.isSleeping()) {
@@ -492,6 +503,8 @@ public class Benderson extends Monster implements GeoEntity {
         return success;
     }
 
+
+
     @Override
     public void die(DamageSource source) {
         if(arenaHintMarker != null && arenaHintMarker.isAlive()){
@@ -550,7 +563,7 @@ public class Benderson extends Monster implements GeoEntity {
 
     @Override
     public boolean canAttack(LivingEntity target) {
-        return target.canBeSeenAsEnemy();
+        return target.canBeSeenAsEnemy() || (target instanceof Player player && player.canBeSeenByAnyone() && player.hasEffect(AllMobEffects.AGGRO_UP));
     }
 
     public Map<Player, Float> getActualEnmityMap(){
@@ -558,7 +571,7 @@ public class Benderson extends Monster implements GeoEntity {
         return this.enmityList.entrySet().stream().map(entry -> {
             var entity = this.level().getEntity(entry.getKey());
             if(!(entity instanceof Player player)) return null;
-            if(!player.isAlive()) return null;
+            if(!player.canBeSeenByAnyone()) return null;
             if(arena.contains(player.position())) return Map.entry(player, entry.getValue());
             return null;
         }).filter(Objects::nonNull).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
@@ -569,7 +582,7 @@ public class Benderson extends Monster implements GeoEntity {
         return this.enmityList.entrySet().stream().filter(entry -> {
             var entity = this.level().getEntity(entry.getKey());
             if(!(entity instanceof Player player)) return false;
-            if(!player.isAlive()) return false;
+            if(!player.canBeSeenByAnyone()) return false;
             return arena.contains(player.position());
         }).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (o, n) -> o, HashMap::new));
     }
@@ -658,12 +671,29 @@ public class Benderson extends Monster implements GeoEntity {
 
         protected void findTarget() {
             ServerLevel level = getServerLevel(this.owner);
-            this.target = level.getNearbyPlayers(TargetingConditions.forCombat(), this.owner, this.owner.getCombatArena())
-                    .stream().map(player -> new Tuple<>(player, this.owner.position().distanceTo(player.position())))
-                    .filter(tuple -> tuple.getB() <= this.range)
-                    .min(Comparator.comparing(Tuple::getB))
-                    .map(Tuple::getA)
-                    .orElse(null);
+            Player candidate = null, candidateAllowCreative = null;
+            double minDist = Double.MAX_VALUE, minDistAllowCreative = Double.MAX_VALUE;
+            for (Player player : level.getEntitiesOfClass(Player.class, this.owner.getCombatArena())) {
+                var dist = this.owner.position().distanceTo(player.position());
+                if(dist > range) continue;
+                if(player.canBeSeenAsEnemy()){
+                    if(dist < minDist){
+                        candidate = player;
+                        minDist = dist;
+                    }
+                } else if (player.canBeSeenByAnyone() && player.hasEffect(AllMobEffects.AGGRO_UP)) {
+                    if(dist < minDistAllowCreative){
+                        candidateAllowCreative = player;
+                        minDistAllowCreative = dist;
+                    }
+                }
+            }
+            if(candidate == null && candidateAllowCreative != null){
+                this.target = candidateAllowCreative;
+            }
+            else{
+                this.target = candidate;
+            }
         }
 
         @Override

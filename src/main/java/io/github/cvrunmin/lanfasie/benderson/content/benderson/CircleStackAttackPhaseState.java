@@ -69,7 +69,7 @@ public class CircleStackAttackPhaseState implements IPhaseState{
                 ((ServerLevel) this.owner.level()).sendParticles(ParticleTypes.EXPLOSION_EMITTER, position.x, position.y, position.z, 0, 0, 0, 0, 0);
                 var acceptingTargets = this.owner.level().getEntities(EntityTypeTest.forClass(Player.class),
                         AABB.ofSize(position, this.range, 10, this.range),
-                        player -> player.isAlive() && player.position().subtract(position).horizontalDistance() <= this.range * 0.5f);
+                        player -> player.canBeSeenByAnyone() && player.position().subtract(position).horizontalDistance() <= this.range * 0.5f);
                 if(!acceptingTargets.isEmpty()){
                     float damage = this.damage;
                     if(this.requiredPlayerToStack < 4){

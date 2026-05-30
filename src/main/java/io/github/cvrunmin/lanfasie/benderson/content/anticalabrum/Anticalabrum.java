@@ -24,6 +24,8 @@ import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.util.RandomPos;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.phys.AABB;
@@ -122,6 +124,12 @@ public class Anticalabrum extends Entity implements TraceableEntity, IEntityWith
                 if (lifeTick >= maxLifeTick) {
                     this.discard();
                 } else {
+                    if(lifeTick == 0){
+                        var bs = this.getBlockStateOn();
+                        if(!bs.isAir()){
+                            this.level().levelEvent(null, 2001, getOnPos(), Block.getId(bs));
+                        }
+                    }
                     if(lifeTick % 100 == 0){
                         getAnticalabrumType().getInfluencingMobEffect().ifPresent(mobEffect -> {
                             var aabb = AABB.ofSize(Vec3.atLowerCornerOf(this.blockPosition()), this.range * 2, 10, this.range * 2);
