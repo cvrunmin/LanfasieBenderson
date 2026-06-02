@@ -1,5 +1,6 @@
-package io.github.cvrunmin.lanfasie.benderson.content.benderson;
+package io.github.cvrunmin.lanfasie.benderson.content.benderson.phases;
 
+import io.github.cvrunmin.lanfasie.benderson.content.benderson.Benderson;
 import io.github.cvrunmin.lanfasie.benderson.content.marker.TargetMarker;
 import io.github.cvrunmin.lanfasie.benderson.index.AllDamageTypes;
 import io.github.cvrunmin.lanfasie.benderson.index.AllSoundEvents;
@@ -76,7 +77,7 @@ public class CircleAoeSelfPhaseState implements IPhaseState{
                     for (LivingEntity acceptingTarget : acceptingTargets) {
                         acceptingTarget.hurtServer(((ServerLevel) this.owner.level()),
                                 this.owner.damageSources().source(AllDamageTypes.BOSS_ABILITY_ATTACK, this.owner),
-                                acceptingTarget instanceof Player ? attackDamage : attackDamage * 0.2f);
+                                acceptingTarget instanceof Player ? attackDamage : attackDamage * Math.min(1.0f, acceptingTarget.getMaxHealth() / 20f));
                         if(acceptingTarget instanceof Player player) {
                             VulnerabilityHelper.addVulnerabilityUp(player);
                         }

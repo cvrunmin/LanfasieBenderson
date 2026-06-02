@@ -1,12 +1,12 @@
-package io.github.cvrunmin.lanfasie.benderson.content.benderson;
+package io.github.cvrunmin.lanfasie.benderson.content.benderson.phases;
 
+import io.github.cvrunmin.lanfasie.benderson.content.benderson.Benderson;
 import io.github.cvrunmin.lanfasie.benderson.content.marker.TargetMarker;
 import io.github.cvrunmin.lanfasie.benderson.index.AllDamageTypes;
 import net.minecraft.commands.arguments.EntityAnchorArgument;
 import net.minecraft.core.UUIDUtil;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.ExperienceOrb;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.component.BlocksAttacks;

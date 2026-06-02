@@ -1,6 +1,7 @@
-package io.github.cvrunmin.lanfasie.benderson.content.benderson;
+package io.github.cvrunmin.lanfasie.benderson.content.benderson.phases;
 
 import io.github.cvrunmin.lanfasie.benderson.content.anticalabrum.Anticalabrum;
+import io.github.cvrunmin.lanfasie.benderson.content.benderson.Benderson;
 import net.minecraft.world.entity.EntityReference;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;

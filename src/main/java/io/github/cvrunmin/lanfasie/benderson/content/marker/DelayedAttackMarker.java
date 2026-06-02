@@ -148,7 +148,7 @@ public class DelayedAttackMarker extends Entity implements TraceableEntity, IEnt
                                     if (livingEntity.canBeSeenByAnyone()) {
                                         livingEntity.hurtServer(((ServerLevel) level()),
                                                 this.damageSources().source(AllDamageTypes.BOSS_ABILITY_ATTACK, this, this.getOwner()),
-                                                livingEntity instanceof Player ? damage : damage * 0.2f);
+                                                livingEntity instanceof Player ? damage : damage * Math.min(1.0f, livingEntity.getMaxHealth() / 20f));
                                         if(livingEntity instanceof Player player) {
                                             VulnerabilityHelper.addVulnerabilityUp(player);
                                         }
@@ -178,7 +178,7 @@ public class DelayedAttackMarker extends Entity implements TraceableEntity, IEnt
                             if(livingEntity.canBeSeenByAnyone()){
                                 livingEntity.hurtServer(((ServerLevel) level()),
                                         this.damageSources().source(AllDamageTypes.BOSS_ABILITY_ATTACK, this, this.getOwner()),
-                                        livingEntity instanceof Player ? damage : damage * 0.2f);
+                                        livingEntity instanceof Player ? damage : damage * Math.min(1.0f, livingEntity.getMaxHealth() / 20f));
                                 if(livingEntity instanceof Player player) {
                                     VulnerabilityHelper.addVulnerabilityUp(player);
                                 }

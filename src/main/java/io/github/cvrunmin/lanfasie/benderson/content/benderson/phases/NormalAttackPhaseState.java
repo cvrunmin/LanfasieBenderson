@@ -1,13 +1,12 @@
-package io.github.cvrunmin.lanfasie.benderson.content.benderson;
+package io.github.cvrunmin.lanfasie.benderson.content.benderson.phases;
 
+import io.github.cvrunmin.lanfasie.benderson.content.benderson.Benderson;
 import net.minecraft.commands.arguments.EntityAnchorArgument;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.level.portal.TeleportTransition;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
-import net.minecraft.world.phys.Vec3;
 
 public class NormalAttackPhaseState implements IPhaseState{
     private final Benderson owner;

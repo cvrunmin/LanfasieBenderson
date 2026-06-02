@@ -9,6 +9,7 @@ import com.geckolib.animation.object.PlayState;
 import com.geckolib.constant.DataTickets;
 import com.geckolib.constant.DefaultAnimations;
 import com.geckolib.util.GeckoLibUtil;
+import io.github.cvrunmin.lanfasie.benderson.content.benderson.phases.*;
 import io.github.cvrunmin.lanfasie.benderson.content.marker.TargetMarker;
 import io.github.cvrunmin.lanfasie.benderson.index.*;
 import net.minecraft.advancements.CriteriaTriggers;
@@ -433,6 +434,14 @@ public class Benderson extends Monster implements GeoEntity {
         return false;
     }
 
+    public static @Nullable Player resolveDamageSourcePlayer(DamageSource source){
+        return switch (source.getEntity()) {
+            case Player player -> player;
+            case OwnableEntity ownable when ownable.getRootOwner() instanceof Player player -> player;
+            case null, default -> null;
+        };
+    }
+
     @Override
     public boolean hurtServer(ServerLevel level, DamageSource source, float damage) {
         if (this.isInvulnerableTo(level, source)) {
@@ -442,7 +451,8 @@ public class Benderson extends Monster implements GeoEntity {
         } else if (source.is(DamageTypeTags.IS_FIRE)) {
             return false;
         }
-        if(!source.is(DamageTypeTags.BYPASSES_INVULNERABILITY) && !(source.getEntity() instanceof Player)) return false;
+        var sourcePlayer = ((ServerPlayer) resolveDamageSourcePlayer(source));
+        if(!source.is(DamageTypeTags.BYPASSES_INVULNERABILITY) && sourcePlayer == null) return false;
         this.damageContainers.push(new DamageContainer(source, damage));
         if (CommonHooks.onEntityIncomingDamage(this, this.damageContainers.peek())) return false;
         if (this.isSleeping()) {
@@ -492,7 +502,8 @@ public class Benderson extends Monster implements GeoEntity {
             }
         }
 
-        if (source.getEntity() instanceof ServerPlayer sourcePlayer) {
+        if (sourcePlayer != null) {
+            // since void damage and /kill damage can hurt this entity, sourcePlayer can be null
             CriteriaTriggers.PLAYER_HURT_ENTITY.trigger(sourcePlayer, this, source, damage, damage, false);
             this.enmityList.putIfAbsent(sourcePlayer.getUUID(), 0f);
             var enmity = inputDamage * sourcePlayer.getAttributeValue(AllAttributes.ENMITY_MULTIPLIER);

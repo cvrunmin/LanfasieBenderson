@@ -1,4 +1,4 @@
-package io.github.cvrunmin.lanfasie.benderson.content.benderson;
+package io.github.cvrunmin.lanfasie.benderson.content.benderson.phases;
 
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;

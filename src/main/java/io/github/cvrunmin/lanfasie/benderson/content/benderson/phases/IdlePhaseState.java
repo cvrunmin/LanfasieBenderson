@@ -1,5 +1,6 @@
-package io.github.cvrunmin.lanfasie.benderson.content.benderson;
+package io.github.cvrunmin.lanfasie.benderson.content.benderson.phases;
 
+import io.github.cvrunmin.lanfasie.benderson.content.benderson.Benderson;
 import net.minecraft.commands.arguments.EntityAnchorArgument;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;

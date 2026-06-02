@@ -1,5 +1,6 @@
-package io.github.cvrunmin.lanfasie.benderson.content.benderson;
+package io.github.cvrunmin.lanfasie.benderson.content.benderson.phases;
 
+import io.github.cvrunmin.lanfasie.benderson.content.benderson.Benderson;
 import io.github.cvrunmin.lanfasie.benderson.content.marker.TargetMarker;
 import io.github.cvrunmin.lanfasie.benderson.index.AllDamageTypes;
 import io.github.cvrunmin.lanfasie.benderson.index.AllSoundEvents;
@@ -9,7 +10,6 @@ import net.minecraft.core.UUIDUtil;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.entity.EntityTypeTest;
@@ -87,7 +87,7 @@ public class PartialArenaAoePhaseState implements IPhaseState{
                         if(acceptingTarget.canBeSeenByAnyone()){
                             acceptingTarget.hurtServer(((ServerLevel) this.owner.level()),
                                     this.owner.damageSources().source(AllDamageTypes.BOSS_ABILITY_ATTACK, this.owner),
-                                    acceptingTarget instanceof Player ? attackDamage : attackDamage * 0.2f);
+                                    acceptingTarget instanceof Player ? attackDamage : attackDamage * Math.min(1.0f, acceptingTarget.getMaxHealth() / 20f));
                             if(acceptingTarget instanceof Player player) {
                                 VulnerabilityHelper.addVulnerabilityUp(player);
                             }

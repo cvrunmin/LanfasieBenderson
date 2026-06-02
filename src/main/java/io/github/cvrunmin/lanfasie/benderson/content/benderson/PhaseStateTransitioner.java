@@ -1,6 +1,6 @@
 package io.github.cvrunmin.lanfasie.benderson.content.benderson;
 
-import com.google.common.collect.Lists;
+import io.github.cvrunmin.lanfasie.benderson.content.benderson.phases.IPhaseState;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
@@ -12,7 +12,6 @@ import javax.annotation.Nullable;
 import java.lang.ref.Reference;
 import java.lang.ref.WeakReference;
 import java.util.*;
-import java.util.stream.IntStream;
 
 public class PhaseStateTransitioner {
     private final WeakReference<Benderson> owner;
