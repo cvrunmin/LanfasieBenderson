@@ -34,6 +34,8 @@ public class OminousOrbItem extends Item {
         if(!entities.isEmpty()) return InteractionResult.FAIL;
         if (level instanceof ServerLevel) {
             Benderson benderson = new Benderson(level, above.getX(), above.getY(), above.getZ());
+            benderson.setBodyState(Benderson.BodyState.ENTRANCE);
+            benderson.setPhaseState("arena_entering");
             level.addFreshEntity(benderson);
             level.gameEvent(context.getPlayer(), GameEvent.ENTITY_PLACE, above);
         }

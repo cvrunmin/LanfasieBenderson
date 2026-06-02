@@ -9,13 +9,17 @@ import com.geckolib.animation.object.PlayState;
 import com.geckolib.constant.DataTickets;
 import com.geckolib.constant.DefaultAnimations;
 import com.geckolib.util.GeckoLibUtil;
+import com.mojang.serialization.Codec;
 import io.github.cvrunmin.lanfasie.benderson.content.benderson.phases.*;
 import io.github.cvrunmin.lanfasie.benderson.content.marker.TargetMarker;
 import io.github.cvrunmin.lanfasie.benderson.index.*;
+import io.netty.buffer.ByteBuf;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.UUIDUtil;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
@@ -25,7 +29,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.util.Mth;
-import net.minecraft.util.Tuple;
+import net.minecraft.util.StringRepresentable;
 import net.minecraft.util.Util;
 import net.minecraft.world.BossEvent;
 import net.minecraft.world.damagesource.DamageSource;
@@ -37,7 +41,6 @@ import net.minecraft.world.entity.ai.control.FlyingMoveControl;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.ai.navigation.FlyingPathNavigation;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
-import net.minecraft.world.entity.ai.targeting.TargetingConditions;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
@@ -57,6 +60,7 @@ public class Benderson extends Monster implements GeoEntity {
     private static final EntityDataAccessor<String> ANIMATE_STATE = SynchedEntityData.defineId(Benderson.class, EntityDataSerializers.STRING);
     private static final EntityDataAccessor<Optional<HashMap<UUID, Float>>> ENMITY_SYNCER = SynchedEntityData.defineId(Benderson.class, AllEntityDataSerializers.OPTIONAL_UUID_FLOAT_MAP.get());
     private static final EntityDataAccessor<Optional<EntityReference<LivingEntity>>> TARGET_SYNCER = SynchedEntityData.defineId(Benderson.class, EntityDataSerializers.OPTIONAL_LIVING_ENTITY_REFERENCE);
+    private static final EntityDataAccessor<BodyState> BODY_STATE = SynchedEntityData.defineId(Benderson.class, AllEntityDataSerializers.BENDERSON_BODY_STATE.get());
 
     private final AnimatableInstanceCache geoCache = GeckoLibUtil.createInstanceCache(this);
     private DamageSource lastDamageSource;
@@ -65,6 +69,7 @@ public class Benderson extends Monster implements GeoEntity {
     protected HashMap<UUID, Float> enmityList = new HashMap<>();
 
     private IdlePhaseState idlePhaseState = new IdlePhaseState(this);
+    private ArenaEnteringPhaseState arenaEnteringPhaseState = new ArenaEnteringPhaseState(this);
     private NormalAttackPhaseState normalAttackPhaseState = new NormalAttackPhaseState(this);
     private LethalAttackPhaseState lethalAttackPhaseState = new LethalAttackPhaseState(this);
     private CircleAoeSelfPhaseState circleAoeSelfPhaseState = new CircleAoeSelfPhaseState(this, 22);
@@ -91,6 +96,7 @@ public class Benderson extends Monster implements GeoEntity {
         this.moveControl = new FlyingMoveControl(this, 180, true);
         transitioner = new PhaseStateTransitioner(this);
         transitioner.addPhaseStateInstance("idle", idlePhaseState)
+                .addPhaseStateInstance("arena_entering", arenaEnteringPhaseState)
                 .addPhaseStateInstance("attack", normalAttackPhaseState)
                 .addPhaseStateInstance("lethal_attack", lethalAttackPhaseState)
                 .addPhaseStateInstance("circle_aoe_self", circleAoeSelfPhaseState)
@@ -100,6 +106,8 @@ public class Benderson extends Monster implements GeoEntity {
                 .addTransition("idle", "idle", 0)
                 .addTransition("idle", "summon_anticalabrum")
                 .addTransition("idle", "attack")
+                .addTransition("arena_entering", "attack", 0)
+                .addTransition("arena_entering", "idle", -1)
                 .addTransition("attack", "idle", -1)
                 .addTransition("attack", "attack", 0)
                 .addTransition("attack", "summon_anticalabrum", 10)
@@ -164,6 +172,7 @@ public class Benderson extends Monster implements GeoEntity {
         entityData.define(ANIMATE_STATE, "idle");
         entityData.define(ENMITY_SYNCER, Optional.empty());
         entityData.define(TARGET_SYNCER, Optional.empty());
+        entityData.define(BODY_STATE, BodyState.ENTRANCE);
     }
 
 
@@ -299,6 +308,14 @@ public class Benderson extends Monster implements GeoEntity {
         this.entityData.set(ANIMATE_STATE, state);
     }
 
+    public BodyState getBodyState(){
+        return entityData.get(BODY_STATE);
+    }
+
+    public void setBodyState(BodyState bodyState){
+        entityData.set(BODY_STATE, bodyState);
+    }
+
     @Override
     public void setTarget(@Nullable LivingEntity target) {
         super.setTarget(target);
@@ -357,6 +374,7 @@ public class Benderson extends Monster implements GeoEntity {
         if(maybeHint instanceof TargetMarker arenaHint){
             this.arenaHintMarker = arenaHint;
         }
+        input.read("BodyState", BodyState.CODEC).ifPresent(this::setBodyState);
         this.enmityList = new HashMap<>();
         var maybeEnmityListObj = input.childrenList("Enmity");
         if(maybeEnmityListObj.isPresent()){
@@ -390,6 +408,7 @@ public class Benderson extends Monster implements GeoEntity {
         if(this.arenaHintMarker != null) {
             output.store("ArenaHint", UUIDUtil.CODEC, this.arenaHintMarker.getUUID());
         }
+        output.store("BodyState", BodyState.CODEC, getBodyState());
         var enmityListObj = output.childrenList("Enmity");
         for (Map.Entry<UUID, Float> entry : this.enmityList.entrySet()) {
             var child = enmityListObj.addChild();
@@ -760,6 +779,29 @@ public class Benderson extends Monster implements GeoEntity {
         public float getTotalDamage(){
             clearOutdatedRecord();
             return (float) damageDeque.stream().mapToDouble(v -> v).sum();
+        }
+    }
+
+    public enum BodyState implements StringRepresentable {
+        ENTRANCE("entrance"),
+        DEEP_LATENT("deeplatent"),
+        TRANSITION_UNVEILED("transition_unveiled"),
+        UNVEILED("unveiled"),
+        TRANSITION_UNFORGIVEN("transition_unforgiven"),
+        UNFORGIVEN("unforgiven");
+
+        public static final Codec<BodyState> CODEC = StringRepresentable.fromEnum(BodyState::values);
+        public static final StreamCodec<ByteBuf, BodyState> STREAM_CODEC = ByteBufCodecs.fromCodec(CODEC);
+
+        private final String name;
+
+        BodyState(String name) {
+            this.name = name;
+        }
+
+        @Override
+        public String getSerializedName() {
+            return name;
         }
     }
 }

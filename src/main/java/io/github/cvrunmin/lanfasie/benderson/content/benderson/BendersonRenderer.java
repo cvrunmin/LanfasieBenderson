@@ -9,6 +9,7 @@ import com.mojang.blaze3d.vertex.QuadInstance;
 import com.mojang.math.Axis;
 import io.github.cvrunmin.lanfasie.benderson.content.anticalabrum.Anticalabrum;
 import io.github.cvrunmin.lanfasie.benderson.content.anticalabrum.AnticalabrumModel;
+import io.github.cvrunmin.lanfasie.benderson.content.benderson.phases.SummonAnticalabrumPhaseState;
 import io.github.cvrunmin.lanfasie.benderson.index.AllEntityTypes;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.SubmitNodeCollector;
@@ -28,7 +29,7 @@ import java.util.Optional;
 
 public class BendersonRenderer<R extends EntityRenderState & GeoRenderState> extends GeoEntityRenderer<Benderson, R> {
     public BendersonRenderer(EntityRendererProvider.Context ctx){
-        super(ctx, AllEntityTypes.BENDERSON.get());
+        super(ctx, new BendersonGeoModel());
         withRenderLayer(new BendersonWeaponGeoLayer<>(ctx, this));
     }
 
