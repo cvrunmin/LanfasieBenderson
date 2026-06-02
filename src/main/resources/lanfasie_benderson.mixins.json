@@ -13,5 +13,9 @@
   },
   "overwrites": {
     "requireAnnotations": true
-  }
+  },
+  "client": [
+    "ItemLayerRenderStateAccessor",
+    "ItemStackRenderStateAccessor"
+  ]
 }

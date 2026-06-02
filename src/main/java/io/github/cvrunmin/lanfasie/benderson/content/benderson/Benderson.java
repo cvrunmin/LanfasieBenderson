@@ -1,5 +1,6 @@
 package io.github.cvrunmin.lanfasie.benderson.content.benderson;
 
+import com.geckolib.animatable.GeoAnimatable;
 import com.geckolib.animatable.GeoEntity;
 import com.geckolib.animatable.instance.AnimatableInstanceCache;
 import com.geckolib.animatable.manager.AnimatableManager;
@@ -61,6 +62,10 @@ public class Benderson extends Monster implements GeoEntity {
     private static final EntityDataAccessor<Optional<HashMap<UUID, Float>>> ENMITY_SYNCER = SynchedEntityData.defineId(Benderson.class, AllEntityDataSerializers.OPTIONAL_UUID_FLOAT_MAP.get());
     private static final EntityDataAccessor<Optional<EntityReference<LivingEntity>>> TARGET_SYNCER = SynchedEntityData.defineId(Benderson.class, EntityDataSerializers.OPTIONAL_LIVING_ENTITY_REFERENCE);
     private static final EntityDataAccessor<BodyState> BODY_STATE = SynchedEntityData.defineId(Benderson.class, AllEntityDataSerializers.BENDERSON_BODY_STATE.get());
+    private static final EntityDataAccessor<Integer> ARENA_RADIUS = SynchedEntityData.defineId(Benderson.class, EntityDataSerializers.INT);
+    private static final EntityDataAccessor<BlockPos> ARENA_CENTER = SynchedEntityData.defineId(Benderson.class, EntityDataSerializers.BLOCK_POS);
+
+    private static final EntityDimensions ARENA_ENTERING_DIMENSIONS = EntityDimensions.fixed(0.0F, 0.0F);
 
     private final AnimatableInstanceCache geoCache = GeckoLibUtil.createInstanceCache(this);
     private DamageSource lastDamageSource;
@@ -130,7 +135,7 @@ public class Benderson extends Monster implements GeoEntity {
     public Benderson(Level level, double x, double y, double z) {
         this(AllEntityTypes.BENDERSON.get(), level);
         this.setPos(x, y, z);
-        this.arenaCenter = BlockPos.containing(x, y, z);
+        this.setArenaCenter(BlockPos.containing(x, y, z));
         this.arenaHintMarker = TargetMarker.byBlockPosLowerCorner(level, this.arenaCenter, TargetMarker.MarkerArgs.simple(TargetMarker.MarkerType.ARENA_HINT, arenaRadius, 1));
         this.arenaHintMarker.setPersistent(true);
         this.arenaHintMarker.setSourceEntity(this);
@@ -155,7 +160,7 @@ public class Benderson extends Monster implements GeoEntity {
         super.onAddedToLevel();
         if(!level().isClientSide()) {
             if(this.arenaCenter == null) {
-                this.arenaCenter = blockPosition();
+                this.setArenaCenter(blockPosition());
             }
             if(this.arenaHintMarker == null){
                 this.arenaHintMarker = TargetMarker.byBlockPosLowerCorner(level(), this.arenaCenter, TargetMarker.MarkerArgs.simple(TargetMarker.MarkerType.ARENA_HINT, arenaRadius, 1));
@@ -172,7 +177,9 @@ public class Benderson extends Monster implements GeoEntity {
         entityData.define(ANIMATE_STATE, "idle");
         entityData.define(ENMITY_SYNCER, Optional.empty());
         entityData.define(TARGET_SYNCER, Optional.empty());
-        entityData.define(BODY_STATE, BodyState.ENTRANCE);
+        entityData.define(BODY_STATE, BodyState.DEEP_LATENT);
+        entityData.define(ARENA_CENTER, BlockPos.ZERO);
+        entityData.define(ARENA_RADIUS, 24);
     }
 
 
@@ -190,14 +197,19 @@ public class Benderson extends Monster implements GeoEntity {
 
     @Override
     public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
-        controllers.add(DefaultAnimations.genericIdleController(),
-                new AnimationController<>("Attack", test -> {
+        controllers.add(new AnimationController<Benderson>("Idle", test -> {
+                    if(test.animatable().getBodyState() == BodyState.ENTRANCE) return PlayState.STOP;
+                    return test.setAndContinue(DefaultAnimations.IDLE);
+                }),
+                new AnimationController<Benderson>("Attack", test -> {
+                    if(test.animatable().getBodyState() == BodyState.ENTRANCE) return PlayState.STOP;
                     if (test.getDataOrDefault(DataTickets.SWINGING_ARM, false))
                         return test.setAndContinue(DefaultAnimations.ATTACK_SWING);
                     return test.setAndContinue(DefaultAnimations.IDLE);
 //                    return PlayState.STOP;
                 }),
-                new AnimationController<>("Special Attack", test -> {
+                new AnimationController<Benderson>("Special Attack", test -> {
+                    if(test.animatable().getBodyState() == BodyState.ENTRANCE) return PlayState.STOP;
                     var animateState = test.getDataOrDefault(BendersonDataTickets.ANIMATE_STATE, "");
                     return switch (animateState) {
                         case LethalAttackPhaseState.ANIMATE_STATE_LETHAL_ATTACK_START ->
@@ -232,7 +244,17 @@ public class Benderson extends Monster implements GeoEntity {
                         }
                         default -> PlayState.STOP;
                     };
-                }));
+                }),
+                new AnimationController<Benderson>("Special Performing", test -> {
+                    var animateState = test.getDataOrDefault(BendersonDataTickets.ANIMATE_STATE, "");
+                    if(test.animatable().getBodyState() == BodyState.ENTRANCE
+                            && Objects.equals(animateState, ArenaEnteringPhaseState.ANIMATE_STATE_START)){
+                        return test.setAndContinue(RawAnimation.begin().thenPlay("sweep_arena"));
+                    }
+                    test.controller().reset();
+                    return PlayState.STOP;
+                })
+                );
     }
 
     @Override
@@ -257,6 +279,7 @@ public class Benderson extends Monster implements GeoEntity {
         if(level().isClientSide() && accessor == ENMITY_SYNCER){
             this.enmityList = entityData.get(ENMITY_SYNCER).orElse(new HashMap<>());
         }
+        refreshDimensions();
     }
 
     @Override
@@ -275,6 +298,18 @@ public class Benderson extends Monster implements GeoEntity {
 
     public void setPhaseState(String state){
         this.transitioner.setPhaseState(state);
+    }
+
+    @Override
+    protected EntityDimensions getDefaultDimensions(Pose pose) {
+        if(this.getBodyState() == BodyState.ENTRANCE) return ARENA_ENTERING_DIMENSIONS;
+        return super.getDefaultDimensions(pose);
+    }
+
+    @Override
+    public boolean shouldRenderAtSqrDistance(double distance) {
+        if(this.getBodyState() == BodyState.ENTRANCE) return distance < Mth.square(64.0 * getViewScale());
+        return super.shouldRenderAtSqrDistance(distance);
     }
 
     @Override
@@ -385,7 +420,7 @@ public class Benderson extends Monster implements GeoEntity {
         }
         transitioner.readAdditionalSaveData(input);
         input.read("ArenaCenter", BlockPos.CODEC).ifPresent(pos -> {
-            this.arenaCenter = pos;
+            this.setArenaCenter(pos);
             if (!level().isClientSide()) {
                 if (this.arenaHintMarker == null) {
                     this.arenaHintMarker = TargetMarker.byBlockPosLowerCorner(level(), this.arenaCenter, TargetMarker.MarkerArgs.simple(TargetMarker.MarkerType.ARENA_HINT, arenaRadius, 1));
@@ -471,7 +506,7 @@ public class Benderson extends Monster implements GeoEntity {
             return false;
         }
         var sourcePlayer = ((ServerPlayer) resolveDamageSourcePlayer(source));
-        if(!source.is(DamageTypeTags.BYPASSES_INVULNERABILITY) && sourcePlayer == null) return false;
+        if(!source.is(DamageTypeTags.BYPASSES_INVULNERABILITY) && (sourcePlayer == null || this.getBodyState() == BodyState.ENTRANCE)) return false;
         this.damageContainers.push(new DamageContainer(source, damage));
         if (CommonHooks.onEntityIncomingDamage(this, this.damageContainers.peek())) return false;
         if (this.isSleeping()) {
@@ -577,18 +612,31 @@ public class Benderson extends Monster implements GeoEntity {
     @Override
     public void startSeenByPlayer(ServerPlayer player) {
         super.startSeenByPlayer(player);
-        this.bossEvent.addPlayer(player);
+        if(isEffectiveAi()) {
+            this.bossEvent.addPlayer(player);
+        }
     }
 
     @Override
     public void stopSeenByPlayer(ServerPlayer player) {
         super.stopSeenByPlayer(player);
-        this.bossEvent.removePlayer(player);
+        if(this.bossEvent.getPlayers().contains(player)) {
+            this.bossEvent.removePlayer(player);
+        }
     }
 
     public Vec3 getCombatArenaCenter(){
         if(this.arenaCenter == null) return Vec3.ZERO;
         return Vec3.atLowerCornerOf(this.arenaCenter);
+    }
+
+    public void setArenaCenter(BlockPos arenaCenter) {
+        this.arenaCenter = arenaCenter;
+        this.entityData.set(ARENA_CENTER, arenaCenter);
+    }
+
+    public Vec3 clientGetCombatArenaCenter(){
+        return Vec3.atLowerCornerOf(entityData.get(ARENA_CENTER));
     }
 
     @Override
@@ -635,7 +683,7 @@ public class Benderson extends Monster implements GeoEntity {
     }
 
     public int getArenaRadius(){
-        return this.arenaRadius;
+        return entityData.get(ARENA_RADIUS);
     }
 
     public static class TopEnmityTargetGoal extends Goal{
