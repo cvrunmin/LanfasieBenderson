@@ -2,6 +2,7 @@ package io.github.cvrunmin.lanfasie.benderson.data;
 
 import io.github.cvrunmin.lanfasie.benderson.LanfasieBenderson;
 import io.github.cvrunmin.lanfasie.benderson.index.AllEntityTypes;
+import io.github.cvrunmin.lanfasie.benderson.index.AllTags;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.data.PackOutput;
@@ -20,5 +21,6 @@ public class MyEntityTypeTagsProvider extends KeyTagProvider<EntityType<?>> {
     protected void addTags(HolderLookup.Provider registries) {
         tag(EntityTypeTags.FALL_DAMAGE_IMMUNE).add(AllEntityTypes.BENDERSON.getKey());
         tag(EntityTypeTags.CANNOT_BE_PUSHED_ONTO_BOATS).add(AllEntityTypes.BENDERSON.getKey());
+        tag(AllTags.IMMUNE_BENDERSON_WIPE_ARENA).add(AllEntityTypes.BENDERSON.getKey());
     }
 }

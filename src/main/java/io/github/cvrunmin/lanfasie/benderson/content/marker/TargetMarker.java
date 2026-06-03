@@ -19,10 +19,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntityReference;
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.*;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
@@ -248,6 +245,16 @@ public class TargetMarker extends Entity implements IEntityWithComplexSpawn {
     @Override
     public boolean shouldRenderAtSqrDistance(double distanceSqr) {
         return distanceSqr < Mth.square(64.0 * getViewScale());
+    }
+
+    private static final EntityDimensions PERSISTENT_DIMENSIONS = EntityDimensions.fixed(0.05f, 0.05f);
+
+    @Override
+    public EntityDimensions getDimensions(Pose pose) {
+        if(isPersistent()){
+            return PERSISTENT_DIMENSIONS;
+        }
+        return super.getDimensions(pose);
     }
 
     @Override

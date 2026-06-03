@@ -6,9 +6,6 @@ import com.geckolib.renderer.GeoEntityRenderer;
 import com.geckolib.renderer.base.BoneSnapshots;
 import com.geckolib.renderer.base.GeoRenderState;
 import com.geckolib.renderer.base.RenderPassInfo;
-import com.mojang.blaze3d.pipeline.BlendFunction;
-import com.mojang.blaze3d.pipeline.ColorTargetState;
-import com.mojang.blaze3d.pipeline.DepthStencilState;
 import com.mojang.blaze3d.pipeline.RenderPipeline;
 import com.mojang.blaze3d.vertex.QuadInstance;
 import com.mojang.math.Axis;
@@ -18,6 +15,7 @@ import io.github.cvrunmin.lanfasie.benderson.content.anticalabrum.AnticalabrumMo
 import io.github.cvrunmin.lanfasie.benderson.content.benderson.phases.ArenaEnteringPhaseState;
 import io.github.cvrunmin.lanfasie.benderson.content.benderson.phases.SummonAnticalabrumPhaseState;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.FaceInfo;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.blockentity.AbstractEndPortalRenderer;
@@ -33,6 +31,7 @@ import net.minecraft.util.ARGB;
 import net.minecraft.util.LightCoordsUtil;
 import net.minecraft.util.Mth;
 import org.joml.Quaternionf;
+import org.joml.Vector3f;
 import org.jspecify.annotations.Nullable;
 
 import java.util.Objects;
@@ -153,11 +152,14 @@ public class BendersonRenderer<R extends LivingEntityRenderState & GeoRenderStat
                 }
                 var poseStack = renderPassInfo.poseStack();
                 poseStack.pushPose();
+                var vfrom = new Vector3f(-24, -10 * gateOpenScale, -5);
+                var vto = new Vector3f(24, 10 * gateOpenScale, 0);
                 submitNodeCollector.submitCustomGeometry(poseStack, PORTAL, (inPose, buffer) -> {
-                    buffer.addVertex(inPose, -24, 10 * gateOpenScale, 0);
-                    buffer.addVertex(inPose, -24, -10 * gateOpenScale, 0);
-                    buffer.addVertex(inPose, 24, -10 * gateOpenScale, 0);
-                    buffer.addVertex(inPose, 24, 10 * gateOpenScale, 0);
+                    for (FaceInfo faceInfo : FaceInfo.values()) {
+                        for (int i = 0; i < 4; i++) {
+                            buffer.addVertex(inPose, faceInfo.getVertexInfo(i).select(vfrom, vto));
+                        }
+                    }
                 });
                 poseStack.popPose();
             }
