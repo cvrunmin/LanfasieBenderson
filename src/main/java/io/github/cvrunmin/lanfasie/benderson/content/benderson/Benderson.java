@@ -792,41 +792,60 @@ public class Benderson extends Monster implements GeoEntity {
         }
     }
 
+    public static class DamageGateRecord{
+        public final float damage;
+        private int life;
+
+        public DamageGateRecord(float damage, int life){
+            this.damage = damage;
+            this.life = life;
+        }
+
+        public void decay(){
+            life--;
+        }
+
+        public boolean outdated(){
+            return life <= 0;
+        }
+
+        public float damage(){
+            return damage;
+        }
+    }
+
     public static class DamageGate{
         private final int maxRecordingDeltaTime;
-        private Deque<Float> damageDeque = new ArrayDeque<>();
-        private Deque<Integer> damageTimeDeque = new ArrayDeque<>();
+        private LinkedList<DamageGateRecord> records = new LinkedList<>();
 
         public DamageGate(int maxRecordingDeltaTime){
             this.maxRecordingDeltaTime = maxRecordingDeltaTime;
         }
 
         private void clearOutdatedRecord(){
-            while (!damageTimeDeque.isEmpty()){
-                if(damageTimeDeque.peekFirst() <= 0){
-                    damageTimeDeque.pollFirst();
-                    damageDeque.pollFirst();
-                }else{
-                    break;
-                }
+            for (Iterator<DamageGateRecord> iterator = records.iterator(); iterator.hasNext(); ) {
+                DamageGateRecord record = iterator.next();
+                if(record.outdated()) iterator.remove();
+                else break;
             }
         }
 
         public void tick(){
-            for (int i = 0; i < damageTimeDeque.size(); i++) {
-                damageTimeDeque.add(damageTimeDeque.pop() - 1);
+            for (Iterator<DamageGateRecord> iterator = records.iterator(); iterator.hasNext(); ) {
+                DamageGateRecord record = iterator.next();
+                record.decay();
+                if(record.outdated()) iterator.remove();
             }
         }
 
         public void addRecord(float damage){
             clearOutdatedRecord();
-            damageDeque.add(damage);
-            damageTimeDeque.add(maxRecordingDeltaTime);
+            records.add(new DamageGateRecord(damage, this.maxRecordingDeltaTime));
         }
 
         public float getTotalDamage(){
             clearOutdatedRecord();
-            return (float) damageDeque.stream().mapToDouble(v -> v).sum();
+            return (float) records.stream().mapToDouble(DamageGateRecord::damage).sum();
         }
     }
 
