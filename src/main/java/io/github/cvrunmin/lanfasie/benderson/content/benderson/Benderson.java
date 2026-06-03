@@ -528,6 +528,7 @@ public class Benderson extends Monster implements GeoEntity {
         if(totalDamageInGate + damage > timegatedDamage){
             damage = Math.max(0, timegatedDamage - totalDamageInGate);
         }
+        this.damageContainers.peek().setNewDamage(damage);
         if(damage > 0){
             this.actuallyHurt(level, source, damage);
             this.lastHurt = damage;
