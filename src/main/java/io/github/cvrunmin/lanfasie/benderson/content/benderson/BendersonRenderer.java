@@ -141,18 +141,22 @@ public class BendersonRenderer<R extends LivingEntityRenderState & GeoRenderStat
             var tSec = performController.getCurrentTimelineTime();
             if(tSec < 8){
                 float gateOpenScale;
+                float gateOpenZScale;
                 if(tSec < 1){
                     gateOpenScale = (float) (1 - Math.pow(1 - tSec, 3));
+                    gateOpenZScale = 1;
                 }
                 else if(tSec >= 7){
                     gateOpenScale = 1 - Mth.clamp((float) (Math.pow((tSec - 7) / 0.5, 3)), 0, 1);
+                    gateOpenZScale = 1 - Mth.clamp((float) (Math.pow((tSec - 7) / 0.5, 3)), 0, 1);
                 }
                 else{
                     gateOpenScale = 1;
+                    gateOpenZScale = 1;
                 }
                 var poseStack = renderPassInfo.poseStack();
                 poseStack.pushPose();
-                var vfrom = new Vector3f(-24, -10 * gateOpenScale, -5);
+                var vfrom = new Vector3f(-24, -10 * gateOpenScale, -5 * gateOpenZScale);
                 var vto = new Vector3f(24, 10 * gateOpenScale, 0);
                 submitNodeCollector.submitCustomGeometry(poseStack, PORTAL, (inPose, buffer) -> {
                     for (FaceInfo faceInfo : FaceInfo.values()) {

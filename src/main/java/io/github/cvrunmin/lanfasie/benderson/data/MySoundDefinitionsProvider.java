@@ -14,6 +14,9 @@ public class MySoundDefinitionsProvider extends SoundDefinitionsProvider {
 
     @Override
     public void registerSounds() {
+        add(AllSoundEvents.BENDERSON_BOSS_THEME_1, SoundDefinition.definition()
+                .with(sound(Identifier.fromNamespaceAndPath(LanfasieBenderson.MODID, "music/stack_of_unforgetable"), SoundDefinition.SoundType.SOUND)
+                        .volume(0.5f).pitch(1.0)));
         add(AllSoundEvents.LETHAL_ATTACK_SFX, SoundDefinition.definition()
                 .with(sound(Identifier.fromNamespaceAndPath(LanfasieBenderson.MODID, "omen/lethal_attack_sfx"), SoundDefinition.SoundType.SOUND)
                         .volume(1.0f)

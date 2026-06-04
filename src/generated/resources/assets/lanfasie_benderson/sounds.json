@@ -1,4 +1,12 @@
 {
+  "benderson_boss_theme_1": {
+    "sounds": [
+      {
+        "name": "lanfasie_benderson:music/stack_of_unforgetable",
+        "volume": 0.5
+      }
+    ]
+  },
   "boss_sweep": {
     "sounds": [
       {

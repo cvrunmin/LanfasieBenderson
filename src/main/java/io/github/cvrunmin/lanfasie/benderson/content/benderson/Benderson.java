@@ -522,13 +522,15 @@ public class Benderson extends Monster implements GeoEntity {
             damage = Float.MAX_VALUE;
         }
         var inputDamage = damage;
-        damage = Math.min(damage, this.getMaxHealth() * 0.01f);
-        var totalDamageInGate = damageGate.getTotalDamage();
-        var timegatedDamage = this.getMaxHealth() * 0.01f;
-        if(totalDamageInGate + damage > timegatedDamage){
-            damage = Math.max(0, timegatedDamage - totalDamageInGate);
+        if(!source.is(DamageTypeTags.BYPASSES_INVULNERABILITY)){
+            damage = Math.min(damage, this.getMaxHealth() * 0.01f);
+            var totalDamageInGate = damageGate.getTotalDamage();
+            var timegatedDamage = this.getMaxHealth() * 0.01f;
+            if(totalDamageInGate + damage > timegatedDamage){
+                damage = Math.max(0, timegatedDamage - totalDamageInGate);
+            }
+            this.damageContainers.peek().setNewDamage(damage);
         }
-        this.damageContainers.peek().setNewDamage(damage);
         if(damage > 0){
             this.actuallyHurt(level, source, damage);
             this.lastHurt = damage;
