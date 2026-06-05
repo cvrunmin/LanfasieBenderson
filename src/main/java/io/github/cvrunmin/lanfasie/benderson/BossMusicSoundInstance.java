@@ -50,16 +50,19 @@ public class BossMusicSoundInstance extends AbstractSoundInstance {
             volume = volume + Mth.clamp(volume, 5e-4f, 0.05f);
             if(volume > this.desiredVolume) volume = this.desiredVolume;
         }else {
-            volume = 0.03f * desiredVolume + 0.97f * volume;
-            if(Math.abs(this.desiredVolume - volume) <= 1e-4 || volume < desiredVolume){
+            volume = 0.1f * desiredVolume + 0.9f * volume;
+            if(Math.abs(this.desiredVolume - volume) <= 1e-2 || volume < desiredVolume){
                 volume = desiredVolume;
             }
         }
         volume = Mth.clamp(volume, 0, 1);
     }
 
-    @Override
-    public float getVolume() {
+    public float getBaseVolume(){
         return volume;
+    }
+
+    public float getDesiredVolume() {
+        return desiredVolume;
     }
 }

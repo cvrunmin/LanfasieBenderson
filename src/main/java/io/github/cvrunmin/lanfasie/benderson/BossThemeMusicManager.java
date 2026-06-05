@@ -15,7 +15,7 @@ import java.util.Objects;
 
 @EventBusSubscriber(modid = LanfasieBenderson.MODID, value = Dist.CLIENT)
 public class BossThemeMusicManager {
-    private static BossMusicTrackPlayer bendersonTheme1Player = new BossMusicTrackPlayer(AllSoundEvents.BENDERSON_BOSS_THEME_1, 169, 2.0f, 166);
+    private static BossMusicTrackPlayer bendersonTheme1Player = new BossMusicTrackPlayer(AllSoundEvents.BENDERSON_BOSS_THEME_1, 169.84f, 2.0f, 162.46f);
 
     @SubscribeEvent
     public static void postClientTick(ClientTickEvent.Post event){
@@ -28,7 +28,9 @@ public class BossThemeMusicManager {
             for (Benderson benderson : entities) {
                 var bossArena = AABB.ofSize(benderson.clientGetCombatArenaCenter(), benderson.getArenaRadius() * 2, 14, benderson.getArenaRadius() * 2);
                 if(bossArena.contains(player.position())){
-                    bendersonTheme1Player.startPlaying();
+                    if(!bendersonTheme1Player.isActive() || bendersonTheme1Player.isMarkedDeactivate()) {
+                        bendersonTheme1Player.startPlaying();
+                    }
                     shouldLoadBossMusic = true;
                     break;
                 }

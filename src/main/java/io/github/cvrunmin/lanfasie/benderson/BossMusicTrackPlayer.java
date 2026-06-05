@@ -60,7 +60,7 @@ public class BossMusicTrackPlayer {
                     if(Minecraft.getInstance().getSoundManager().isActive(tracks[i])){
                         tracks[i].fadeToVolume(0);
                         tracks[i].fadeVolume();
-                        if(tracks[i].getVolume() < 1e-4){
+                        if(tracks[i].getBaseVolume() <= 1e-2){
                             Minecraft.getInstance().getSoundManager().stop(tracks[i]);
                             tracks[i] = null;
                         }
@@ -92,7 +92,7 @@ public class BossMusicTrackPlayer {
                 }
             } else {
                 for (int i = 0; i < tracks.length; i++) {
-                    if(tracks[i] != null){
+                    if(tracks[i] != null && tracks[i].getDesiredVolume() != 1){
                         tracks[i].setVolume(i == activeTrack ? 1 : 0);
                     }
                 }
@@ -112,5 +112,9 @@ public class BossMusicTrackPlayer {
 
     public boolean isActive() {
         return active;
+    }
+
+    public boolean isMarkedDeactivate(){
+        return markedDeactivate;
     }
 }
