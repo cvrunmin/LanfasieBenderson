@@ -5,6 +5,7 @@ import io.github.cvrunmin.lanfasie.benderson.content.anticalabrum.Anticalabrum;
 import io.github.cvrunmin.lanfasie.benderson.content.benderson.Benderson;
 import io.github.cvrunmin.lanfasie.benderson.content.marker.DelayedAttackMarker;
 import io.github.cvrunmin.lanfasie.benderson.content.marker.TargetMarker;
+import io.github.cvrunmin.lanfasie.benderson.content.unforgiven.*;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.level.block.Blocks;
@@ -28,6 +29,17 @@ public class AllEntityTypes {
     public static final DeferredHolder<EntityType<?>, EntityType<DelayedAttackMarker>> DELAYED_ATTACK_MARKER = ENTITY_TYPES.registerEntityType("delayed_attack_marker", DelayedAttackMarker::new, MobCategory.MISC,
             b -> b.sized(0, 0).noLootTable().clientTrackingRange(12));
 
+    public static final DeferredHolder<EntityType<?>, EntityType<UnforgivenSpoiling>> UNFORGIVEN_SPOILING = ENTITY_TYPES.registerEntityType("unforgiven_spoiling", UnforgivenSpoiling::new, MobCategory.MONSTER,
+            b -> b.sized(0.8f, 1.2f).clientTrackingRange(8));
+    public static final DeferredHolder<EntityType<?>, EntityType<UnforgivenRidicule>> UNFORGIVEN_RIDICULE = ENTITY_TYPES.registerEntityType("unforgiven_ridicule", UnforgivenRidicule::new, MobCategory.MONSTER,
+            b -> b.sized(0.8f, 1.2f).clientTrackingRange(8));
+    public static final DeferredHolder<EntityType<?>, EntityType<UnforgivenPerfidy>> UNFORGIVEN_PERFIDY = ENTITY_TYPES.registerEntityType("unforgiven_perfidy", UnforgivenPerfidy::new, MobCategory.MONSTER,
+            b -> b.sized(0.8f, 1.2f).clientTrackingRange(8));
+    public static final DeferredHolder<EntityType<?>, EntityType<UnforgivenCowardice>> UNFORGIVEN_COWARDICE = ENTITY_TYPES.registerEntityType("unforgiven_cowardice", UnforgivenCowardice::new, MobCategory.MONSTER,
+            b -> b.sized(0.8f, 1.2f).clientTrackingRange(8));
+    public static final DeferredHolder<EntityType<?>, EntityType<UnforgivenIndiscretion>> UNFORGIVEN_INDISCRETION = ENTITY_TYPES.registerEntityType("unforgiven_indiscretion", UnforgivenIndiscretion::new, MobCategory.MONSTER,
+            b -> b.sized(0.8f, 1.2f).clientTrackingRange(8));
+
     public static void register(IEventBus modBus){
         ENTITY_TYPES.register(modBus);
         modBus.addListener(AllEntityTypes::createDefaultAttributes);
@@ -35,5 +47,10 @@ public class AllEntityTypes {
 
     public static void createDefaultAttributes(EntityAttributeCreationEvent event){
         event.put(BENDERSON.get(), Benderson.createAttributes().build());
+        event.put(UNFORGIVEN_SPOILING.get(), UnforgivenSpoiling.createAttributes());
+        event.put(UNFORGIVEN_RIDICULE.get(), UnforgivenRidicule.createAttributes());
+        event.put(UNFORGIVEN_PERFIDY.get(), UnforgivenPerfidy.createAttributes());
+        event.put(UNFORGIVEN_COWARDICE.get(), UnforgivenCowardice.createAttributes());
+        event.put(UNFORGIVEN_INDISCRETION.get(), UnforgivenIndiscretion.createAttributes());
     }
 }

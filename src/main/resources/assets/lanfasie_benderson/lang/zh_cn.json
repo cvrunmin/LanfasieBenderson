@@ -1,4 +1,6 @@
-{  "block.lanfasie_benderson.deep_latent_caller": "深潜能量拉取点",
+{
+  "attributes.lanfasie_benderson.enmity_multiplier": "仇恨倍率",
+  "block.lanfasie_benderson.deep_latent_caller": "深潜能量拉取点",
   "death.attack.boss_ability_attack": "%1$s 在躲避 %2$s 的攻击时只差一步就能踏入安全区",
   "death.attack.boss_ability_attack.item": "%1$s 在躲避拿着 %3$s 的 %2$s 的攻击时只差一步就能踏入安全区",
   "death.attack.boss_ability_attack.player": "%1$s 在躲避 %2$s 的攻击时只差一步就能踏入安全区",
@@ -17,15 +19,19 @@
   "entity.lanfasie_benderson.benderson.name.deep_latent": "深潜空域的团魂",
   "entity.lanfasie_benderson.benderson.name.forgiven": "得到宽恕的团魂",
   "entity.lanfasie_benderson.benderson.name.unforgiven": "不获宽恕的团魂",
+  "entity.lanfasie_benderson.delayed_attack_marker": "延迟攻击标记",
   "entity.lanfasie_benderson.target_marker": "目标标记",
+  "entity.lanfasie_benderson.unforgiven_cowardice": "不获宽恕的怯弱",
+  "entity.lanfasie_benderson.unforgiven_indiscretion": "不获宽恕的失言",
+  "entity.lanfasie_benderson.unforgiven_perfidy": "不获宽恕的背义",
+  "entity.lanfasie_benderson.unforgiven_ridicule": "不获宽恕的嘲弄",
+  "entity.lanfasie_benderson.unforgiven_spoiling": "不获宽恕的溺爱",
   "item.lanfasie_benderson.ominous_orb": "不祥的潜能量球",
   "item.lanfasie_benderson.provoking_stick": "挑衅棒",
   "item.lanfasie_benderson.sword_of_dawnwaiter": "晨曦等待者之剑",
   "item.lanfasie_benderson.sword_of_dawnwaiter_tainted": "锈蚀的晨曦等待者之剑",
+  "subtitles.lanfasie_benderson.enemy_sweep": "横扫攻击",
   "subtitles.lanfasie_benderson.lethal_attack": "预兆：致命攻击",
   "subtitles.lanfasie_benderson.stack_attack": "预兆：可分摊攻击",
-  "text.lanfasie_benderson.enmity_bar.aggro": "引战",
-  "attributes.lanfasie_benderson.enmity_multiplier": "仇恨倍率",
-  "entity.lanfasie_benderson.delayed_attack_marker": "延迟攻击标记",
-  "subtitles.lanfasie_benderson.enemy_sweep": "横扫攻击"
+  "text.lanfasie_benderson.enmity_bar.aggro": "引战"
 }
