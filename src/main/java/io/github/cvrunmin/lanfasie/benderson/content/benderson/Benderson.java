@@ -1,6 +1,5 @@
 package io.github.cvrunmin.lanfasie.benderson.content.benderson;
 
-import com.geckolib.animatable.GeoAnimatable;
 import com.geckolib.animatable.GeoEntity;
 import com.geckolib.animatable.instance.AnimatableInstanceCache;
 import com.geckolib.animatable.manager.AnimatableManager;
@@ -505,8 +504,10 @@ public class Benderson extends Monster implements GeoEntity {
         } else if (source.is(DamageTypeTags.IS_FIRE)) {
             return false;
         }
+        if(isTransitioning()) return false;
         var sourcePlayer = ((ServerPlayer) resolveDamageSourcePlayer(source));
-        if(!source.is(DamageTypeTags.BYPASSES_INVULNERABILITY) && (sourcePlayer == null || this.getBodyState() == BodyState.ENTRANCE)) return false;
+        if(!source.is(DamageTypeTags.BYPASSES_INVULNERABILITY)
+                && (sourcePlayer == null || source.getEntity() instanceof OwnableEntity && !canAttack(sourcePlayer))) return false;
         this.damageContainers.push(new DamageContainer(source, damage));
         if (CommonHooks.onEntityIncomingDamage(this, this.damageContainers.peek())) return false;
         if (this.isSleeping()) {
@@ -728,6 +729,16 @@ public class Benderson extends Monster implements GeoEntity {
         }
     }
 
+    public boolean isTransitioning(){
+        return getBodyState().isTransition();
+    }
+
+    @Override
+    public boolean isInvulnerable() {
+        if(isTransitioning()) return true;
+        return super.isInvulnerable();
+    }
+
     public static class NearestTargetGoal extends Goal{
         private final Benderson owner;
         private final float range;
@@ -853,25 +864,32 @@ public class Benderson extends Monster implements GeoEntity {
     }
 
     public enum BodyState implements StringRepresentable {
-        ENTRANCE("entrance"),
-        DEEP_LATENT("deeplatent"),
-        TRANSITION_UNVEILED("transition_unveiled"),
-        UNVEILED("unveiled"),
-        TRANSITION_UNFORGIVEN("transition_unforgiven"),
-        UNFORGIVEN("unforgiven");
+        ENTRANCE("entrance", true),
+        DEEP_LATENT("deeplatent", false),
+        TRANSITION_UNVEILED("transition_unveiled", true),
+        UNVEILED("unveiled", false),
+        TRANSITION_UNFORGIVEN("transition_unforgiven", true),
+        TRANSITION_UNFORGIVEN_POST("transition_unforgiven_post", true),
+        UNFORGIVEN("unforgiven", false);
 
         public static final Codec<BodyState> CODEC = StringRepresentable.fromEnum(BodyState::values);
         public static final StreamCodec<ByteBuf, BodyState> STREAM_CODEC = ByteBufCodecs.fromCodec(CODEC);
 
         private final String name;
+        private final boolean isTransition;
 
-        BodyState(String name) {
+        BodyState(String name, boolean isTransition) {
             this.name = name;
+            this.isTransition = isTransition;
         }
 
         @Override
         public String getSerializedName() {
             return name;
+        }
+
+        public boolean isTransition() {
+            return isTransition;
         }
     }
 }
