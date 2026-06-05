@@ -16,7 +16,9 @@
   },
   "client": [
     "ItemLayerRenderStateAccessor",
-    "ItemStackRenderStateAccessor"
+    "ItemStackRenderStateAccessor",
+    "SoundEngineAccessor",
+    "SoundManagerAccessor"
   ],
   "mixinextras": {
     "minVersion": "0.5.0"
