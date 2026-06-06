@@ -132,7 +132,13 @@ public class Benderson extends Monster implements GeoEntity {
     }
 
     public Benderson(Level level, double x, double y, double z) {
+        this(level, x, y, z, 24);
+    }
+
+    public Benderson(Level level, double x, double y, double z, int arenaRadius) {
         this(AllEntityTypes.BENDERSON.get(), level);
+        this.arenaRadius = arenaRadius;
+        this.entityData.set(ARENA_RADIUS, arenaRadius);
         this.setPos(x, y, z);
         this.setArenaCenter(BlockPos.containing(x, y, z));
         this.arenaHintMarker = TargetMarker.byBlockPosLowerCorner(level, this.arenaCenter, TargetMarker.MarkerArgs.simple(TargetMarker.MarkerType.ARENA_HINT, arenaRadius, 1));
@@ -157,7 +163,7 @@ public class Benderson extends Monster implements GeoEntity {
     @Override
     public void onAddedToLevel() {
         super.onAddedToLevel();
-        if(!level().isClientSide()) {
+        if(!level().isClientSide() && !isNoAi()) {
             if(this.arenaCenter == null) {
                 this.setArenaCenter(blockPosition());
             }
@@ -420,7 +426,7 @@ public class Benderson extends Monster implements GeoEntity {
         transitioner.readAdditionalSaveData(input);
         input.read("ArenaCenter", BlockPos.CODEC).ifPresent(pos -> {
             this.setArenaCenter(pos);
-            if (!level().isClientSide()) {
+            if (!level().isClientSide() && !isNoAi()) {
                 if (this.arenaHintMarker == null) {
                     this.arenaHintMarker = TargetMarker.byBlockPosLowerCorner(level(), this.arenaCenter, TargetMarker.MarkerArgs.simple(TargetMarker.MarkerType.ARENA_HINT, arenaRadius, 1));
                     this.arenaHintMarker.setPersistent(true);
@@ -616,7 +622,7 @@ public class Benderson extends Monster implements GeoEntity {
     @Override
     public void startSeenByPlayer(ServerPlayer player) {
         super.startSeenByPlayer(player);
-        if(isEffectiveAi()) {
+        if(!isNoAi()) {
             this.bossEvent.addPlayer(player);
         }
     }

@@ -140,7 +140,9 @@ public class PhaseStateTransitioner {
     }
 
     public void addAdditionalSaveData(ValueOutput output){
-        output.putString("Phase", currentState);
+        if(currentState != null) {
+            output.putString("Phase", currentState);
+        }
         var phasesObj = output.child("PhaseData");
         for (Map.Entry<String, WeakReference<IPhaseState>> entry : this.possiblePhaseState.entrySet()) {
             var state = entry.getValue().get();

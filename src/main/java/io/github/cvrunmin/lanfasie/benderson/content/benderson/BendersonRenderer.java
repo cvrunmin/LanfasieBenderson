@@ -81,6 +81,7 @@ public class BendersonRenderer<R extends LivingEntityRenderState & GeoRenderStat
             snapshots.ifPresent("leftArmRotator", bone -> bone.skipRender(true));
             snapshots.ifPresent("leftForearm", bone -> bone.skipRender(true));
             snapshots.ifPresent("head", bone -> bone.skipRender(true));
+            snapshots.ifPresent("hat", bone -> bone.skipRender(true));
             snapshots.ifPresent("body1", bone -> bone.skipRender(true));
             var performController = Optional.ofNullable(renderPassInfo.getGeckolibData(DataTickets.ANIMATABLE_MANAGER)).map(AnimatableManager::getAnimationControllers).map(map -> map.get("Special Performing")).orElse(null);
             if(performController != null){
@@ -92,6 +93,8 @@ public class BendersonRenderer<R extends LivingEntityRenderState & GeoRenderStat
                     });
                 }
             }
+        } else if (renderPassInfo.getGeckolibData(BendersonDataTickets.BODY_STATE) == Benderson.BodyState.UNVEILED) {
+            snapshots.ifPresent("hat", bone -> bone.skipRender(true));
         }
     }
 

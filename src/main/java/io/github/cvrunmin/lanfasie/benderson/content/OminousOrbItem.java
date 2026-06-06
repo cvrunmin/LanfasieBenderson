@@ -2,6 +2,7 @@ package io.github.cvrunmin.lanfasie.benderson.content;
 
 import io.github.cvrunmin.lanfasie.benderson.content.benderson.Benderson;
 import io.github.cvrunmin.lanfasie.benderson.index.AllBlocks;
+import io.github.cvrunmin.lanfasie.benderson.index.AllDataComponents;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionResult;
@@ -33,7 +34,8 @@ public class OminousOrbItem extends Item {
         List<Benderson> entities = level.getEntitiesOfClass(Benderson.class, AABB.ofSize(Vec3.atLowerCornerOf(above), 48, 10, 48));
         if(!entities.isEmpty()) return InteractionResult.FAIL;
         if (level instanceof ServerLevel) {
-            Benderson benderson = new Benderson(level, above.getX(), above.getY(), above.getZ());
+            var radius = context.getItemInHand().getComponents().getOrDefault(AllDataComponents.ARENA_RADIUS.get(), 24);
+            Benderson benderson = new Benderson(level, above.getX(), above.getY(), above.getZ(), radius);
             benderson.setBodyState(Benderson.BodyState.ENTRANCE);
             benderson.setPhaseState("arena_entering");
             level.addFreshEntity(benderson);

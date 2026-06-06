@@ -48,6 +48,7 @@ public class LanfasieBenderson {
         // Register the commonSetup method for modloading
         modEventBus.addListener(this::commonSetup);
 
+        AllDataComponents.register(modEventBus);
         AllBlocks.register(modEventBus);
         AllItems.register(modEventBus);
         AllAttributes.register(modEventBus);
