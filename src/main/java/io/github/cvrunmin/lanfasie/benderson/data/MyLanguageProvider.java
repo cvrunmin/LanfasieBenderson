@@ -19,6 +19,11 @@ public class MyLanguageProvider extends LanguageProvider {
         this.addItem(AllItems.SWORD_OF_DAWNWAITER_TAINTED, "Tainted Sword of Dawnwaiter");
         this.addItem(AllItems.OMINOUS_ORB, "Ominous Orb of Latent");
         this.addItem(AllItems.PROVOKING_STICK, "Provoking Stick");
+        this.addItem(AllItems.UNFORGIVEN_COWARDICE_SPAWN_EGG, "Unforgiven Cowardice Spawn Egg");
+        this.addItem(AllItems.UNFORGIVEN_INDISCRETION_SPAWN_EGG, "Unforgiven Indiscretion Spawn Egg");
+        this.addItem(AllItems.UNFORGIVEN_PERFIDY_SPAWN_EGG, "Unforgiven Perfidy Spawn Egg");
+        this.addItem(AllItems.UNFORGIVEN_RIDICULE_SPAWN_EGG, "Unforgiven Ridicule Spawn Egg");
+        this.addItem(AllItems.UNFORGIVEN_SPOILING_SPAWN_EGG, "Unforgiven Spoiling Spawn Egg");
         this.addBlock(AllBlocks.DEEP_LATENT_CALLER, "Deep Latent Caller");
         this.addEntityType(AllEntityTypes.BENDERSON, "Benderson the Abyss-sunken Dawnwaiter");
         this.add("entity.lanfasie_benderson.benderson.name.deep_latent", "Team Soul of Deep Latent");

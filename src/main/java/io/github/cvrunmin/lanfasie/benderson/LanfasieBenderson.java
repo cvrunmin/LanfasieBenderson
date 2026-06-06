@@ -80,14 +80,21 @@ public class LanfasieBenderson {
     // Add the example block item to the building blocks tab
     private void addCreative(BuildCreativeModeTabContentsEvent event) {
         if(CreativeModeTabs.COMBAT.equals(event.getTabKey())){
-            event.accept(new ItemStack(AllItems.SWORD_OF_DAWNWAITER));
-            event.accept(new ItemStack(AllItems.PROVOKING_STICK));
+            event.accept(AllItems.SWORD_OF_DAWNWAITER);
+            event.accept(AllItems.PROVOKING_STICK);
         }
         if(CreativeModeTabs.INGREDIENTS.equals(event.getTabKey())){
-            event.accept(new ItemStack(AllItems.OMINOUS_ORB));
+            event.accept(AllItems.OMINOUS_ORB);
         }
         if(CreativeModeTabs.FUNCTIONAL_BLOCKS.equals(event.getTabKey())){
-            event.accept(new ItemStack(AllItems.DEEP_LATENT_CALLER));
+            event.accept(AllItems.DEEP_LATENT_CALLER);
+        }
+        if(CreativeModeTabs.SPAWN_EGGS.equals(event.getTabKey())){
+            event.accept(AllItems.UNFORGIVEN_COWARDICE_SPAWN_EGG);
+            event.accept(AllItems.UNFORGIVEN_SPOILING_SPAWN_EGG);
+            event.accept(AllItems.UNFORGIVEN_INDISCRETION_SPAWN_EGG);
+            event.accept(AllItems.UNFORGIVEN_PERFIDY_SPAWN_EGG);
+            event.accept(AllItems.UNFORGIVEN_RIDICULE_SPAWN_EGG);
         }
     }
 

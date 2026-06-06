@@ -30,15 +30,15 @@ public class AllEntityTypes {
             b -> b.sized(0, 0).noLootTable().clientTrackingRange(12));
 
     public static final DeferredHolder<EntityType<?>, EntityType<UnforgivenSpoiling>> UNFORGIVEN_SPOILING = ENTITY_TYPES.registerEntityType("unforgiven_spoiling", UnforgivenSpoiling::new, MobCategory.MONSTER,
-            b -> b.sized(0.8f, 1.2f).clientTrackingRange(8));
+            b -> b.sized(0.8f, 1.5f).eyeHeight(1.2f).clientTrackingRange(8));
     public static final DeferredHolder<EntityType<?>, EntityType<UnforgivenRidicule>> UNFORGIVEN_RIDICULE = ENTITY_TYPES.registerEntityType("unforgiven_ridicule", UnforgivenRidicule::new, MobCategory.MONSTER,
-            b -> b.sized(0.8f, 1.2f).clientTrackingRange(8));
+            b -> b.sized(0.6f, 1.8f).eyeHeight(0.6f).clientTrackingRange(8));
     public static final DeferredHolder<EntityType<?>, EntityType<UnforgivenPerfidy>> UNFORGIVEN_PERFIDY = ENTITY_TYPES.registerEntityType("unforgiven_perfidy", UnforgivenPerfidy::new, MobCategory.MONSTER,
-            b -> b.sized(0.8f, 1.2f).clientTrackingRange(8));
+            b -> b.sized(0.5f, 1.6f).eyeHeight(1.45f).clientTrackingRange(8));
     public static final DeferredHolder<EntityType<?>, EntityType<UnforgivenCowardice>> UNFORGIVEN_COWARDICE = ENTITY_TYPES.registerEntityType("unforgiven_cowardice", UnforgivenCowardice::new, MobCategory.MONSTER,
-            b -> b.sized(0.8f, 1.2f).clientTrackingRange(8));
+            b -> b.sized(0.65f, 0.625f).clientTrackingRange(8));
     public static final DeferredHolder<EntityType<?>, EntityType<UnforgivenIndiscretion>> UNFORGIVEN_INDISCRETION = ENTITY_TYPES.registerEntityType("unforgiven_indiscretion", UnforgivenIndiscretion::new, MobCategory.MONSTER,
-            b -> b.sized(0.8f, 1.2f).clientTrackingRange(8));
+            b -> b.sized(0.6f, 2.8f).eyeHeight(2.5f).clientTrackingRange(8));
 
     public static void register(IEventBus modBus){
         ENTITY_TYPES.register(modBus);

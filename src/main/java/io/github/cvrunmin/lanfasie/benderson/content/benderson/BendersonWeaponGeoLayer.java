@@ -46,7 +46,7 @@ public class BendersonWeaponGeoLayer<O, R extends GeoRenderState> extends BlockA
 
     public BendersonWeaponGeoLayer(EntityRendererProvider.Context context, GeoRenderer<Benderson, O, R> renderer) {
         super(context, renderer);
-        this.itemStack = Lazy.of(() -> new ItemStack(AllItems.SWORD_OF_DAWNWAITER_TAINTED));
+        this.itemStack = Lazy.of(AllItems.SWORD_OF_DAWNWAITER_TAINTED::toStack);
     }
 
     @Override

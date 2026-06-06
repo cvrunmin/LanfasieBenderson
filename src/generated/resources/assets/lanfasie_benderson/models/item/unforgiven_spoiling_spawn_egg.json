@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "lanfasie_benderson:item/unforgiven_spoiling_spawn_egg"
+  }
+}

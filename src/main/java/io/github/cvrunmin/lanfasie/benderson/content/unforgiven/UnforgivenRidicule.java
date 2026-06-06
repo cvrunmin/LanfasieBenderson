@@ -1,5 +1,6 @@
 package io.github.cvrunmin.lanfasie.benderson.content.unforgiven;
 
+import io.github.cvrunmin.lanfasie.benderson.index.AllEntityTypes;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.monster.Monster;
@@ -9,6 +10,12 @@ public class UnforgivenRidicule extends Monster {
     public UnforgivenRidicule(EntityType<? extends Monster> type, Level level) {
         super(type, level);
     }
+
+    public UnforgivenRidicule(Level level, double x, double y, double z){
+        this(AllEntityTypes.UNFORGIVEN_RIDICULE.get(), level);
+        this.setPos(x, y, z);
+    }
+
     public static AttributeSupplier createAttributes(){
         return Monster.createMonsterAttributes().build();
     }

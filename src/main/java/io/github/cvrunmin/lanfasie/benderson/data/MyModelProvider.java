@@ -46,6 +46,11 @@ public class MyModelProvider extends ModelProvider {
         itemModels.generateFlatItem(AllItems.SWORD_OF_DAWNWAITER.get(), template);
         itemModels.generateFlatItem(AllItems.SWORD_OF_DAWNWAITER_TAINTED.get(), template);
         itemModels.generateFlatItem(AllItems.OMINOUS_ORB.get(), ModelTemplates.FLAT_ITEM);
+        itemModels.generateFlatItem(AllItems.UNFORGIVEN_COWARDICE_SPAWN_EGG.get(), ModelTemplates.FLAT_ITEM);
+        itemModels.generateFlatItem(AllItems.UNFORGIVEN_SPOILING_SPAWN_EGG.get(), ModelTemplates.FLAT_ITEM);
+        itemModels.generateFlatItem(AllItems.UNFORGIVEN_INDISCRETION_SPAWN_EGG.get(), ModelTemplates.FLAT_ITEM);
+        itemModels.generateFlatItem(AllItems.UNFORGIVEN_PERFIDY_SPAWN_EGG.get(), ModelTemplates.FLAT_ITEM);
+        itemModels.generateFlatItem(AllItems.UNFORGIVEN_RIDICULE_SPAWN_EGG.get(), ModelTemplates.FLAT_ITEM);
         itemModels.itemModelOutput.accept(AllItems.PROVOKING_STICK.get(), new ConditionalItemModel.Unbaked(
                 Optional.empty(),
                 new IsProvokingModelProperty(),

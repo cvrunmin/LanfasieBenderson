@@ -5,9 +5,11 @@ import io.github.cvrunmin.lanfasie.benderson.content.anticalabrum.AnticalabrumRe
 import io.github.cvrunmin.lanfasie.benderson.content.benderson.BendersonRenderer;
 import io.github.cvrunmin.lanfasie.benderson.content.marker.DelayedAttackMarkerRenderer;
 import io.github.cvrunmin.lanfasie.benderson.content.marker.TargetMarkerRenderer;
+import io.github.cvrunmin.lanfasie.benderson.content.unforgiven.*;
 import io.github.cvrunmin.lanfasie.benderson.data.*;
 import io.github.cvrunmin.lanfasie.benderson.index.AllDamageTypes;
 import io.github.cvrunmin.lanfasie.benderson.index.AllEntityTypes;
+import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.core.RegistrySetBuilder;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.Identifier;
@@ -47,6 +49,11 @@ public class LanfasieBendersonClient {
         event.registerEntityRenderer(AllEntityTypes.TARGET_MARKER.get(), TargetMarkerRenderer::new);
         event.registerEntityRenderer(AllEntityTypes.ANTICALABRUM.get(), AnticalabrumRenderer::new);
         event.registerEntityRenderer(AllEntityTypes.DELAYED_ATTACK_MARKER.get(), DelayedAttackMarkerRenderer::new);
+        event.registerEntityRenderer(AllEntityTypes.UNFORGIVEN_COWARDICE.get(), UnforgivenCowardiceRenderer::new);
+        event.registerEntityRenderer(AllEntityTypes.UNFORGIVEN_INDISCRETION.get(), UnforgivenIndiscretionRenderer::new);
+        event.registerEntityRenderer(AllEntityTypes.UNFORGIVEN_PERFIDY.get(), UnforgivenPerfidyRenderer::new);
+        event.registerEntityRenderer(AllEntityTypes.UNFORGIVEN_RIDICULE.get(), UnforgivenRidiculeRenderer::new);
+        event.registerEntityRenderer(AllEntityTypes.UNFORGIVEN_SPOILING.get(), UnforgivenSpoilingRenderer::new);
     }
 
     @SubscribeEvent
