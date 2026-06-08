@@ -24,7 +24,10 @@ public class MyLanguageProvider extends LanguageProvider {
         this.addItem(AllItems.UNFORGIVEN_PERFIDY_SPAWN_EGG, "Unforgiven Perfidy Spawn Egg");
         this.addItem(AllItems.UNFORGIVEN_RIDICULE_SPAWN_EGG, "Unforgiven Ridicule Spawn Egg");
         this.addItem(AllItems.UNFORGIVEN_SPOILING_SPAWN_EGG, "Unforgiven Spoiling Spawn Egg");
+        this.addItem(AllItems.SHALLOWAY_SWORD, "Shalloway Sword");
+        this.addItem(AllItems.SHALLOWAY_SHIELD, "Shalloway Shield");
         this.addBlock(AllBlocks.DEEP_LATENT_CALLER, "Deep Latent Caller");
+        this.add("itemGroup.lanfasie_benderson", "Lanfasie: Benderson");
         this.addEntityType(AllEntityTypes.BENDERSON, "Benderson the Abyss-sunken Dawnwaiter");
         this.add("entity.lanfasie_benderson.benderson.name.deep_latent", "Team Soul of Deep Latent");
         this.add("entity.lanfasie_benderson.benderson.name.unforgiven", "Unforgiven Team Soul");
@@ -32,6 +35,7 @@ public class MyLanguageProvider extends LanguageProvider {
         this.addEntityType(AllEntityTypes.TARGET_MARKER, "Target Marker");
         this.addEntityType(AllEntityTypes.DELAYED_ATTACK_MARKER, "Delayed Attack Marker");
         this.addEntityType(AllEntityTypes.ANTICALABRUM, "Anticalabrum");
+        this.addEntityType(AllEntityTypes.DAWN, "Dawn");
         this.addEntityType(AllEntityTypes.UNFORGIVEN_SPOILING, "Unforgiven Spoiling");
         this.addEntityType(AllEntityTypes.UNFORGIVEN_RIDICULE, "Unforgiven Ridicule");
         this.addEntityType(AllEntityTypes.UNFORGIVEN_PERFIDY, "Unforgiven Perfidy");

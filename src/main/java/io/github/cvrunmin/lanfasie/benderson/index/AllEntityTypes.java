@@ -3,6 +3,7 @@ package io.github.cvrunmin.lanfasie.benderson.index;
 import io.github.cvrunmin.lanfasie.benderson.LanfasieBenderson;
 import io.github.cvrunmin.lanfasie.benderson.content.anticalabrum.Anticalabrum;
 import io.github.cvrunmin.lanfasie.benderson.content.benderson.Benderson;
+import io.github.cvrunmin.lanfasie.benderson.content.dawn.DawnEntity;
 import io.github.cvrunmin.lanfasie.benderson.content.marker.DelayedAttackMarker;
 import io.github.cvrunmin.lanfasie.benderson.content.marker.TargetMarker;
 import io.github.cvrunmin.lanfasie.benderson.content.unforgiven.*;
@@ -19,6 +20,9 @@ public class AllEntityTypes {
 
     public static final DeferredHolder<EntityType<?>, EntityType<Benderson>> BENDERSON = ENTITY_TYPES.registerEntityType("benderson", Benderson::new, MobCategory.MONSTER,
             b -> b.fireImmune().sized(0.6f, 2.375f).immuneTo(Blocks.WITHER_ROSE).clientTrackingRange(12));
+
+    public static final DeferredHolder<EntityType<?>, EntityType<DawnEntity>> DAWN = ENTITY_TYPES.registerEntityType("dawn", DawnEntity::new, MobCategory.CREATURE,
+            b -> b.fireImmune().sized(0.6f, 2.375f).immuneTo(Blocks.WITHER_ROSE).clientTrackingRange(8));
 
     public static final DeferredHolder<EntityType<?>, EntityType<TargetMarker>> TARGET_MARKER = ENTITY_TYPES.registerEntityType("target_marker", TargetMarker::new, MobCategory.MISC,
             b -> b.sized(0, 0).noLootTable().clientTrackingRange(16));
@@ -47,6 +51,7 @@ public class AllEntityTypes {
 
     public static void createDefaultAttributes(EntityAttributeCreationEvent event){
         event.put(BENDERSON.get(), Benderson.createAttributes().build());
+        event.put(DAWN.get(), DawnEntity.createAttributes().build());
         event.put(UNFORGIVEN_SPOILING.get(), UnforgivenSpoiling.createAttributes());
         event.put(UNFORGIVEN_RIDICULE.get(), UnforgivenRidicule.createAttributes());
         event.put(UNFORGIVEN_PERFIDY.get(), UnforgivenPerfidy.createAttributes());

@@ -19,8 +19,8 @@ public class MyEntityTypeTagsProvider extends KeyTagProvider<EntityType<?>> {
 
     @Override
     protected void addTags(HolderLookup.Provider registries) {
-        tag(EntityTypeTags.FALL_DAMAGE_IMMUNE).add(AllEntityTypes.BENDERSON.getKey());
-        tag(EntityTypeTags.CANNOT_BE_PUSHED_ONTO_BOATS).add(AllEntityTypes.BENDERSON.getKey());
-        tag(AllTags.IMMUNE_BENDERSON_WIPE_ARENA).add(AllEntityTypes.BENDERSON.getKey());
+        tag(EntityTypeTags.FALL_DAMAGE_IMMUNE).add(AllEntityTypes.BENDERSON.getKey(), AllEntityTypes.DAWN.getKey());
+        tag(EntityTypeTags.CANNOT_BE_PUSHED_ONTO_BOATS).add(AllEntityTypes.BENDERSON.getKey(), AllEntityTypes.DAWN.getKey());
+        tag(AllTags.IMMUNE_BENDERSON_WIPE_ARENA).add(AllEntityTypes.BENDERSON.getKey(), AllEntityTypes.DAWN.getKey());
     }
 }

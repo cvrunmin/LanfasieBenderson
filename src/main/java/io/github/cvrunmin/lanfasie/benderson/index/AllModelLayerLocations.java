@@ -1,6 +1,7 @@
 package io.github.cvrunmin.lanfasie.benderson.index;
 
 import io.github.cvrunmin.lanfasie.benderson.LanfasieBenderson;
+import io.github.cvrunmin.lanfasie.benderson.content.equipment.ShallowayShieldModel;
 import io.github.cvrunmin.lanfasie.benderson.content.unforgiven.*;
 import net.minecraft.client.model.geom.ModelLayerLocation;
 import net.minecraft.resources.Identifier;
@@ -16,6 +17,7 @@ public class AllModelLayerLocations {
     public static final ModelLayerLocation UNFORGIVEN_PERFIDY = new ModelLayerLocation(Identifier.fromNamespaceAndPath(LanfasieBenderson.MODID, "unforgiven_perfidy"), "main");
     public static final ModelLayerLocation UNFORGIVEN_RIDICULE = new ModelLayerLocation(Identifier.fromNamespaceAndPath(LanfasieBenderson.MODID, "unforgiven_ridicule"), "main");
     public static final ModelLayerLocation UNFORGIVEN_SPOILING = new ModelLayerLocation(Identifier.fromNamespaceAndPath(LanfasieBenderson.MODID, "unforgiven_spoiling"), "main");
+    public static final ModelLayerLocation SHALLOWAY_SHIELD = new ModelLayerLocation(Identifier.fromNamespaceAndPath(LanfasieBenderson.MODID, "shalloway_shield"), "main");
 
     @SubscribeEvent
     public static void registerModelLayerDefinitions(EntityRenderersEvent.RegisterLayerDefinitions event){
@@ -24,5 +26,6 @@ public class AllModelLayerLocations {
         event.registerLayerDefinition(UNFORGIVEN_PERFIDY, UnforgivenPerfidyModel::createBodyLayer);
         event.registerLayerDefinition(UNFORGIVEN_RIDICULE, UnforgivenRidiculeModel::createBodyLayer);
         event.registerLayerDefinition(UNFORGIVEN_SPOILING, UnforgivenSpoilingModel::createBodyLayer);
+        event.registerLayerDefinition(SHALLOWAY_SHIELD, ShallowayShieldModel::createLayer);
     }
 }

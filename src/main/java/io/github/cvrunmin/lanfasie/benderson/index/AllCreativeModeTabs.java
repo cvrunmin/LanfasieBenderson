@@ -12,13 +12,22 @@ import net.neoforged.neoforge.registries.DeferredRegister;
 public class AllCreativeModeTabs {
     public static final DeferredRegister<CreativeModeTab> CREATIVE_MODE_TABS = DeferredRegister.create(Registries.CREATIVE_MODE_TAB, LanfasieBenderson.MODID);
 
-    //    public static final DeferredHolder<CreativeModeTab, CreativeModeTab> EXAMPLE_TAB = CREATIVE_MODE_TABS.register("example_tab", () -> CreativeModeTab.builder()
-//            .title(Component.translatable("itemGroup.lanfasie_benderson")) //The language key for the title of your CreativeModeTab
-//            .withTabsBefore(CreativeModeTabs.COMBAT)
-//            .icon(() -> EXAMPLE_ITEM.get().getDefaultInstance())
-//            .displayItems((parameters, output) -> {
-//                output.accept(EXAMPLE_ITEM.get()); // Add the example item to the tab. For your own tabs, this method is preferred over the event
-//            }).build());
+    public static final DeferredHolder<CreativeModeTab, CreativeModeTab> MY_TAB = CREATIVE_MODE_TABS.register("main", () -> CreativeModeTab.builder()
+        .title(Component.translatable("itemGroup.lanfasie_benderson")) //The language key for the title of your CreativeModeTab
+        .icon(() -> AllItems.AGGRO_UP_ICON.get().getDefaultInstance())
+        .displayItems((parameters, output) -> {
+            output.accept(AllItems.DEEP_LATENT_CALLER);
+            output.accept(AllItems.OMINOUS_ORB);
+            output.accept(AllItems.PROVOKING_STICK);
+            output.accept(AllItems.SWORD_OF_DAWNWAITER);
+            output.accept(AllItems.SHALLOWAY_SWORD);
+            output.accept(AllItems.SHALLOWAY_SHIELD);
+            output.accept(AllItems.UNFORGIVEN_PERFIDY_SPAWN_EGG);
+            output.accept(AllItems.UNFORGIVEN_RIDICULE_SPAWN_EGG);
+            output.accept(AllItems.UNFORGIVEN_INDISCRETION_SPAWN_EGG);
+            output.accept(AllItems.UNFORGIVEN_COWARDICE_SPAWN_EGG);
+            output.accept(AllItems.UNFORGIVEN_SPOILING_SPAWN_EGG);
+        }).build());
 
     public static void register(IEventBus modBus){
         CREATIVE_MODE_TABS.register(modBus);

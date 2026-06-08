@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/handheld",
+  "textures": {
+    "layer0": "lanfasie_benderson:item/shalloway_sword"
+  }
+}

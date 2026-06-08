@@ -75,7 +75,15 @@ public class BossMusicTrackPlayer {
                 markedDeactivate = false;
             }
         }else{
-            if(tracks[activeTrack] != null) tracks[activeTrack].fadeVolume();
+            if(tracks[activeTrack] != null) {
+                if(!Minecraft.getInstance().getSoundManager().isActive(tracks[activeTrack])){
+                    tracks[activeTrack] = BossMusicSoundInstance.fromMusic(soundEvent.value());
+                    Minecraft.getInstance().getSoundManager().play(tracks[activeTrack]);
+                    tick = 0;
+                    return;
+                }
+                tracks[activeTrack].fadeVolume();
+            }
             if(tick >= crossFadeStartTime && tick <= crossFadeStartTime + crossFadeDuration){
                 int nextTrack = (activeTrack + 1) % tracks.length;
                 if(tracks[nextTrack] == null){

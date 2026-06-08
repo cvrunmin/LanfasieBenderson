@@ -3,6 +3,8 @@ package io.github.cvrunmin.lanfasie.benderson;
 import io.github.cvrunmin.lanfasie.benderson.content.anticalabrum.AnticalabrumModel;
 import io.github.cvrunmin.lanfasie.benderson.content.anticalabrum.AnticalabrumRenderer;
 import io.github.cvrunmin.lanfasie.benderson.content.benderson.BendersonRenderer;
+import io.github.cvrunmin.lanfasie.benderson.content.dawn.DawnEntityRenderer;
+import io.github.cvrunmin.lanfasie.benderson.content.equipment.ShallowayShieldSpecialRenderer;
 import io.github.cvrunmin.lanfasie.benderson.content.marker.DelayedAttackMarkerRenderer;
 import io.github.cvrunmin.lanfasie.benderson.content.marker.TargetMarkerRenderer;
 import io.github.cvrunmin.lanfasie.benderson.content.unforgiven.*;
@@ -22,6 +24,7 @@ import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import net.neoforged.neoforge.client.event.ModelEvent;
 import net.neoforged.neoforge.client.event.RegisterConditionalItemModelPropertyEvent;
+import net.neoforged.neoforge.client.event.RegisterSpecialModelRendererEvent;
 import net.neoforged.neoforge.client.gui.ConfigurationScreen;
 import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
 import net.neoforged.neoforge.data.event.GatherDataEvent;
@@ -48,12 +51,18 @@ public class LanfasieBendersonClient {
         event.registerEntityRenderer(AllEntityTypes.BENDERSON.get(), BendersonRenderer::new);
         event.registerEntityRenderer(AllEntityTypes.TARGET_MARKER.get(), TargetMarkerRenderer::new);
         event.registerEntityRenderer(AllEntityTypes.ANTICALABRUM.get(), AnticalabrumRenderer::new);
+        event.registerEntityRenderer(AllEntityTypes.DAWN.get(), DawnEntityRenderer::new);
         event.registerEntityRenderer(AllEntityTypes.DELAYED_ATTACK_MARKER.get(), DelayedAttackMarkerRenderer::new);
         event.registerEntityRenderer(AllEntityTypes.UNFORGIVEN_COWARDICE.get(), UnforgivenCowardiceRenderer::new);
         event.registerEntityRenderer(AllEntityTypes.UNFORGIVEN_INDISCRETION.get(), UnforgivenIndiscretionRenderer::new);
         event.registerEntityRenderer(AllEntityTypes.UNFORGIVEN_PERFIDY.get(), UnforgivenPerfidyRenderer::new);
         event.registerEntityRenderer(AllEntityTypes.UNFORGIVEN_RIDICULE.get(), UnforgivenRidiculeRenderer::new);
         event.registerEntityRenderer(AllEntityTypes.UNFORGIVEN_SPOILING.get(), UnforgivenSpoilingRenderer::new);
+    }
+
+    @SubscribeEvent
+    public static void registerSpecialRenderers(RegisterSpecialModelRendererEvent event){
+        event.register(Identifier.fromNamespaceAndPath(LanfasieBenderson.MODID, "shalloway_shield"), ShallowayShieldSpecialRenderer.Unbaked.MAP_CODEC);
     }
 
     @SubscribeEvent
