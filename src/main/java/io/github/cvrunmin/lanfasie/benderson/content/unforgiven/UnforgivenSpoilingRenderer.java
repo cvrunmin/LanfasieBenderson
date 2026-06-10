@@ -22,4 +22,11 @@ public class UnforgivenSpoilingRenderer extends MobRenderer<UnforgivenSpoiling, 
     public UnforgivenSpoilingRenderState createRenderState() {
         return new UnforgivenSpoilingRenderState();
     }
+
+    @Override
+    public void extractRenderState(UnforgivenSpoiling entity, UnforgivenSpoilingRenderState state, float partialTicks) {
+        super.extractRenderState(entity, state, partialTicks);
+        state.jumpCompletion = entity.getJumpCompletion(partialTicks);
+        state.hopAnimationState.copyFrom(entity.hopAnimationState);
+    }
 }
