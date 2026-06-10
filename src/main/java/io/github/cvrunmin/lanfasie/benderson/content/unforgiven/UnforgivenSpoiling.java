@@ -40,7 +40,7 @@ public class UnforgivenSpoiling extends Monster {
     }
 
     public static AttributeSupplier createAttributes(){
-        return Monster.createMonsterAttributes().add(Attributes.ATTACK_DAMAGE, 2.0).build();
+        return Monster.createMonsterAttributes().add(Attributes.ATTACK_DAMAGE, 2.0).add(Attributes.MOVEMENT_SPEED, 0.2).build();
     }
 
     @Override
@@ -118,7 +118,9 @@ public class UnforgivenSpoiling extends Monster {
 
     @Override
     protected void customServerAiStep(ServerLevel level) {
-
+        if (this.jumpDelayTicks > 0) {
+            this.jumpDelayTicks--;
+        }
         if (this.onGround()) {
             if (!this.wasOnGround) {
                 this.setJumping(false);

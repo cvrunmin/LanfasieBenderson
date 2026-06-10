@@ -23,7 +23,7 @@ public class UnforgivenIndiscretion extends Monster {
     }
 
     public static AttributeSupplier createAttributes(){
-        return Monster.createMonsterAttributes().add(Attributes.MAX_HEALTH, 30).build();
+        return Monster.createMonsterAttributes().add(Attributes.MAX_HEALTH, 30).add(Attributes.MOVEMENT_SPEED, 0.25).build();
     }
 
     @Override

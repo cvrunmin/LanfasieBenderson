@@ -23,7 +23,7 @@ public class UnforgivenRidicule extends Monster {
     }
 
     public static AttributeSupplier createAttributes(){
-        return Monster.createMonsterAttributes().add(Attributes.ATTACK_DAMAGE, 3.0).build();
+        return Monster.createMonsterAttributes().add(Attributes.ATTACK_DAMAGE, 3.0).add(Attributes.MOVEMENT_SPEED, 0.25).build();
     }
 
     @Override

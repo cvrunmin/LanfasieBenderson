@@ -359,12 +359,12 @@ public class Benderson extends Monster implements GeoEntity {
     @Override
     public void setTarget(@Nullable LivingEntity target) {
         super.setTarget(target);
-        this.entityData.set(TARGET_SYNCER, Optional.ofNullable(EntityReference.of(target)));
+        this.entityData.set(TARGET_SYNCER, Optional.ofNullable(EntityReference.of(this.getTarget())));
     }
 
     @Override
     protected @Nullable LivingEntity asValidTarget(@Nullable LivingEntity target) {
-        if (target instanceof Player player && ((player.isCreative() && !player.hasEffect(AllMobEffects.AGGRO_UP)) || player.isSpectator())) {
+        if (!(target instanceof Player player) || ((player.isCreative() && !player.hasEffect(AllMobEffects.AGGRO_UP)) || player.isSpectator())) {
             return null;
         } else {
             return target != null && !this.canAttack(target) ? null : target;

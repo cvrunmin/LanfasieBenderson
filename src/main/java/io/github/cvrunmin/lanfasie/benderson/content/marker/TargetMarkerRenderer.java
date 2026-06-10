@@ -295,6 +295,7 @@ public class TargetMarkerRenderer extends EntityRenderer<TargetMarker, TargetMar
 
     private void submitConeAoeMark(TargetMarkerRenderState state, PoseStack poseStack, SubmitNodeCollector submitNodeCollector, CameraRenderState camera, float alpha){
         var angle = state.range2 % 360;
+        if(angle == 0) return;
         var halfAngle = angle * 0.5f;
         float t1 = state.ageInTicks % 20;
         float a1;
@@ -310,7 +311,6 @@ public class TargetMarkerRenderer extends EntityRenderer<TargetMarker, TargetMar
         submitNodeCollector.submitCustomGeometry(poseStack, TRIANGLE_STRIP_RENDER_TYPE.apply(COLOR_SCHEME_MARKER_TEXTURE), (inPose, buffer) -> {
             var innerStack = new PoseStack();
             var halfRange = state.range;
-            buffer.addVertex(inPose, Math.max(0, halfRange - 0.25f), 1e-3f, 0).setColor(1f, 1f, 1f, alpha).setUv(0.9999f, 0f).setUv1(0, 0).setUv2(0, 0).setNormal(0, 1, 0);
             for (int i = 0; i < angle + 1; i++) {
                 float fi = i;
                 if(fi > angle) fi = angle;
@@ -318,8 +318,14 @@ public class TargetMarkerRenderer extends EntityRenderer<TargetMarker, TargetMar
                 var rad = Math.PI * fi / 180f;
                 var cr = (float)Math.cos(rad);
                 var sr = (float)Math.sin(rad);
+                if(i == 0){
+                    buffer.addVertex(inPose, Math.max(0, halfRange - 0.25f) * cr, 1e-3f, Math.max(0, halfRange - 0.25f) * sr).setColor(1f, 1f, 1f, alpha).setUv(0.9999f, 0f).setUv1(0, 0).setUv2(0, 0).setNormal(0, 1, 0);
+                }
                 buffer.addVertex(inPose, Math.max(0, halfRange - 0.25f) * cr, 1e-3f, Math.max(0, halfRange - 0.25f) * sr).setColor(1f, 1f, 1f, alpha).setUv(0.9999f, 0f).setUv1(0, 0).setUv2(0, 0).setNormal(0, 1, 0);
                 buffer.addVertex(inPose, halfRange * cr, 1e-3f, halfRange * sr).setColor(1f, 1f, 1f, alpha).setUv(0f, 0f).setUv1(0, 0).setUv2(0, 0).setNormal(0, 1, 0);
+                if(i + 1 >= angle + 1){
+                    buffer.addVertex(inPose, halfRange * cr, 1e-3f, halfRange * sr).setColor(1f, 1f, 1f, alpha).setUv(0f, 0f).setUv1(0, 0).setUv2(0, 0).setNormal(0, 1, 0);
+                }
             }
             for (int i = 0; i < angle + 1; i++) {
                 float fi = i;
@@ -328,15 +334,19 @@ public class TargetMarkerRenderer extends EntityRenderer<TargetMarker, TargetMar
                 var rad = Math.PI * fi / 180f;
                 var cr = (float)Math.cos(rad);
                 var sr = (float)Math.sin(rad);
+                if(i == 0){
+                    buffer.addVertex(inPose, 0, 1e-3f, 0).setColor(1f, 1f, 1f, alpha).setUv(0.999f, 0f).setUv1(0, 0).setUv2(0, 0).setNormal(0, 1, 0);
+                }
                 buffer.addVertex(inPose, 0, 1e-3f, 0).setColor(1f, 1f, 1f, alpha).setUv(0.999f, 0f).setUv1(0, 0).setUv2(0, 0).setNormal(0, 1, 0);
                 buffer.addVertex(inPose, Math.max(0, halfRange - 0.25f) * cr, 1e-3f, Math.max(0, halfRange - 0.25f) * sr).setColor(1f, 1f, 1f, alpha).setUv(0.999f, 0f).setUv1(0, 0).setUv2(0, 0).setNormal(0, 1, 0);
+                if(i + 1 >= angle + 1){
+                    buffer.addVertex(inPose, Math.max(0, halfRange - 0.25f) * cr, 1e-3f, Math.max(0, halfRange - 0.25f) * sr).setColor(1f, 1f, 1f, alpha).setUv(0.999f, 0f).setUv1(0, 0).setUv2(0, 0).setNormal(0, 1, 0);
+                }
             }
-            buffer.addVertex(inPose, Math.max(0, halfRange - 0.25f), 1e-3f, 0).setColor(1f, 1f, 1f, alpha).setUv(0.999f, 0f).setUv1(0, 0).setUv2(0, 0).setNormal(0, 1, 0);
         });
         submitNodeCollector.submitCustomGeometry(poseStack, TRIANGLE_STRIP_RENDER_TYPE.apply(COLOR_SCHEME_MARKER_TEXTURE), (inPose, buffer) -> {
             var innerStack = new PoseStack();
             var halfRange = state.range * (t1 / 20f);
-            buffer.addVertex(inPose, Math.max(0, halfRange - 0.125f), 3e-3f, 0).setColor(1f, 1f, 1f, alpha * a1).setUv(0f, 0f).setUv1(0, 0).setUv2(0, 0).setNormal(0, 1, 0);
             for (int i = 0; i < angle + 1; i++) {
                 float fi = i;
                 if(fi > angle) fi = angle;
@@ -344,10 +354,15 @@ public class TargetMarkerRenderer extends EntityRenderer<TargetMarker, TargetMar
                 var rad = Math.PI * fi / 180f;
                 var cr = (float)Math.cos(rad);
                 var sr = (float)Math.sin(rad);
+                if(i == 0){
+                    buffer.addVertex(inPose, Math.max(0, halfRange - 0.125f) * cr, 3e-3f, Math.max(0, halfRange - 0.125f) * sr).setColor(1f, 1f, 1f, alpha * a1).setUv(0f, 0f).setUv1(0, 0).setUv2(0, 0).setNormal(0, 1, 0);
+                }
                 buffer.addVertex(inPose, Math.max(0, halfRange - 0.125f) * cr, 3e-3f, Math.max(0, halfRange - 0.125f) * sr).setColor(1f, 1f, 1f, alpha * a1).setUv(0f, 0f).setUv1(0, 0).setUv2(0, 0).setNormal(0, 1, 0);
                 buffer.addVertex(inPose, halfRange * cr, 3e-3f, halfRange * sr).setColor(1f, 1f, 1f, alpha * a1).setUv(0f, 0f).setUv1(0, 0).setUv2(0, 0).setNormal(0, 1, 0);
+                if(i + 1 >= angle + 1){
+                    buffer.addVertex(inPose, halfRange * cr, 3e-3f, halfRange * sr).setColor(1f, 1f, 1f, alpha * a1).setUv(0f, 0f).setUv1(0, 0).setUv2(0, 0).setNormal(0, 1, 0);
+                }
             }
-            buffer.addVertex(inPose, halfRange, 3e-3f, 0).setColor(1f, 1f, 1f, alpha * a1).setUv(0f, 0f).setUv1(0, 0).setUv2(0, 0).setNormal(0, 1, 0);
         });
         poseStack.popPose();
     }
