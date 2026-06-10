@@ -25,11 +25,13 @@ import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.entity.IEntityWithComplexSpawn;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Optional;
 import java.util.UUID;
 
-public class TargetMarker extends Entity implements IEntityWithComplexSpawn {
+public class TargetMarker extends Entity implements IEntityWithComplexSpawn, OwnableEntity {
+
     public enum TargetType implements StringRepresentable {
         ENTITY, POS;
 
@@ -48,6 +50,7 @@ public class TargetMarker extends Entity implements IEntityWithComplexSpawn {
         LINEAR_STACK("stack_linear"),
         CIRCLE_AOE("circle_aoe"),
         LINEAR_AOE("linear_aoe"),
+        CONE_AOE("cone_aoe"),
         ARENA_HINT("arena_hint"),
         ;
 
@@ -128,13 +131,14 @@ public class TargetMarker extends Entity implements IEntityWithComplexSpawn {
     public static final EntityDataAccessor<Boolean> PERSISTENT_ACCESSOR = SynchedEntityData.defineId(TargetMarker.class, EntityDataSerializers.BOOLEAN);
 
     public static final EntityDataAccessor<Optional<EntityReference<LivingEntity>>> TARGET_ENTITY_SYNCER = SynchedEntityData.defineId(TargetMarker.class, EntityDataSerializers.OPTIONAL_LIVING_ENTITY_REFERENCE);
+    public static final EntityDataAccessor<Optional<EntityReference<LivingEntity>>> SOURCE_ENTITY_SYNCER = SynchedEntityData.defineId(TargetMarker.class, EntityDataSerializers.OPTIONAL_LIVING_ENTITY_REFERENCE);
 
     private LivingEntity targetEntity;
     private UUID delayedTargetEntityUuid;
     private int delayedTargetEntityGraceTick = 0;
     private int lifeTick = 0;
 
-    private LivingEntity sourceEntity;
+    private EntityReference<LivingEntity> sourceEntity;
     private int sourceEntityFailCount = 0;
 
     public TargetMarker(EntityType<?> type, Level level) {
@@ -166,11 +170,16 @@ public class TargetMarker extends Entity implements IEntityWithComplexSpawn {
     }
 
     public void setSourceEntity(LivingEntity sourceEntity) {
-        this.sourceEntity = sourceEntity;
+        setSourceEntityRef(EntityReference.of(sourceEntity));
+    }
+
+    private void setSourceEntityRef(EntityReference<LivingEntity> ref){
+        this.sourceEntity = ref;
+        this.entityData.set(SOURCE_ENTITY_SYNCER, Optional.ofNullable(this.sourceEntity));
     }
 
     public LivingEntity getSourceEntity() {
-        return sourceEntity;
+        return sourceEntity.getEntity(level(), LivingEntity.class);
     }
 
     @Override
@@ -179,6 +188,7 @@ public class TargetMarker extends Entity implements IEntityWithComplexSpawn {
         entityData.define(MARKER_ARGS_ACCESSOR, MarkerArgs.EMPTY);
         entityData.define(PERSISTENT_ACCESSOR, false);
         entityData.define(TARGET_ENTITY_SYNCER, Optional.empty());
+        entityData.define(SOURCE_ENTITY_SYNCER, Optional.empty());
     }
 
     @Override
@@ -188,6 +198,9 @@ public class TargetMarker extends Entity implements IEntityWithComplexSpawn {
             if(accessor == TARGET_ENTITY_SYNCER){
                 Optional<EntityReference<LivingEntity>> maybeEntityRef = entityData.get(TARGET_ENTITY_SYNCER);
                 maybeEntityRef.ifPresent(entityRef -> this.targetEntity = EntityReference.getLivingEntity(entityRef, this.level()));
+            } else if (accessor == SOURCE_ENTITY_SYNCER) {
+                var maybeEntityRef = entityData.get(SOURCE_ENTITY_SYNCER);
+                maybeEntityRef.ifPresent(ref -> this.sourceEntity = ref);
             }
         }
     }
@@ -222,11 +235,17 @@ public class TargetMarker extends Entity implements IEntityWithComplexSpawn {
             }
         }else{
             if (!level().isClientSide() && getMarkerArgs().markerType == MarkerType.ARENA_HINT) {
-                if (sourceEntity == null || !sourceEntity.isAlive()) {
+                if (sourceEntity == null) {
                     sourceEntityFailCount++;
                     if (sourceEntityFailCount >= 5) this.discard();
                 } else {
-                    sourceEntityFailCount = 0;
+                    var srcEntity = getSourceEntity();
+                    if (srcEntity == null || !srcEntity.isAlive()) {
+                        sourceEntityFailCount++;
+                        if (sourceEntityFailCount >= 5) this.discard();
+                    } else {
+                        sourceEntityFailCount = 0;
+                    }
                 }
             }
         }
@@ -275,7 +294,7 @@ public class TargetMarker extends Entity implements IEntityWithComplexSpawn {
         this.entityData.set(MARKER_ARGS_ACCESSOR, input.read("MarkerArgs", MarkerArgs.CODEC).orElse(MarkerArgs.EMPTY));
         input.getInt("LifeTick").ifPresent(v -> lifeTick = v);
         this.setPersistent(input.getBooleanOr("Persistent", false));
-        Optional.ofNullable(EntityReference.<LivingEntity>read(input, "Source")).map(v -> v.getEntity(this.level(), LivingEntity.class)).ifPresent(v -> this.sourceEntity = v);
+        Optional.ofNullable(EntityReference.<LivingEntity>read(input, "Source")).ifPresent(this::setSourceEntityRef);
     }
 
     @Override
@@ -288,7 +307,7 @@ public class TargetMarker extends Entity implements IEntityWithComplexSpawn {
         output.putInt("LifeTick", this.lifeTick);
         output.putBoolean("Persistent", this.isPersistent());
         if(sourceEntity != null){
-            EntityReference.of(sourceEntity).store(output, "Source");
+            sourceEntity.store(output, "Source");
         }
     }
 
@@ -320,6 +339,11 @@ public class TargetMarker extends Entity implements IEntityWithComplexSpawn {
             }
         }
         return targetEntity;
+    }
+
+    @Override
+    public @Nullable EntityReference<LivingEntity> getOwnerReference() {
+        return sourceEntity;
     }
 
     public void setTargetPos(BlockPos targetPos) {

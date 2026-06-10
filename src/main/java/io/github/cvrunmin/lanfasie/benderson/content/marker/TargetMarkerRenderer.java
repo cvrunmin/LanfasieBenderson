@@ -21,8 +21,10 @@ import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 import net.minecraft.util.Util;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Quaternionf;
+import org.joml.Vector3f;
 
 import java.util.function.Function;
 
@@ -97,6 +99,12 @@ public class TargetMarkerRenderer extends EntityRenderer<TargetMarker, TargetMar
                 state.overheadOffset = targetEntity.getBbHeight() - 0.25f;
             }
         }
+        if(entity.getMarkerArgs().markerType() == TargetMarker.MarkerType.LINEAR_STACK){
+            LivingEntity sourceEntity = entity.getSourceEntity();
+            if(sourceEntity != null){
+                state.direction = entity.getPosition(partialTicks).subtract(sourceEntity.getPosition(partialTicks)).multiply(1, 0, 1).normalize();
+            }
+        }
     }
 
     @Override
@@ -115,11 +123,14 @@ public class TargetMarkerRenderer extends EntityRenderer<TargetMarker, TargetMar
         } else {
             alpha = 1f;
         }
+        if(alpha < 0.1f) return; // skip rendering when nearly invisible
         switch (state.markerType) {
             case LETHAL_ATTACK -> submitLethalAttackMark(state, poseStack, submitNodeCollector, camera, alpha);
             case CIRCLE_AOE -> submitCircleAoeMark(state, poseStack, submitNodeCollector, camera, alpha);
             case LINEAR_AOE -> submitLinearAoeMark(state, poseStack, submitNodeCollector, camera, alpha);
+            case CONE_AOE -> submitConeAoeMark(state, poseStack, submitNodeCollector, camera, alpha);
             case CIRCLE_STACK -> submitCircleStackMark(state, poseStack, submitNodeCollector, camera, alpha);
+            case LINEAR_STACK -> submitLinearStackMark(state, poseStack, submitNodeCollector, camera, alpha);
             case ARENA_HINT -> submitArenaHint(state, poseStack, submitNodeCollector, camera, alpha);
             case null, default -> {
             }
@@ -217,14 +228,8 @@ public class TargetMarkerRenderer extends EntityRenderer<TargetMarker, TargetMar
         }else{
             a1 = (20 - t1) / 5f * 0.8f;
         }
-        Vec3 vec1 = state.direction.horizontal().normalize();
-        Vec3 vec2 = new Vec3(0, 0, 1);
-        var rot = vec1.dot(vec2);
-        rot = Mth.clamp(rot, -1, 1); // should never being clamped with two unit vectors, but just in case
-        var angle = Math.acos(rot);
-        var crossVec = vec2.cross(vec1);
-        angle = Math.signum(crossVec.y) * angle;
         poseStack.pushPose();
+        poseStack.rotateAround(new Quaternionf().rotationTo(new Vector3f(0, 0, 1), state.direction.horizontal().normalize().toVector3f()), 0, 0, 0);
         submitNodeCollector.submitCustomGeometry(poseStack, RENDER_TYPE.apply(COLOR_SCHEME_MARKER_TEXTURE), (inPose, buffer) -> {
             var innerStack = new PoseStack();
             var halfRange = state.range * 0.5f;
@@ -284,6 +289,65 @@ public class TargetMarkerRenderer extends EntityRenderer<TargetMarker, TargetMar
             buffer.addVertex(inPose, -halfRange, 2e-3f, dr2 + Math.min(halfRange2, 0.25f)).setUv(0f, 0f).setColor(1, 1, 1, alpha * a1).setUv1(0, 0).setUv2(0, 0).setNormal(0, 1, 0);
             buffer.addVertex(inPose, halfRange, 2e-3f, dr2 + Math.min(halfRange2, 0.25f)).setUv(0f, 0f).setColor(1, 1, 1, alpha * a1).setUv1(0, 0).setUv2(0, 0).setNormal(0, 1, 0);
             buffer.addVertex(inPose, halfRange, 2e-3f, dr2).setUv(0.9999f, 0f).setColor(1, 1, 1, alpha * a1).setUv1(0, 0).setUv2(0, 0).setNormal(0, 1, 0);
+        });
+        poseStack.popPose();
+    }
+
+    private void submitConeAoeMark(TargetMarkerRenderState state, PoseStack poseStack, SubmitNodeCollector submitNodeCollector, CameraRenderState camera, float alpha){
+        var angle = state.range2 % 360;
+        var halfAngle = angle * 0.5f;
+        float t1 = state.ageInTicks % 20;
+        float a1;
+        if(t1 < 5){
+            a1 = t1 / 5f * 0.8f;
+        }else if(t1 < 15){
+            a1 = 0.8f;
+        }else{
+            a1 = (20 - t1) / 5f * 0.8f;
+        }
+        poseStack.pushPose();
+        poseStack.rotateAround(new Quaternionf().rotationTo(new Vector3f(1, 0, 0), state.direction.horizontal().normalize().toVector3f()), 0, 0, 0);
+        submitNodeCollector.submitCustomGeometry(poseStack, TRIANGLE_STRIP_RENDER_TYPE.apply(COLOR_SCHEME_MARKER_TEXTURE), (inPose, buffer) -> {
+            var innerStack = new PoseStack();
+            var halfRange = state.range;
+            buffer.addVertex(inPose, Math.max(0, halfRange - 0.25f), 1e-3f, 0).setColor(1f, 1f, 1f, alpha).setUv(0.9999f, 0f).setUv1(0, 0).setUv2(0, 0).setNormal(0, 1, 0);
+            for (int i = 0; i < angle + 1; i++) {
+                float fi = i;
+                if(fi > angle) fi = angle;
+                fi -= halfAngle;
+                var rad = Math.PI * fi / 180f;
+                var cr = (float)Math.cos(rad);
+                var sr = (float)Math.sin(rad);
+                buffer.addVertex(inPose, Math.max(0, halfRange - 0.25f) * cr, 1e-3f, Math.max(0, halfRange - 0.25f) * sr).setColor(1f, 1f, 1f, alpha).setUv(0.9999f, 0f).setUv1(0, 0).setUv2(0, 0).setNormal(0, 1, 0);
+                buffer.addVertex(inPose, halfRange * cr, 1e-3f, halfRange * sr).setColor(1f, 1f, 1f, alpha).setUv(0f, 0f).setUv1(0, 0).setUv2(0, 0).setNormal(0, 1, 0);
+            }
+            for (int i = 0; i < angle + 1; i++) {
+                float fi = i;
+                if(fi > angle) fi = angle;
+                fi -= halfAngle;
+                var rad = Math.PI * fi / 180f;
+                var cr = (float)Math.cos(rad);
+                var sr = (float)Math.sin(rad);
+                buffer.addVertex(inPose, 0, 1e-3f, 0).setColor(1f, 1f, 1f, alpha).setUv(0.999f, 0f).setUv1(0, 0).setUv2(0, 0).setNormal(0, 1, 0);
+                buffer.addVertex(inPose, Math.max(0, halfRange - 0.25f) * cr, 1e-3f, Math.max(0, halfRange - 0.25f) * sr).setColor(1f, 1f, 1f, alpha).setUv(0.999f, 0f).setUv1(0, 0).setUv2(0, 0).setNormal(0, 1, 0);
+            }
+            buffer.addVertex(inPose, Math.max(0, halfRange - 0.25f), 1e-3f, 0).setColor(1f, 1f, 1f, alpha).setUv(0.999f, 0f).setUv1(0, 0).setUv2(0, 0).setNormal(0, 1, 0);
+        });
+        submitNodeCollector.submitCustomGeometry(poseStack, TRIANGLE_STRIP_RENDER_TYPE.apply(COLOR_SCHEME_MARKER_TEXTURE), (inPose, buffer) -> {
+            var innerStack = new PoseStack();
+            var halfRange = state.range * (t1 / 20f);
+            buffer.addVertex(inPose, Math.max(0, halfRange - 0.125f), 3e-3f, 0).setColor(1f, 1f, 1f, alpha * a1).setUv(0f, 0f).setUv1(0, 0).setUv2(0, 0).setNormal(0, 1, 0);
+            for (int i = 0; i < angle + 1; i++) {
+                float fi = i;
+                if(fi > angle) fi = angle;
+                fi -= halfAngle;
+                var rad = Math.PI * fi / 180f;
+                var cr = (float)Math.cos(rad);
+                var sr = (float)Math.sin(rad);
+                buffer.addVertex(inPose, Math.max(0, halfRange - 0.125f) * cr, 3e-3f, Math.max(0, halfRange - 0.125f) * sr).setColor(1f, 1f, 1f, alpha * a1).setUv(0f, 0f).setUv1(0, 0).setUv2(0, 0).setNormal(0, 1, 0);
+                buffer.addVertex(inPose, halfRange * cr, 3e-3f, halfRange * sr).setColor(1f, 1f, 1f, alpha * a1).setUv(0f, 0f).setUv1(0, 0).setUv2(0, 0).setNormal(0, 1, 0);
+            }
+            buffer.addVertex(inPose, halfRange, 3e-3f, 0).setColor(1f, 1f, 1f, alpha * a1).setUv(0f, 0f).setUv1(0, 0).setUv2(0, 0).setNormal(0, 1, 0);
         });
         poseStack.popPose();
     }
@@ -355,6 +419,56 @@ public class TargetMarkerRenderer extends EntityRenderer<TargetMarker, TargetMar
             }
         });
     }
+
+    private void submitLinearStackMark(TargetMarkerRenderState state, PoseStack poseStack, SubmitNodeCollector submitNodeCollector, CameraRenderState camera, float alpha) {
+        submitNodeCollector.submitCustomGeometry(poseStack, RENDER_TYPE.apply(STACK_ATTACK_MARKER_TEXTURE), (inPose, buffer) -> {
+            var innerStack = new PoseStack();
+            innerStack.last().set(inPose);
+            innerStack.pushPose();
+            innerStack.rotateAround(new Quaternionf().rotateY((float) Math.toRadians(-camera.yRot)), 0, 0, 0);
+            innerStack.translate(0, state.overheadOffset + 0.5f, 0);
+            var pose = innerStack.last();
+            buffer.addVertex(pose, -0.5f, 0.4f, 0).setUv(0.5f, 0).setUv1(0, 0).setUv2(0, 0).setColor(1f, 1f, 1f, alpha).setNormal(0, 0, 1);
+            buffer.addVertex(pose, -0.5f, 0, 0).setUv(0.5f, LETHAL_ATTACK_ARROW_1_HEIGHT / 256f).setUv1(0, 0).setUv2(0, 0).setColor(1f, 1f, 1f, alpha).setNormal(0, 0, 1);
+            buffer.addVertex(pose, 0.5f, 0, 0).setUv(0.5f + LETHAL_ATTACK_ARROW_1_WIDTH / 512f, LETHAL_ATTACK_ARROW_1_HEIGHT / 256f).setUv1(0, 0).setUv2(0, 0).setColor(1f, 1f, 1f, alpha).setNormal(0, 0, 1);
+            buffer.addVertex(pose, 0.5f, 0.4f, 0).setUv(0.5f + LETHAL_ATTACK_ARROW_1_WIDTH / 512f, 0).setUv1(0, 0).setUv2(0, 0).setColor(1f, 1f, 1f, alpha).setNormal(0, 0, 1);
+
+            innerStack.translate(0, 0.2f + 0.2f * ((float) Math.cos(Math.PI * state.ageInTicks * 0.1) + 1), 0);
+            pose = innerStack.last();
+            buffer.addVertex(pose, -0.25f, 0.4f, 0).setUv(0.5f, LETHAL_ATTACK_ARROW_1_HEIGHT / 256f).setUv1(0, 0).setUv2(0, 0).setColor(1f, 1f, 1f, alpha).setNormal(0, 0, 1);
+            buffer.addVertex(pose, -0.25f, 0, 0).setUv(0.5f, (LETHAL_ATTACK_ARROW_1_HEIGHT + LETHAL_ATTACK_ARROW_2_HEIGHT) / 256f).setUv1(0, 0).setUv2(0, 0).setColor(1f, 1f, 1f, alpha).setNormal(0, 0, 1);
+            buffer.addVertex(pose, 0.25f, 0, 0).setUv(0.5f + LETHAL_ATTACK_ARROW_2_WIDTH / 512f, (LETHAL_ATTACK_ARROW_1_HEIGHT + LETHAL_ATTACK_ARROW_2_HEIGHT) / 256f).setUv1(0, 0).setUv2(0, 0).setColor(1f, 1f, 1f, alpha).setNormal(0, 0, 1);
+            buffer.addVertex(pose, 0.25f, 0.4f, 0).setUv(0.5f + LETHAL_ATTACK_ARROW_2_WIDTH / 512f, LETHAL_ATTACK_ARROW_1_HEIGHT / 256f).setUv1(0, 0).setUv2(0, 0).setColor(1f, 1f, 1f, alpha).setNormal(0, 0, 1);
+            buffer.addVertex(pose, -0.25f, 0.7f, 0).setUv(0.5f, LETHAL_ATTACK_ARROW_1_HEIGHT / 256f).setUv1(0, 0).setUv2(0, 0).setColor(1f, 1f, 1f, alpha).setNormal(0, 0, 1);
+            buffer.addVertex(pose, -0.25f, 0.3f, 0).setUv(0.5f, (LETHAL_ATTACK_ARROW_1_HEIGHT + LETHAL_ATTACK_ARROW_2_HEIGHT) / 256f).setUv1(0, 0).setUv2(0, 0).setColor(1f, 1f, 1f, alpha).setNormal(0, 0, 1);
+            buffer.addVertex(pose, 0.25f, 0.3f, 0).setUv(0.5f + LETHAL_ATTACK_ARROW_2_WIDTH / 512f, (LETHAL_ATTACK_ARROW_1_HEIGHT + LETHAL_ATTACK_ARROW_2_HEIGHT) / 256f).setUv1(0, 0).setUv2(0, 0).setColor(1f, 1f, 1f, alpha).setNormal(0, 0, 1);
+            buffer.addVertex(pose, 0.25f, 0.7f, 0).setUv(0.5f + LETHAL_ATTACK_ARROW_2_WIDTH / 512f, LETHAL_ATTACK_ARROW_1_HEIGHT / 256f).setUv1(0, 0).setUv2(0, 0).setColor(1f, 1f, 1f, alpha).setNormal(0, 0, 1);
+            innerStack.popPose();
+
+            var halfRange = state.range * 0.5f;
+            for (int i1 = 0; i1 < 6; i1++) {
+                var zOffset = (i1 % 3 - 1) * 1.45f;
+                var xScale = i1 / 3 == 1 ? 1 : -1;
+                innerStack.pushPose();
+                innerStack.rotateAround(new Quaternionf().rotationTo(new Vector3f(0, 0, 1), state.direction.toVector3f()), 0, 0, 0);
+                innerStack.scale(xScale, 1, 1);
+                innerStack.translate(halfRange, state.markerHeight + 0.01f, zOffset);
+                pose = innerStack.last();
+                for (int i2 = 0; i2 < 5; i2++) {
+                    float t2 = ((state.ageInTicks + i2 * 2) % 20);
+                    float deltaRadius = (float) (2.0 * (1 - (1 - Math.pow(1 - t2 / 20f, 5))));
+                    float alpha3 = t2 < 15 ? 1 : (20 - t2) / 5;
+                    float alpha4 = t2 < 10 ? t2 * 0.7f / 10 + 0.3f : 1;
+                    buffer.addVertex(pose, 0.75f + deltaRadius, 0, -0.625f).setUv(0.5f, 0).setUv1(0, 0).setUv2(0, 0).setColor(alpha4, 1f, alpha4, alpha * alpha3).setNormal(0, 1, 0);
+                    buffer.addVertex(pose, 0 + deltaRadius, 0, -0.625f).setUv(0.5f, LETHAL_ATTACK_ARROW_1_HEIGHT / 256f).setUv1(0, 0).setUv2(0, 0).setColor(alpha4, 1f, alpha4, alpha * alpha3).setNormal(0, 1, 0);
+                    buffer.addVertex(pose, 0 + deltaRadius, 0, 0.625f).setUv(0.5f + LETHAL_ATTACK_ARROW_1_WIDTH / 512f, LETHAL_ATTACK_ARROW_1_HEIGHT / 256f).setUv1(0, 0).setUv2(0, 0).setColor(alpha4, 1f, alpha4, alpha * alpha3).setNormal(0, 1, 0);
+                    buffer.addVertex(pose, 0.75f + deltaRadius, 0.0f, 0.625f).setUv(0.5f + LETHAL_ATTACK_ARROW_1_WIDTH / 512f, 0).setUv1(0, 0).setUv2(0, 0).setColor(alpha4, 1f, alpha4, alpha * alpha3).setNormal(0, 1, 0);
+                }
+                innerStack.popPose();
+            }
+        });
+    }
+
     private void submitArenaHint(TargetMarkerRenderState state, PoseStack poseStack, SubmitNodeCollector submitNodeCollector, CameraRenderState cameraRenderState, float alpha){
         var arenaRadius = state.range;
         submitNodeCollector.submitCustomGeometry(poseStack, RenderTypes.entityTranslucent(ARENA_FLAME), (inPose, buffer) -> {
