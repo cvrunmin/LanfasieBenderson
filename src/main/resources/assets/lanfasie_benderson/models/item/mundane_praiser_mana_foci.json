@@ -2,8 +2,8 @@
 	"format_version": "1.21.11",
 	"credit": "Made with Blockbench",
 	"textures": {
-		"0": "lanfasie_benderson:item/mundane_praiser_foci",
-		"particle": "lanfasie_benderson:item/mundane_praiser_foci"
+		"0": "lanfasie_benderson:item/mundane_praiser_mana_foci",
+		"particle": "lanfasie_benderson:item/mundane_praiser_mana_foci"
 	},
 	"elements": [
 		{
@@ -189,6 +189,41 @@
 			}
 		}
 	],
+	"display": {
+		"thirdperson_righthand": {
+			"rotation": [5, 0, 0],
+			"translation": [0, 2.5, -6.5],
+			"scale": [0.63, 0.63, 0.63]
+		},
+		"thirdperson_lefthand": {
+			"rotation": [5, 0, 0],
+			"translation": [0, 2.5, -6.5],
+			"scale": [0.63, 0.63, 0.63]
+		},
+		"firstperson_righthand": {
+			"rotation": [0, -90, -15],
+			"translation": [3.25, 4.25, -2],
+			"scale": [0.68, 0.68, 0.68]
+		},
+		"firstperson_lefthand": {
+			"rotation": [0, -90, -15],
+			"translation": [3.25, 4.25, -2],
+			"scale": [0.68, 0.68, 0.68]
+		},
+		"ground": {
+			"translation": [0, 5, 0],
+			"scale": [0.83, 0.83, 0.83]
+		},
+		"gui": {
+			"rotation": [20, 45, 0],
+			"translation": [0, -1, 0.25],
+			"scale": [0.9, 0.9, 0.9]
+		},
+		"head": {
+			"translation": [0, 12, 0],
+			"scale": [0.75, 0.75, 0.75]
+		}
+	},
 	"groups": [
 		0,
 		{

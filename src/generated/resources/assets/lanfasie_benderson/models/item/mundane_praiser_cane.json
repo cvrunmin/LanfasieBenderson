@@ -1,0 +1,76 @@
+{
+  "parent": "minecraft:item/handheld_rod",
+  "display": {
+    "firstperson_lefthand": {
+      "rotation": [
+        -20,
+        -90,
+        -70
+      ],
+      "scale": [
+        1.36,
+        1.36,
+        0.68
+      ],
+      "translation": [
+        3.13,
+        2,
+        0.13
+      ]
+    },
+    "firstperson_righthand": {
+      "rotation": [
+        -20,
+        90,
+        70
+      ],
+      "scale": [
+        1.36,
+        1.36,
+        0.68
+      ],
+      "translation": [
+        3.13,
+        2,
+        0.13
+      ]
+    },
+    "thirdperson_lefthand": {
+      "rotation": [
+        0,
+        -90,
+        -40
+      ],
+      "scale": [
+        1.7,
+        1.7,
+        0.85
+      ],
+      "translation": [
+        0,
+        -2,
+        2
+      ]
+    },
+    "thirdperson_righthand": {
+      "rotation": [
+        0,
+        90,
+        40
+      ],
+      "scale": [
+        1.7,
+        1.7,
+        0.85
+      ],
+      "translation": [
+        0,
+        -2,
+        2
+      ]
+    }
+  },
+  "textures": {
+    "layer0": "lanfasie_benderson:item/mundane_praiser_cane"
+  }
+}

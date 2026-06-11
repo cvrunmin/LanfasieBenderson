@@ -6,6 +6,9 @@ import io.github.cvrunmin.lanfasie.benderson.content.benderson.Benderson;
 import io.github.cvrunmin.lanfasie.benderson.content.dawn.DawnEntity;
 import io.github.cvrunmin.lanfasie.benderson.content.marker.DelayedAttackMarker;
 import io.github.cvrunmin.lanfasie.benderson.content.marker.TargetMarker;
+import io.github.cvrunmin.lanfasie.benderson.content.mundane_praisers.MundanePraiserBard;
+import io.github.cvrunmin.lanfasie.benderson.content.mundane_praisers.MundanePraiserRedMage;
+import io.github.cvrunmin.lanfasie.benderson.content.mundane_praisers.MundanePraiserWhiteMage;
 import io.github.cvrunmin.lanfasie.benderson.content.unforgiven.*;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
@@ -23,6 +26,15 @@ public class AllEntityTypes {
 
     public static final DeferredHolder<EntityType<?>, EntityType<DawnEntity>> DAWN = ENTITY_TYPES.registerEntityType("dawn", DawnEntity::new, MobCategory.CREATURE,
             b -> b.fireImmune().sized(0.6f, 2.375f).immuneTo(Blocks.WITHER_ROSE).clientTrackingRange(8));
+
+    public static final DeferredHolder<EntityType<?>, EntityType<MundanePraiserBard>> MUNDANE_PRAISER_BARD = ENTITY_TYPES.registerEntityType("mundane_praiser_bard", MundanePraiserBard::new, MobCategory.CREATURE,
+            b -> b.fireImmune().sized(0.6f, 2.125f).immuneTo(Blocks.WITHER_ROSE).clientTrackingRange(8));
+
+    public static final DeferredHolder<EntityType<?>, EntityType<MundanePraiserWhiteMage>> MUNDANE_PRAISER_WHITE_MAGE = ENTITY_TYPES.registerEntityType("mundane_praiser_white_mage", MundanePraiserWhiteMage::new, MobCategory.CREATURE,
+            b -> b.fireImmune().sized(0.6f, 2.125f).immuneTo(Blocks.WITHER_ROSE).clientTrackingRange(8));
+
+    public static final DeferredHolder<EntityType<?>, EntityType<MundanePraiserRedMage>> MUNDANE_PRAISER_RED_MAGE = ENTITY_TYPES.registerEntityType("mundane_praiser_red_mage", MundanePraiserRedMage::new, MobCategory.CREATURE,
+            b -> b.fireImmune().sized(0.6f, 2.125f).immuneTo(Blocks.WITHER_ROSE).clientTrackingRange(8));
 
     public static final DeferredHolder<EntityType<?>, EntityType<TargetMarker>> TARGET_MARKER = ENTITY_TYPES.registerEntityType("target_marker", TargetMarker::new, MobCategory.MISC,
             b -> b.sized(0, 0).noLootTable().clientTrackingRange(16));
@@ -52,6 +64,9 @@ public class AllEntityTypes {
     public static void createDefaultAttributes(EntityAttributeCreationEvent event){
         event.put(BENDERSON.get(), Benderson.createAttributes().build());
         event.put(DAWN.get(), DawnEntity.createAttributes().build());
+        event.put(MUNDANE_PRAISER_BARD.get(), MundanePraiserBard.createAttributes().build());
+        event.put(MUNDANE_PRAISER_WHITE_MAGE.get(), MundanePraiserWhiteMage.createAttributes().build());
+        event.put(MUNDANE_PRAISER_RED_MAGE.get(), MundanePraiserRedMage.createAttributes().build());
         event.put(UNFORGIVEN_SPOILING.get(), UnforgivenSpoiling.createAttributes());
         event.put(UNFORGIVEN_RIDICULE.get(), UnforgivenRidicule.createAttributes());
         event.put(UNFORGIVEN_PERFIDY.get(), UnforgivenPerfidy.createAttributes());

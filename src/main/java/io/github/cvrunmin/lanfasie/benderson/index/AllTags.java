@@ -8,4 +8,5 @@ import net.minecraft.world.entity.EntityType;
 
 public class AllTags {
     public static final TagKey<EntityType<?>> IMMUNE_BENDERSON_WIPE_ARENA = TagKey.create(Registries.ENTITY_TYPE, Identifier.fromNamespaceAndPath(LanfasieBenderson.MODID, "immune_benderson_wipe_arena"));
+    public static final TagKey<EntityType<?>> IGNORE_UNFORGIVEN_INDISCRETION_BROADCAST = TagKey.create(Registries.ENTITY_TYPE, Identifier.fromNamespaceAndPath(LanfasieBenderson.MODID, "ignore_unforgiven_indiscretion_broadcast"));
 }

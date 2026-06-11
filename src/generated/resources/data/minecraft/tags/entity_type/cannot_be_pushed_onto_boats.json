@@ -1,6 +1,9 @@
 {
   "values": [
     "lanfasie_benderson:benderson",
-    "lanfasie_benderson:dawn"
+    "lanfasie_benderson:dawn",
+    "lanfasie_benderson:mundane_praiser_bard",
+    "lanfasie_benderson:mundane_praiser_white_mage",
+    "lanfasie_benderson:mundane_praiser_red_mage"
   ]
 }

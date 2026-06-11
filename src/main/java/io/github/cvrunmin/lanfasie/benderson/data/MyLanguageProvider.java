@@ -40,6 +40,9 @@ public class MyLanguageProvider extends LanguageProvider {
         this.addEntityType(AllEntityTypes.DELAYED_ATTACK_MARKER, "Delayed Attack Marker");
         this.addEntityType(AllEntityTypes.ANTICALABRUM, "Anticalabrum");
         this.addEntityType(AllEntityTypes.DAWN, "Dawn");
+        this.addEntityType(AllEntityTypes.MUNDANE_PRAISER_BARD, "Mundane Praiser Bard");
+        this.addEntityType(AllEntityTypes.MUNDANE_PRAISER_WHITE_MAGE, "Mundane Praiser White Mage");
+        this.addEntityType(AllEntityTypes.MUNDANE_PRAISER_RED_MAGE, "Mundane Praiser Red Mage");
         this.addEntityType(AllEntityTypes.UNFORGIVEN_SPOILING, "Unforgiven Spoiling");
         this.addEntityType(AllEntityTypes.UNFORGIVEN_RIDICULE, "Unforgiven Ridicule");
         this.addEntityType(AllEntityTypes.UNFORGIVEN_PERFIDY, "Unforgiven Perfidy");

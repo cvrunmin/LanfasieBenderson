@@ -27,6 +27,10 @@ public class AllCreativeModeTabs {
             output.accept(AllItems.UNFORGIVEN_INDISCRETION_SPAWN_EGG);
             output.accept(AllItems.UNFORGIVEN_COWARDICE_SPAWN_EGG);
             output.accept(AllItems.UNFORGIVEN_SPOILING_SPAWN_EGG);
+            output.accept(AllItems.MUNDANE_PRAISER_BOW);
+            output.accept(AllItems.MUNDANE_PRAISER_CANE);
+            output.accept(AllItems.MUNDANE_PRAISER_RAPIER);
+            output.accept(AllItems.MUNDANE_PRAISER_MANA_FOCI);
         }).build());
 
     public static void register(IEventBus modBus){

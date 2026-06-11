@@ -19,8 +19,30 @@ public class MyEntityTypeTagsProvider extends KeyTagProvider<EntityType<?>> {
 
     @Override
     protected void addTags(HolderLookup.Provider registries) {
-        tag(EntityTypeTags.FALL_DAMAGE_IMMUNE).add(AllEntityTypes.BENDERSON.getKey(), AllEntityTypes.DAWN.getKey());
-        tag(EntityTypeTags.CANNOT_BE_PUSHED_ONTO_BOATS).add(AllEntityTypes.BENDERSON.getKey(), AllEntityTypes.DAWN.getKey());
-        tag(AllTags.IMMUNE_BENDERSON_WIPE_ARENA).add(AllEntityTypes.BENDERSON.getKey(), AllEntityTypes.DAWN.getKey());
+        tag(EntityTypeTags.FALL_DAMAGE_IMMUNE)
+                .add(AllEntityTypes.BENDERSON.getKey(),
+                AllEntityTypes.DAWN.getKey(),
+                AllEntityTypes.MUNDANE_PRAISER_BARD.getKey(),
+                AllEntityTypes.MUNDANE_PRAISER_WHITE_MAGE.getKey(),
+                AllEntityTypes.MUNDANE_PRAISER_RED_MAGE.getKey());
+        tag(EntityTypeTags.CANNOT_BE_PUSHED_ONTO_BOATS)
+                .add(AllEntityTypes.BENDERSON.getKey(),
+                AllEntityTypes.DAWN.getKey(),
+                AllEntityTypes.MUNDANE_PRAISER_BARD.getKey(),
+                AllEntityTypes.MUNDANE_PRAISER_WHITE_MAGE.getKey(),
+                AllEntityTypes.MUNDANE_PRAISER_RED_MAGE.getKey());
+        tag(AllTags.IMMUNE_BENDERSON_WIPE_ARENA)
+                .add(AllEntityTypes.BENDERSON.getKey(),
+                AllEntityTypes.DAWN.getKey(),
+                AllEntityTypes.MUNDANE_PRAISER_BARD.getKey(),
+                AllEntityTypes.MUNDANE_PRAISER_WHITE_MAGE.getKey(),
+                AllEntityTypes.MUNDANE_PRAISER_RED_MAGE.getKey());
+        tag(AllTags.IGNORE_UNFORGIVEN_INDISCRETION_BROADCAST)
+                .add(AllEntityTypes.BENDERSON.getKey(),
+                AllEntityTypes.DAWN.getKey(),
+                AllEntityTypes.MUNDANE_PRAISER_BARD.getKey(),
+                AllEntityTypes.MUNDANE_PRAISER_WHITE_MAGE.getKey(),
+                AllEntityTypes.MUNDANE_PRAISER_RED_MAGE.getKey()
+                );
     }
 }

@@ -20,7 +20,9 @@ public class MyItemTagsProvider extends KeyTagProvider<Item> {
     @Override
     protected void addTags(HolderLookup.Provider registries) {
         tag(ItemTags.SWORDS).add(AllItems.SWORD_OF_DAWNWAITER.getKey(), AllItems.SHALLOWAY_SWORD.getKey());
-        tag(Tags.Items.MELEE_WEAPON_TOOLS).add(AllItems.SWORD_OF_DAWNWAITER.getKey(), AllItems.SHALLOWAY_SWORD.getKey());
+        tag(Tags.Items.MELEE_WEAPON_TOOLS).add(AllItems.SWORD_OF_DAWNWAITER.getKey(), AllItems.SHALLOWAY_SWORD.getKey(), AllItems.MUNDANE_PRAISER_RAPIER.getKey());
+        tag(ItemTags.BOW_ENCHANTABLE).add(AllItems.MUNDANE_PRAISER_BOW.getKey());
         tag(Tags.Items.TOOLS_SHIELD).add(AllItems.SHALLOWAY_SHIELD.getKey());
+        tag(Tags.Items.TOOLS_BOW).add(AllItems.MUNDANE_PRAISER_BOW.getKey());
     }
 }

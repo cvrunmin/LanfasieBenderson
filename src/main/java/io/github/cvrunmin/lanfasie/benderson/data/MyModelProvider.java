@@ -11,10 +11,12 @@ import net.minecraft.client.data.models.model.*;
 import net.minecraft.client.renderer.item.ConditionalItemModel;
 import net.minecraft.client.renderer.item.CuboidItemModelWrapper;
 import net.minecraft.client.renderer.item.ItemModel;
+import net.minecraft.client.renderer.item.properties.numeric.UseDuration;
 import net.minecraft.client.renderer.special.ShieldSpecialRenderer;
 import net.minecraft.client.resources.model.sprite.Material;
 import net.minecraft.data.PackOutput;
 import net.minecraft.resources.Identifier;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.neoforged.neoforge.client.model.generators.template.ExtendedModelTemplate;
 import net.neoforged.neoforge.client.model.generators.template.ExtendedModelTemplateBuilder;
@@ -70,10 +72,35 @@ public class MyModelProvider extends ModelProvider {
             itemModels.itemModelOutput
                     .accept(item, ItemModelUtils.conditional(ShieldSpecialRenderer.DEFAULT_TRANSFORMATION, ItemModelUtils.isUsingItem(), blocking, normal));
         }
-        itemModels.generateBow(AllItems.MUNDANE_PRAISER_BOW.get());
-        itemModels.generateFlatItem(AllItems.MUNDANE_PRAISER_CANE.get(), ModelTemplates.FLAT_HANDHELD_ROD_ITEM);
-        itemModels.generateFlatItem(AllItems.MUNDANE_PRAISER_RAPIER.get(), ModelTemplates.FLAT_HANDHELD_ITEM);
+        generatePraiserBow(itemModels, AllItems.MUNDANE_PRAISER_BOW.get());
+        itemModels.generateFlatItem(AllItems.MUNDANE_PRAISER_CANE.get(), ExtendedModelTemplateBuilder.of(ModelTemplates.FLAT_HANDHELD_ROD_ITEM)
+                        .transform(ItemDisplayContext.FIRST_PERSON_RIGHT_HAND, builder -> builder.rotation(-20, 90, 70).translation(3.13f, 2.0f, 0.13f).scale(1.36f, 1.36f, 0.68f))
+                        .transform(ItemDisplayContext.FIRST_PERSON_LEFT_HAND, builder -> builder.rotation(-20, -90, -70).translation(3.13f, 2.0f, 0.13f).scale(1.36f, 1.36f, 0.68f))
+                        .transform(ItemDisplayContext.THIRD_PERSON_RIGHT_HAND, builder -> builder.rotation(0, 90, 40).translation(0, -2, 2).scale(1.7f, 1.7f, 0.85f))
+                        .transform(ItemDisplayContext.THIRD_PERSON_LEFT_HAND, builder -> builder.rotation(0, -90, -40).translation(0, -2, 2).scale(1.7f, 1.7f, 0.85f))
+                .build());
+        itemModels.generateFlatItem(AllItems.MUNDANE_PRAISER_RAPIER.get(), ExtendedModelTemplateBuilder.of(ModelTemplates.FLAT_HANDHELD_ITEM)
+                        .transform(ItemDisplayContext.GUI, builder -> builder.rotation(180, 180, -90))
+                .build());
         itemModels.itemModelOutput.accept(AllItems.MUNDANE_PRAISER_MANA_FOCI.get(), ItemModelUtils.plainModel(ModelLocationUtils.getModelLocation(AllItems.MUNDANE_PRAISER_MANA_FOCI.get())));
     }
 
+    private void generatePraiserBow(ItemModelGenerators itemModels, Item item) {
+        var template = ModelTemplates.createItem(Identifier.fromNamespaceAndPath(LanfasieBenderson.MODID, "mundane_praiser_bow").toString(), TextureSlot.LAYER0);
+        ItemModel.Unbaked bowModel = ItemModelUtils.plainModel(ModelLocationUtils.getModelLocation(item));
+        ItemModel.Unbaked pulling0 = ItemModelUtils.plainModel(itemModels.createFlatItemModel(item, "_pulling_0", template));
+        ItemModel.Unbaked pulling1 = ItemModelUtils.plainModel(itemModels.createFlatItemModel(item, "_pulling_1", template));
+        ItemModel.Unbaked pulling2 = ItemModelUtils.plainModel(itemModels.createFlatItemModel(item, "_pulling_2", template));
+        itemModels.itemModelOutput
+                .accept(
+                        item,
+                        ItemModelUtils.conditional(
+                                ItemModelUtils.isUsingItem(),
+                                ItemModelUtils.rangeSelect(
+                                        new UseDuration(false), 0.05F, pulling0, ItemModelUtils.override(pulling1, 0.65F), ItemModelUtils.override(pulling2, 0.9F)
+                                ),
+                                bowModel
+                        )
+                );
+    }
 }
