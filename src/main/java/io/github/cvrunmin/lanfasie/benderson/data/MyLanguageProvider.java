@@ -26,6 +26,10 @@ public class MyLanguageProvider extends LanguageProvider {
         this.addItem(AllItems.UNFORGIVEN_SPOILING_SPAWN_EGG, "Unforgiven Spoiling Spawn Egg");
         this.addItem(AllItems.SHALLOWAY_SWORD, "Shalloway Sword");
         this.addItem(AllItems.SHALLOWAY_SHIELD, "Shalloway Shield");
+        this.addItem(AllItems.MUNDANE_PRAISER_BOW, "Mundane Praiser Bow");
+        this.addItem(AllItems.MUNDANE_PRAISER_CANE, "Mundane Praiser Cane");
+        this.addItem(AllItems.MUNDANE_PRAISER_RAPIER, "Mundane Praiser Rapier");
+        this.addItem(AllItems.MUNDANE_PRAISER_MANA_FOCI, "Mundane Praiser Mana Foci");
         this.addBlock(AllBlocks.DEEP_LATENT_CALLER, "Deep Latent Caller");
         this.add("itemGroup.lanfasie_benderson", "Lanfasie: Benderson");
         this.addEntityType(AllEntityTypes.BENDERSON, "Benderson the Abyss-sunken Dawnwaiter");

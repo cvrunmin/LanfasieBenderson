@@ -48,6 +48,10 @@ public class AllItems {
                     )
             )
             .component(DataComponents.BREAK_SOUND, SoundEvents.SHIELD_BREAK)));
+    public static final DeferredItem<BowItem> MUNDANE_PRAISER_BOW = ITEMS.registerItem("mundane_praiser_bow", properties -> new BowItem(properties.enchantable(1)));
+    public static final DeferredItem<Item> MUNDANE_PRAISER_CANE = ITEMS.registerItem("mundane_praiser_cane", properties -> new Item(properties));
+    public static final DeferredItem<Item> MUNDANE_PRAISER_RAPIER = ITEMS.registerItem("mundane_praiser_rapier", properties -> new Item(properties));
+    public static final DeferredItem<Item> MUNDANE_PRAISER_MANA_FOCI = ITEMS.registerItem("mundane_praiser_mana_foci", properties -> new Item(properties));
 
     public static void register(IEventBus modBus){
         ITEMS.register(modBus);

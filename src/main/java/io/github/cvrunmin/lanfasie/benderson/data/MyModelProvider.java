@@ -70,6 +70,10 @@ public class MyModelProvider extends ModelProvider {
             itemModels.itemModelOutput
                     .accept(item, ItemModelUtils.conditional(ShieldSpecialRenderer.DEFAULT_TRANSFORMATION, ItemModelUtils.isUsingItem(), blocking, normal));
         }
+        itemModels.generateBow(AllItems.MUNDANE_PRAISER_BOW.get());
+        itemModels.generateFlatItem(AllItems.MUNDANE_PRAISER_CANE.get(), ModelTemplates.FLAT_HANDHELD_ROD_ITEM);
+        itemModels.generateFlatItem(AllItems.MUNDANE_PRAISER_RAPIER.get(), ModelTemplates.FLAT_HANDHELD_ITEM);
+        itemModels.itemModelOutput.accept(AllItems.MUNDANE_PRAISER_MANA_FOCI.get(), ItemModelUtils.plainModel(ModelLocationUtils.getModelLocation(AllItems.MUNDANE_PRAISER_MANA_FOCI.get())));
     }
 
 }
