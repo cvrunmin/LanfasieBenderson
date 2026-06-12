@@ -46,7 +46,8 @@ public class DelayedAttackMarker extends Entity implements TraceableEntity, IEnt
 
     public enum AttackType implements StringRepresentable{
         BLACK_CAT_SMASH("black_cat_smash"),
-        FIREBALL_METEOR("fireball_meteor");
+        FIREBALL_METEOR("fireball_meteor"),
+        BENDERSON_REMOTE_STACKABLE_METEOR("benderson_remote_stackable_meteor");
 
         public static final Codec<AttackType> CODEC = StringRepresentable.fromEnum(AttackType::values);
         public static final StreamCodec<ByteBuf, AttackType> STREAM_CODEC = ByteBufCodecs.fromCodec(CODEC);
@@ -106,6 +107,15 @@ public class DelayedAttackMarker extends Entity implements TraceableEntity, IEnt
         return instance;
     }
 
+    public static DelayedAttackMarker createRemoteMeteor(Level level, Vec3 location, @Nullable LivingEntity owner, int lifeTick){
+        var instance = new DelayedAttackMarker(AllEntityTypes.DELAYED_ATTACK_MARKER.get(), level);
+        instance.setAttackType(AttackType.BENDERSON_REMOTE_STACKABLE_METEOR);
+        instance.owner = EntityReference.of(owner);
+        instance.setPos(location);
+        instance.setMaxLifeTick(lifeTick + 5);
+        return instance;
+    }
+
     @Override
     protected void defineSynchedData(SynchedEntityData.Builder entityData) {
         entityData.define(ATTACK_TYPE_ACCESSOR, AttackType.FIREBALL_METEOR);
@@ -118,8 +128,8 @@ public class DelayedAttackMarker extends Entity implements TraceableEntity, IEnt
     public void tick() {
         super.tick();
         lifeTick++;
+        final int remainingLife = getMaxLifeTick() - lifeTick;
         if(!level().isClientSide()){
-            final int remainingLife = getMaxLifeTick() - lifeTick;
             switch (getAttackType()){
                 case BLACK_CAT_SMASH -> {
                     var catMoveTotalTime = (int)((getRange() + CAT_HALF_DEPTH) * 2 / CAT_MOVE_SPEED);
@@ -193,6 +203,17 @@ public class DelayedAttackMarker extends Entity implements TraceableEntity, IEnt
                 if(associatedTargetMarker != null && associatedTargetMarker.isAlive()){
                     associatedTargetMarker.discard();
                 }
+            }
+        }else{
+            switch (getAttackType()){
+                case FIREBALL_METEOR -> {
+                    if(remainingLife >= 8 && remainingLife <= 28){
+                        var pos = this.position();
+                        var offset = 10 * (remainingLife - 8) / 20f;
+                        this.level().addParticle(ParticleTypes.SMOKE, pos.x, pos.y + (0.5 + offset) * 3, pos.z, 0, 0, 0);
+                    }
+                }
+                case null, default -> {}
             }
         }
     }

@@ -15,6 +15,7 @@ import io.github.cvrunmin.lanfasie.benderson.data.*;
 import io.github.cvrunmin.lanfasie.benderson.index.AllDamageTypes;
 import io.github.cvrunmin.lanfasie.benderson.index.AllEntityTypes;
 import io.github.cvrunmin.lanfasie.benderson.index.AllItems;
+import io.github.cvrunmin.lanfasie.benderson.utils.ArmPoseEnumProxy;
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.core.RegistrySetBuilder;
@@ -79,7 +80,7 @@ public class LanfasieBendersonClient {
         event.registerItem(new IClientItemExtensions() {
             @Override
             public HumanoidModel.@Nullable ArmPose getArmPose(LivingEntity entityLiving, InteractionHand hand, ItemStack itemStack) {
-                return HumanoidModel.ArmPose.SPEAR;
+                return ArmPoseEnumProxy.MANA_FOCI_POSE_PROXY.getValue();
             }
         }, AllItems.MUNDANE_PRAISER_MANA_FOCI);
     }

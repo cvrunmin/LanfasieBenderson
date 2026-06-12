@@ -31,8 +31,10 @@ public class MyModelProvider extends ModelProvider {
 
     @Override
     protected void registerModels(BlockModelGenerators blockModels, ItemModelGenerators itemModels) {
-        blockModels.blockStateOutput.accept(BlockModelGenerators.createSimpleBlock(AllBlocks.DEEP_LATENT_CALLER.get(),
-                BlockModelGenerators.plainVariant(new TexturedModel(TextureMapping.cube(new Material(Identifier.withDefaultNamespace("block/sculk_shrieker_inner_top"))), ModelTemplates.CUBE_ALL).create(AllBlocks.DEEP_LATENT_CALLER.get(), blockModels.modelOutput))));
+        blockModels.createTrivialCube(AllBlocks.DEEP_LATENT_BLOCK.get());
+        blockModels.createTrivialCube(AllBlocks.DEEP_LATENT_CALLER.get());
+//        blockModels.blockStateOutput.accept(BlockModelGenerators.createSimpleBlock(AllBlocks.DEEP_LATENT_CALLER.get(),
+//                BlockModelGenerators.plainVariant(new TexturedModel(TextureMapping.cube(new Material(Identifier.withDefaultNamespace("block/sculk_shrieker_inner_top"))), ModelTemplates.CUBE_ALL).create(AllBlocks.DEEP_LATENT_CALLER.get(), blockModels.modelOutput))));
         itemModels.generateFlatItem(AllItems.AGGRO_UP_ICON.get(), ModelTemplates.FLAT_ITEM);
         {
             ExtendedModelTemplate template = ExtendedModelTemplateBuilder.of(ModelTemplates.FLAT_HANDHELD_ITEM)

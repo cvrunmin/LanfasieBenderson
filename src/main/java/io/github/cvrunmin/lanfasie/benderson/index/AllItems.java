@@ -53,8 +53,8 @@ public class AllItems {
     public static final DeferredItem<Item> MUNDANE_PRAISER_RAPIER = ITEMS.registerItem("mundane_praiser_rapier", properties -> new Item(properties
             .enchantable(10)
             .durability(1326)
-            .component(DataComponents.PIERCING_WEAPON, new PiercingWeapon(true, false, Optional.of(SoundEvents.SPEAR_USE), Optional.of(SoundEvents.SPEAR_HIT)))
-            .component(DataComponents.ATTACK_RANGE, new AttackRange(2.0F, 4.5F, 2.0F, 6.5F, 0.125F, 0.5F))
+            .component(DataComponents.PIERCING_WEAPON, new PiercingWeapon(true, false, Optional.of(SoundEvents.SPEAR_ATTACK), Optional.of(SoundEvents.SPEAR_HIT)))
+            .component(DataComponents.ATTACK_RANGE, new AttackRange(0.0F, 3.5F, 0.0F, 4.5F, 0.0625F, 0.5F))
             .component(DataComponents.MINIMUM_ATTACK_CHARGE, 1.0F)
             .component(DataComponents.SWING_ANIMATION, new SwingAnimation(SwingAnimationType.STAB, 15))
             .component(DataComponents.USE_EFFECTS, new UseEffects(true, false, 1.0F))

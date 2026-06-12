@@ -1,0 +1,13 @@
+{
+  "entries": [
+    {
+      "enum": "net/minecraft/client/model/HumanoidModel$ArmPose",
+      "name": "LANFASIE_BENDERSON_HOLDING_MANA_FOCI",
+      "constructor": "(ZZLnet/neoforged/neoforge/client/IArmPoseTransformer;)V",
+      "parameters": {
+        "class":"io/github/cvrunmin/lanfasie/benderson/utils/ArmPoseEnumProxy",
+        "field": "MANA_FOCI_POSE_PROXY"
+      }
+    }
+  ]
+}

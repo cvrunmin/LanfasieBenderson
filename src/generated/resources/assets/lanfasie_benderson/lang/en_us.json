@@ -1,5 +1,6 @@
 {
   "attributes.lanfasie_benderson.enmity_multiplier": "Enmity multiplier",
+  "block.lanfasie_benderson.deep_latent_block": "Deep Latent Block",
   "block.lanfasie_benderson.deep_latent_caller": "Deep Latent Caller",
   "death.attack.boss_ability_attack": "%1$s was one step behind from safe area when dodging attack from %2$s",
   "death.attack.boss_ability_attack.item": "%1$s was one step behind from safe area when dodging attack from %2$s holding %3$s",

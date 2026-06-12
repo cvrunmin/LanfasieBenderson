@@ -1,6 +1,6 @@
 {
   "parent": "minecraft:block/cube_all",
   "textures": {
-    "all": "lanfasie_benderson:block/deep_latent_caller"
+    "all": "lanfasie_benderson:block/deep_latent_block"
   }
 }

@@ -30,6 +30,7 @@ public class MyLanguageProvider extends LanguageProvider {
         this.addItem(AllItems.MUNDANE_PRAISER_CANE, "Mundane Praiser Cane");
         this.addItem(AllItems.MUNDANE_PRAISER_RAPIER, "Mundane Praiser Rapier");
         this.addItem(AllItems.MUNDANE_PRAISER_MANA_FOCI, "Mundane Praiser Mana Foci");
+        this.addBlock(AllBlocks.DEEP_LATENT_BLOCK, "Deep Latent Block");
         this.addBlock(AllBlocks.DEEP_LATENT_CALLER, "Deep Latent Caller");
         this.add("itemGroup.lanfasie_benderson", "Lanfasie: Benderson");
         this.addEntityType(AllEntityTypes.BENDERSON, "Benderson the Abyss-sunken Dawnwaiter");
