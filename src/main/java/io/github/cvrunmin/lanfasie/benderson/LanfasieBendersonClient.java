@@ -14,10 +14,15 @@ import io.github.cvrunmin.lanfasie.benderson.content.unforgiven.*;
 import io.github.cvrunmin.lanfasie.benderson.data.*;
 import io.github.cvrunmin.lanfasie.benderson.index.AllDamageTypes;
 import io.github.cvrunmin.lanfasie.benderson.index.AllEntityTypes;
+import io.github.cvrunmin.lanfasie.benderson.index.AllItems;
+import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.core.RegistrySetBuilder;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.Identifier;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.item.ItemStack;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.ModContainer;
@@ -28,9 +33,12 @@ import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import net.neoforged.neoforge.client.event.ModelEvent;
 import net.neoforged.neoforge.client.event.RegisterConditionalItemModelPropertyEvent;
 import net.neoforged.neoforge.client.event.RegisterSpecialModelRendererEvent;
+import net.neoforged.neoforge.client.extensions.common.IClientItemExtensions;
+import net.neoforged.neoforge.client.extensions.common.RegisterClientExtensionsEvent;
 import net.neoforged.neoforge.client.gui.ConfigurationScreen;
 import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
 import net.neoforged.neoforge.data.event.GatherDataEvent;
+import org.jspecify.annotations.Nullable;
 
 // This class will not load on dedicated servers. Accessing client side code from here is safe.
 @Mod(value = LanfasieBenderson.MODID, dist = Dist.CLIENT)
@@ -64,6 +72,16 @@ public class LanfasieBendersonClient {
         event.registerEntityRenderer(AllEntityTypes.UNFORGIVEN_PERFIDY.get(), UnforgivenPerfidyRenderer::new);
         event.registerEntityRenderer(AllEntityTypes.UNFORGIVEN_RIDICULE.get(), UnforgivenRidiculeRenderer::new);
         event.registerEntityRenderer(AllEntityTypes.UNFORGIVEN_SPOILING.get(), UnforgivenSpoilingRenderer::new);
+    }
+
+    @SubscribeEvent
+    public static void registerClientExtensions(RegisterClientExtensionsEvent event){
+        event.registerItem(new IClientItemExtensions() {
+            @Override
+            public HumanoidModel.@Nullable ArmPose getArmPose(LivingEntity entityLiving, InteractionHand hand, ItemStack itemStack) {
+                return HumanoidModel.ArmPose.SPEAR;
+            }
+        }, AllItems.MUNDANE_PRAISER_MANA_FOCI);
     }
 
     @SubscribeEvent

@@ -8,7 +8,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.*;
-import net.minecraft.world.item.component.BlocksAttacks;
+import net.minecraft.world.item.component.*;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.registries.DeferredItem;
 import net.neoforged.neoforge.registries.DeferredRegister;
@@ -50,7 +50,16 @@ public class AllItems {
             .component(DataComponents.BREAK_SOUND, SoundEvents.SHIELD_BREAK)));
     public static final DeferredItem<BowItem> MUNDANE_PRAISER_BOW = ITEMS.registerItem("mundane_praiser_bow", properties -> new BowItem(properties.enchantable(1)));
     public static final DeferredItem<Item> MUNDANE_PRAISER_CANE = ITEMS.registerItem("mundane_praiser_cane", properties -> new Item(properties));
-    public static final DeferredItem<Item> MUNDANE_PRAISER_RAPIER = ITEMS.registerItem("mundane_praiser_rapier", properties -> new Item(properties));
+    public static final DeferredItem<Item> MUNDANE_PRAISER_RAPIER = ITEMS.registerItem("mundane_praiser_rapier", properties -> new Item(properties
+            .enchantable(10)
+            .durability(1326)
+            .component(DataComponents.PIERCING_WEAPON, new PiercingWeapon(true, false, Optional.of(SoundEvents.SPEAR_USE), Optional.of(SoundEvents.SPEAR_HIT)))
+            .component(DataComponents.ATTACK_RANGE, new AttackRange(2.0F, 4.5F, 2.0F, 6.5F, 0.125F, 0.5F))
+            .component(DataComponents.MINIMUM_ATTACK_CHARGE, 1.0F)
+            .component(DataComponents.SWING_ANIMATION, new SwingAnimation(SwingAnimationType.STAB, 15))
+            .component(DataComponents.USE_EFFECTS, new UseEffects(true, false, 1.0F))
+            .component(DataComponents.WEAPON, new Weapon(1))
+    ));
     public static final DeferredItem<Item> MUNDANE_PRAISER_MANA_FOCI = ITEMS.registerItem("mundane_praiser_mana_foci", properties -> new Item(properties));
 
     public static void register(IEventBus modBus){

@@ -22,4 +22,12 @@ public class UnforgivenIndiscretionRenderer extends MobRenderer<UnforgivenIndisc
     public UnforgivenIndiscretionRenderState createRenderState() {
         return new UnforgivenIndiscretionRenderState();
     }
+
+    @Override
+    public void extractRenderState(UnforgivenIndiscretion entity, UnforgivenIndiscretionRenderState state, float partialTicks) {
+        super.extractRenderState(entity, state, partialTicks);
+        if(entity.isBroadcasting()){
+            state.yRot += state.ageInTicks * 360 / 1.5f;
+        }
+    }
 }

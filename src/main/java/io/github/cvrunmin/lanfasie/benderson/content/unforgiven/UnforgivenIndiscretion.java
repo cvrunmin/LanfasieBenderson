@@ -1,6 +1,9 @@
 package io.github.cvrunmin.lanfasie.benderson.content.unforgiven;
 
 import io.github.cvrunmin.lanfasie.benderson.index.AllEntityTypes;
+import net.minecraft.network.syncher.EntityDataAccessor;
+import net.minecraft.network.syncher.EntityDataSerializers;
+import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -11,8 +14,13 @@ import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
+import org.jspecify.annotations.Nullable;
+
+import java.util.EnumSet;
 
 public class UnforgivenIndiscretion extends Monster {
+    private static final EntityDataAccessor<Boolean> DATA_BROADCASTING = SynchedEntityData.defineId(UnforgivenIndiscretion.class, EntityDataSerializers.BOOLEAN);
+
     public UnforgivenIndiscretion(EntityType<? extends Monster> type, Level level) {
         super(type, level);
     }
@@ -23,7 +31,11 @@ public class UnforgivenIndiscretion extends Monster {
     }
 
     public static AttributeSupplier createAttributes(){
-        return Monster.createMonsterAttributes().add(Attributes.MAX_HEALTH, 30).add(Attributes.MOVEMENT_SPEED, 0.25).build();
+        return Monster.createMonsterAttributes()
+                .add(Attributes.MAX_HEALTH, 30)
+                .add(Attributes.MOVEMENT_SPEED, 0.25)
+                .add(Attributes.ARMOR, 2)
+                .build();
     }
 
     @Override
@@ -36,12 +48,33 @@ public class UnforgivenIndiscretion extends Monster {
         this.targetSelector.addGoal(2, new HurtByTargetGoal(this));
     }
 
+    @Override
+    protected void defineSynchedData(SynchedEntityData.Builder entityData) {
+        super.defineSynchedData(entityData);
+        entityData.define(DATA_BROADCASTING, false);
+    }
+
+    @Override
+    public void setTarget(@Nullable LivingEntity target) {
+        this.setBroadcasting(target != null);
+        super.setTarget(target);
+    }
+
+    public void setBroadcasting(boolean flag){
+        this.entityData.set(DATA_BROADCASTING, flag);
+    }
+
+    public boolean isBroadcasting(){
+        return this.entityData.get(DATA_BROADCASTING);
+    }
+
     private static class AnnounceTargetGoal extends Goal{
         private final UnforgivenIndiscretion guy;
         private int tick;
 
         private AnnounceTargetGoal(UnforgivenIndiscretion guy) {
             this.guy = guy;
+            this.setFlags(EnumSet.of(Goal.Flag.JUMP, Goal.Flag.MOVE));
         }
 
         @Override
