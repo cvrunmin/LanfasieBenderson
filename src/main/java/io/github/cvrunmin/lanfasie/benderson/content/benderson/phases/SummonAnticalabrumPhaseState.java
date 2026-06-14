@@ -56,7 +56,7 @@ public class SummonAnticalabrumPhaseState implements IPhaseState{
 
     @Override
     public boolean canUse() {
-        return cooldownTick <= 0 && this.owner.getTarget() != null && (lastSword == null || lastSword.isRemoved());
+        return cooldownTick <= 0 && this.owner.getBodyState() == Benderson.BodyState.DEEP_LATENT && this.owner.getTarget() != null && (lastSword == null || lastSword.isRemoved());
     }
 
     @Override

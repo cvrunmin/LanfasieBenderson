@@ -2,6 +2,7 @@ package io.github.cvrunmin.lanfasie.benderson.content.benderson.phases;
 
 import io.github.cvrunmin.lanfasie.benderson.content.benderson.Benderson;
 import io.github.cvrunmin.lanfasie.benderson.content.marker.TargetMarker;
+import io.github.cvrunmin.lanfasie.benderson.index.AllAttributes;
 import io.github.cvrunmin.lanfasie.benderson.index.AllDamageTypes;
 import net.minecraft.commands.arguments.EntityAnchorArgument;
 import net.minecraft.core.UUIDUtil;
@@ -9,9 +10,12 @@ import net.minecraft.core.component.DataComponents;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.ExperienceOrb;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.item.component.BlocksAttacks;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
+
+import java.util.Optional;
 
 public class LethalAttackPhaseState implements IPhaseState{
     public static final String ANIMATE_STATE_LETHAL_ATTACK_START = "lethal_attack.start";
@@ -63,9 +67,15 @@ public class LethalAttackPhaseState implements IPhaseState{
                         ExperienceOrb.award((ServerLevel) this.owner.level(), currentTarget.position(), 20);
                     }
                 }
+                float damage = 18.0f;
+                if(Optional.ofNullable(this.owner.getAttribute(AllAttributes.EXTREME)).map(attr -> attr.getValue() != 0).orElse(false)){
+                    float enlargedDamage = (float) (damage * this.owner.getAttributeValue(Attributes.ATTACK_DAMAGE));
+                    float maxHandleableDamage = currentTarget.getMaxHealth() * 0.9f;
+                    damage = Math.min(enlargedDamage, maxHandleableDamage);
+                }
                 currentTarget.hurtServer(((ServerLevel) this.owner.level()),
                         this.owner.damageSources().source(AllDamageTypes.LETHAL_ATTACK, this.owner),
-                        18.0f * Math.max(0.05f, 1 - reductionFactor));
+                        damage * Math.max(0.05f, 1 - reductionFactor));
                 if (currentTarget.isDeadOrDying() && this.trackingMarker != null && this.trackingMarker.isAlive()) {
                     this.trackingMarker.discard();
                 }

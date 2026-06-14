@@ -3,55 +3,46 @@ package io.github.cvrunmin.lanfasie.benderson.content.benderson.phases;
 import io.github.cvrunmin.lanfasie.benderson.content.benderson.Benderson;
 import io.github.cvrunmin.lanfasie.benderson.content.marker.TargetMarker;
 import io.github.cvrunmin.lanfasie.benderson.index.AllDamageTypes;
-import io.github.cvrunmin.lanfasie.benderson.index.AllSoundEvents;
-import io.github.cvrunmin.lanfasie.benderson.utils.VulnerabilityHelper;
-import net.minecraft.commands.arguments.EntityAnchorArgument;
 import net.minecraft.core.UUIDUtil;
+import net.minecraft.core.particles.BlockParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.entity.EntityTypeTest;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
-import net.minecraft.world.phys.AABB;
-import net.minecraft.world.phys.Vec3;
 
-public class CircleAoeSelfPhaseState implements IPhaseState{
-    public static final String ANIMATE_STATE_CIRCLE_AOE_START = "circle_aoe_self.start";
-    public static final String ANIMATE_STATE_CIRCLE_AOE_LOOP = "circle_aoe_self.loop";
-    public static final String ANIMATE_STATE_CIRCLE_AOE_END = "circle_aoe_self.end";
+public class KnockbackFromCenterPhaseState implements IPhaseState{
+    public static final String ANIMATE_STATE_START = "knockback_radial.start";
+    public static final String ANIMATE_STATE_LOOP = "knockback_radial.loop";
+    public static final String ANIMATE_STATE_END = "knockback_radial.end";
     private final Benderson owner;
     private TargetMarker trackingMarker;
     private int currentTick = 0;
-    private final int diameter;
+    private final double knockbackDistance;
     private int maxTicks = (int) (20 * (5.5f + 2.5f));
     private int cooldownTick = 0;
     private final float attackDamage;
 
-    public CircleAoeSelfPhaseState(Benderson owner) {
-        this(owner, 7, 5.0f);
-    }
-
-    public CircleAoeSelfPhaseState(Benderson owner, int diameter, float attackDamage) {
+    public KnockbackFromCenterPhaseState(Benderson owner, double knockbackDistance, float attackDamage) {
         this.owner = owner;
-        this.diameter = diameter;
+        this.knockbackDistance = knockbackDistance;
         this.attackDamage = attackDamage;
     }
+
 
     @Override
     public void start() {
         if(this.owner.level().isClientSide()) return;
-        var marker = new TargetMarker(this.owner.level(), this.owner,
-                TargetMarker.MarkerArgs.simple(TargetMarker.MarkerType.CIRCLE_AOE, this.diameter, 110));
-        this.trackingMarker = marker;
-        this.owner.level().addFreshEntity(marker);
-        this.owner.lookAt(EntityAnchorArgument.Anchor.FEET, new Vec3(0, 0, 1).add(this.owner.position()));
-        this.owner.setAnimateState(ANIMATE_STATE_CIRCLE_AOE_START);
+        trackingMarker = new TargetMarker(this.owner.level(), this.owner.getCombatArenaCenter(), TargetMarker.MarkerArgs.simple(TargetMarker.MarkerType.KNOCKBACK_RADIAL, (float) (this.owner.getArenaRadius() * Math.sqrt(2)), 110));
+        this.owner.level().addFreshEntity(trackingMarker);
+        this.owner.setAnimateState(ANIMATE_STATE_START);
         this.currentTick = this.maxTicks;
     }
 
@@ -61,30 +52,28 @@ public class CircleAoeSelfPhaseState implements IPhaseState{
         currentTick--;
         int pastTicks = maxTicks - currentTick;
         if(pastTicks == 5){
-            this.owner.setAnimateState(ANIMATE_STATE_CIRCLE_AOE_LOOP);
+            this.owner.setAnimateState(ANIMATE_STATE_LOOP);
         } else if (pastTicks == 110) {
-            this.owner.setAnimateState(ANIMATE_STATE_CIRCLE_AOE_END);
+            this.owner.setAnimateState(ANIMATE_STATE_END);
         } else if(pastTicks > 110 && pastTicks <= 120){
             if(pastTicks % 2 == 1){
-                double dx = -Mth.sin(this.owner.getYRot() * (float) (Math.PI / 180.0));
-                double dz = Mth.cos(this.owner.getYRot() * (float) (Math.PI / 180.0));
-                this.owner.level().playSound(null, this.owner.getX(), this.owner.getY(), this.owner.getZ(), AllSoundEvents.BOSS_SWEEP_SFX.get(), SoundSource.HOSTILE, 1, 1);
-                ((ServerLevel) this.owner.level()).sendParticles(ParticleTypes.SWEEP_ATTACK, this.owner.getX() + dx, this.owner.getY(0.5), this.owner.getZ() + dz, 0, dx, 0.0, dz, 0.0);
+                this.owner.level().playSound(null, this.owner.getX(), this.owner.getY(), this.owner.getZ(), SoundEvents.STONE_FALL, SoundSource.HOSTILE, 1, 0.5f);
+                ((ServerLevel) this.owner.level()).sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.STONE.defaultBlockState()),
+                        this.owner.getX(), this.owner.getY(), this.owner.getZ(), 0, 0, 0.0, 0, 0.0);
             }
             if (pastTicks == 114) {
                 if(!this.owner.level().isClientSide()){
                     var acceptingTargets = this.owner.level().getEntities(EntityTypeTest.forClass(LivingEntity.class),
-                            AABB.ofSize(this.owner.position(), this.diameter, 15, this.diameter).intersect(this.owner.getCombatArena()),
-                            livingEntity -> livingEntity.canBeSeenByAnyone() && livingEntity.position().subtract(this.owner.position()).horizontalDistance() <= this.diameter * 0.5f);
+                            this.owner.getCombatArena(),
+                            LivingEntity::canBeSeenByAnyone);
                     for (LivingEntity acceptingTarget : acceptingTargets) {
                         float damage = acceptingTarget instanceof Player ? attackDamage : attackDamage * Math.min(1.0f, acceptingTarget.getMaxHealth() / 20f);
                         damage *= (float) this.owner.getAttributeValue(Attributes.ATTACK_DAMAGE);
+                        var dir = this.owner.position().subtract(acceptingTarget.position()).horizontal().normalize();
                         acceptingTarget.hurtServer(((ServerLevel) this.owner.level()),
                                 this.owner.damageSources().source(AllDamageTypes.BOSS_ABILITY_ATTACK, this.owner),
                                 damage);
-                        if(acceptingTarget instanceof Player player) {
-                            VulnerabilityHelper.addVulnerabilityUp(player);
-                        }
+                        acceptingTarget.knockback(knockbackDistance, dir.x, dir.z);
                     }
                 }
             }
@@ -102,7 +91,7 @@ public class CircleAoeSelfPhaseState implements IPhaseState{
         }
         this.trackingMarker = null;
         this.currentTick = 0;
-        this.cooldownTick = 600;
+        cooldownTick = 400;
         this.owner.setGlobalCooldown(100);
     }
 
@@ -113,7 +102,16 @@ public class CircleAoeSelfPhaseState implements IPhaseState{
 
     @Override
     public boolean canUse() {
-        return cooldownTick <= 0 && this.owner.getTarget() != null && !this.owner.isInGlobalCooldown();
+        return this.owner.getBodyState() == Benderson.BodyState.UNFORGIVEN || this.owner.getBodyState() == Benderson.BodyState.UNVEILED;
+    }
+
+    @Override
+    public void addAdditionalSaveData(ValueOutput output) {
+        output.putInt("Tick", this.currentTick);
+        output.putInt("Cooldown", this.cooldownTick);
+        if(this.trackingMarker != null) {
+            output.store("Marker", UUIDUtil.CODEC, this.trackingMarker.getUUID());
+        }
     }
 
     @Override
@@ -126,15 +124,6 @@ public class CircleAoeSelfPhaseState implements IPhaseState{
             if(entity instanceof TargetMarker marker){
                 this.trackingMarker = marker;
             }
-        }
-    }
-
-    @Override
-    public void addAdditionalSaveData(ValueOutput output) {
-        output.putInt("Tick", this.currentTick);
-        output.putInt("Cooldown", this.cooldownTick);
-        if(this.trackingMarker != null) {
-            output.store("Marker", UUIDUtil.CODEC, this.trackingMarker.getUUID());
         }
     }
 }

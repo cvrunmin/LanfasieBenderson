@@ -65,7 +65,11 @@ public class MyLanguageProvider extends LanguageProvider {
         this.add("death.attack.boss_ability_attack", "%1$s was one step behind from safe area when dodging attack from %2$s");
         this.add("death.attack.boss_ability_attack.player", "%1$s was one step behind from safe area when dodging attack from %2$s");
         this.add("death.attack.boss_ability_attack.item", "%1$s was one step behind from safe area when dodging attack from %2$s holding %3$s");
+        this.add("death.attack.ecliptic_meteor", "%1$s ordered an Ecliptic Meteorite Latte, and made a default review for %2$s");
+        this.add("death.attack.ecliptic_meteor.player", "%1$s ordered an Ecliptic Meteorite Latte, and made a default review for %2$s");
+        this.add("death.attack.ecliptic_meteor.item", "%1$s ordered an Ecliptic Meteorite Latte, and made a default review for %2$s holding %3$s");
         this.add("text.lanfasie_benderson.enmity_bar.aggro", "A");
         this.add("attributes.lanfasie_benderson.enmity_multiplier", "Enmity multiplier");
+        this.add("attributes.lanfasie_benderson.extreme", "Extreme Mode");
     }
 }

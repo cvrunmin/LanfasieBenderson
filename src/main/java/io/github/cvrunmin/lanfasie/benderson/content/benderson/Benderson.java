@@ -12,6 +12,7 @@ import com.geckolib.constant.DataTickets;
 import com.geckolib.constant.DefaultAnimations;
 import com.geckolib.util.GeckoLibUtil;
 import com.mojang.serialization.Codec;
+import io.github.cvrunmin.lanfasie.benderson.LanfasieBenderson;
 import io.github.cvrunmin.lanfasie.benderson.content.benderson.phases.*;
 import io.github.cvrunmin.lanfasie.benderson.content.marker.TargetMarker;
 import io.github.cvrunmin.lanfasie.benderson.index.*;
@@ -25,6 +26,7 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerBossEvent;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -37,6 +39,7 @@ import net.minecraft.world.BossEvent;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.*;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.control.FlyingMoveControl;
@@ -78,7 +81,7 @@ public class Benderson extends Monster implements GeoEntity {
     private ArenaEnteringPhaseState arenaEnteringPhaseState = new ArenaEnteringPhaseState(this);
     private NormalAttackPhaseState normalAttackPhaseState = new NormalAttackPhaseState(this);
     private LethalAttackPhaseState lethalAttackPhaseState = new LethalAttackPhaseState(this);
-    private CircleAoeSelfPhaseState circleAoeSelfPhaseState = new CircleAoeSelfPhaseState(this, 22);
+    private CircleAoeSelfPhaseState circleAoeSelfPhaseState = new CircleAoeSelfPhaseState(this, 10, 22);
     private CircleStackAttackPhaseState circleStackAttackPhaseState = new CircleStackAttackPhaseState(this, 20);
     private PartialArenaAoePhaseState threeforthAreanAoePhaseState = new PartialArenaAoePhaseState(this, 22);
     private SummonAnticalabrumPhaseState summonAnticalabrumPhaseState = new SummonAnticalabrumPhaseState(this);
@@ -203,6 +206,7 @@ public class Benderson extends Monster implements GeoEntity {
                 .add(Attributes.ATTACK_DAMAGE, 1.0)
                 .add(Attributes.KNOCKBACK_RESISTANCE, 1.0f)
                 .add(Attributes.EXPLOSION_KNOCKBACK_RESISTANCE, 1.0f)
+                .add(AllAttributes.EXTREME, 0)
                 .add(Attributes.ATTACK_KNOCKBACK, 0.0f);
     }
 
@@ -374,7 +378,6 @@ public class Benderson extends Monster implements GeoEntity {
     public void setBodyState(BodyState bodyState){
         entityData.set(BODY_STATE, bodyState);
         bossEvent.setName(getDisplayName());
-        level().environmentAttributes();
     }
 
     @Override
@@ -556,6 +559,10 @@ public class Benderson extends Monster implements GeoEntity {
         if(!source.is(DamageTypeTags.BYPASSES_INVULNERABILITY)){
             if(this.getHealth() / this.getMaxHealth() > 0.9 && this.getBodyState() == BodyState.DEEP_LATENT && damage > this.getHealth()){
                 this.setPhaseState("elevate_to_extreme");
+                var exceedingFactor = Math.max(1, damage / this.getMaxHealth());
+                this.getAttribute(Attributes.MAX_HEALTH).addPermanentModifier(new AttributeModifier(Identifier.fromNamespaceAndPath(LanfasieBenderson.MODID, "extreme"), exceedingFactor * 10 - 1, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL));
+                this.getAttribute(Attributes.ATTACK_DAMAGE).addPermanentModifier(new AttributeModifier(Identifier.fromNamespaceAndPath(LanfasieBenderson.MODID, "extreme"), exceedingFactor * 5 - 1, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL));
+                this.getAttribute(AllAttributes.EXTREME).addPermanentModifier(new AttributeModifier(Identifier.fromNamespaceAndPath(LanfasieBenderson.MODID, "extreme"), 1, AttributeModifier.Operation.ADD_VALUE));
                 damage = 0.01f;
             }
             damage = Math.min(damage, this.getMaxHealth() * 0.01f);
@@ -716,8 +723,8 @@ public class Benderson extends Monster implements GeoEntity {
     }
 
     public @NonNull AABB getCombatArena() {
-        if(this.arenaCenter == null) return new AABB(-32, -5, -32, 32, 5, 32);
-        return AABB.ofSize(Vec3.atLowerCornerOf(this.arenaCenter), this.arenaRadius * 2, 10, this.arenaRadius * 2);
+        if(this.arenaCenter == null) return new AABB(-32, -3, -32, 32, 9, 32);
+        return AABB.ofSize(Vec3.atLowerCornerOf(this.arenaCenter), this.arenaRadius * 2, 12, this.arenaRadius * 2).move(0, 2, 0);
     }
 
     public int getArenaRadius(){
@@ -770,6 +777,7 @@ public class Benderson extends Monster implements GeoEntity {
     @Override
     public boolean isInvulnerable() {
         if(isTransitioning()) return true;
+        if(transitioner.getPhaseState() instanceof KnockbackFromCenterPhaseState) return true;
         return super.isInvulnerable();
     }
 

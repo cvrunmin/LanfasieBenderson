@@ -51,6 +51,8 @@ public class TargetMarker extends Entity implements IEntityWithComplexSpawn, Own
         CIRCLE_AOE("circle_aoe"),
         LINEAR_AOE("linear_aoe"),
         CONE_AOE("cone_aoe"),
+        KNOCKBACK_RADIAL("knockback_radial"),
+        GROUND_PROXIMITY("ground_proximity"),
         ARENA_HINT("arena_hint"),
         ;
 

@@ -12,6 +12,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.entity.EntityTypeTest;
 import net.minecraft.world.level.storage.ValueInput;
@@ -28,14 +29,14 @@ public class CircleStackAttackPhaseState implements IPhaseState{
     private TargetMarker trackingMarker;
     private int currentTick = 0;
     private int requiredPlayerToStack = 0;
-    private final int range = 5;
+    private final int diameter = 5;
     private int maxTicks = (int) (20 * (5.5f + 2.5f));
     private int cooldownTick = 0;
-    private float damage;
+    private float damageMultiplier;
 
     public CircleStackAttackPhaseState(Benderson owner, float damage) {
         this.owner = owner;
-        this.damage = damage;
+        this.damageMultiplier = damage;
     }
 
     @Override
@@ -45,7 +46,7 @@ public class CircleStackAttackPhaseState implements IPhaseState{
             this.requiredPlayerToStack = this.owner.getActualEnmityMap().size();
             currentTarget = this.owner.getTarget();
             var marker = new TargetMarker(this.owner.level(), this.currentTarget,
-                    TargetMarker.MarkerArgs.simple(TargetMarker.MarkerType.CIRCLE_STACK, this.range, 110));
+                    TargetMarker.MarkerArgs.simple(TargetMarker.MarkerType.CIRCLE_STACK, this.diameter, 110));
             this.trackingMarker = marker;
             this.owner.level().addFreshEntity(marker);
             this.owner.lookAt(EntityAnchorArgument.Anchor.FEET, currentTarget.position());
@@ -71,13 +72,14 @@ public class CircleStackAttackPhaseState implements IPhaseState{
                 this.owner.level().playSound(null, position.x, position.y, position.z, SoundEvents.GENERIC_EXPLODE, SoundSource.HOSTILE, 1, 1);
                 ((ServerLevel) this.owner.level()).sendParticles(ParticleTypes.EXPLOSION_EMITTER, position.x, position.y, position.z, 0, 0, 0, 0, 0);
                 var acceptingTargets = this.owner.level().getEntities(EntityTypeTest.forClass(Player.class),
-                        AABB.ofSize(position, this.range, 10, this.range),
-                        player -> player.canBeSeenByAnyone() && player.position().subtract(position).horizontalDistance() <= this.range * 0.5f);
+                        AABB.ofSize(position, this.diameter, 20, this.diameter).intersect(owner.getCombatArena()),
+                        player -> player.canBeSeenByAnyone() && player.position().subtract(position).horizontalDistance() <= this.diameter * 0.5f);
                 if(!acceptingTargets.isEmpty()){
-                    float damage = this.damage;
+                    float damage = this.damageMultiplier;
                     if(this.requiredPlayerToStack < 4){
-                        damage = this.damage * (this.requiredPlayerToStack / 4f + 0.5f);
+                        damage = this.damageMultiplier * (this.requiredPlayerToStack / 4f + 0.5f);
                     }
+                    damage *= (float) this.owner.getAttributeValue(Attributes.ATTACK_DAMAGE);
                     damage = damage / acceptingTargets.size();
                     for (Player acceptingTarget : acceptingTargets) {
                         acceptingTarget.hurtServer(((ServerLevel) this.owner.level()),

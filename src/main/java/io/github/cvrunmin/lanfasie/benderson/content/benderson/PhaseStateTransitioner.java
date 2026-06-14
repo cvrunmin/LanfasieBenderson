@@ -14,15 +14,15 @@ import java.lang.ref.WeakReference;
 import java.util.*;
 
 public class PhaseStateTransitioner {
-    private final WeakReference<Benderson> owner;
-    private final Map<String, WeakReference<IPhaseState>> possiblePhaseState = new HashMap<>();
+    private final Benderson owner;
+    private final Map<String, IPhaseState> possiblePhaseState = new HashMap<>();
     private final Map<String, Map<String, DestRecord>> possibleTransition = new HashMap<>();
     private String fallbackStateKey;
     private String currentState;
     private boolean shouldChangePhase;
 
     public PhaseStateTransitioner(Benderson owner){
-        this.owner = new WeakReference<>(owner);
+        this.owner = owner;
     }
 
     public void tick(){
@@ -37,7 +37,7 @@ public class PhaseStateTransitioner {
                 List<String> candidateList = new ArrayList<>();
                 var candidateWeight = new ArrayList<Integer>();
                 for (Map.Entry<String, DestRecord> entry : transitionMap.entrySet()) {
-                    var state = Optional.ofNullable(possiblePhaseState.get(entry.getKey())).map(Reference::get).orElse(null);
+                    var state = Optional.ofNullable(possiblePhaseState.get(entry.getKey())).orElse(null);
                     if(state == null) continue;
                     if(!state.canUse()) continue;
                     if(entry.getValue().priority < curPriority) continue;
@@ -67,7 +67,7 @@ public class PhaseStateTransitioner {
                 }
             }
         }else{
-            var state = possiblePhaseState.get(currentState).get();
+            var state = possiblePhaseState.get(currentState);
             if(state == null) shouldChangePhase = true;
             else{
                 var tickResult = state.tick();
@@ -78,13 +78,13 @@ public class PhaseStateTransitioner {
             }
         }
         if(changed){
-            var state = possiblePhaseState.get(currentState).get();
+            var state = possiblePhaseState.get(currentState);
             if(state != null) state.start();
             shouldChangePhase = false;
         }
-        for (Map.Entry<String, WeakReference<IPhaseState>> entry : possiblePhaseState.entrySet()) {
+        for (Map.Entry<String, IPhaseState> entry : possiblePhaseState.entrySet()) {
             if(!Objects.equals(entry.getKey(), currentState)){
-                var state = entry.getValue().get();
+                var state = entry.getValue();
                 if(state != null) state.inactiveTick();
             }
         }
@@ -104,11 +104,11 @@ public class PhaseStateTransitioner {
     public void setPhaseState(String key){
         if(!possiblePhaseState.containsKey(key)) return;
         if(currentState != null){
-            var state = possiblePhaseState.get(currentState).get();
+            var state = possiblePhaseState.get(currentState);
             if(state != null) state.end();
         }
         this.currentState = key;
-        var state = possiblePhaseState.get(currentState).get();
+        var state = possiblePhaseState.get(currentState);
         if(state != null) {
             if(state.canUse()) {
                 state.start();
@@ -119,9 +119,18 @@ public class PhaseStateTransitioner {
         }
     }
 
+    public String getPhaseStateId(){
+        return currentState;
+    }
+
+    public IPhaseState getPhaseState(){
+        if(!possiblePhaseState.containsKey(currentState)) return null;
+        return possiblePhaseState.get(currentState);
+    }
+
     public PhaseStateTransitioner addPhaseStateInstance(String key, IPhaseState phaseState){
         if(possiblePhaseState.containsKey(key)) throw new IllegalArgumentException("PhaseState key %s already exists".formatted(key));
-        possiblePhaseState.put(key, new WeakReference<>(phaseState));
+        possiblePhaseState.put(key, phaseState);
         if(fallbackStateKey == null) fallbackStateKey = key;
         return this;
     }
@@ -143,7 +152,7 @@ public class PhaseStateTransitioner {
 
     @Nullable
     public Benderson getOwner() {
-        return owner.get();
+        return owner;
     }
 
     public void addAdditionalSaveData(ValueOutput output){
@@ -151,8 +160,8 @@ public class PhaseStateTransitioner {
             output.putString("Phase", currentState);
         }
         var phasesObj = output.child("PhaseData");
-        for (Map.Entry<String, WeakReference<IPhaseState>> entry : this.possiblePhaseState.entrySet()) {
-            var state = entry.getValue().get();
+        for (Map.Entry<String, IPhaseState> entry : this.possiblePhaseState.entrySet()) {
+            var state = entry.getValue();
             if(state != null) state.addAdditionalSaveData(phasesObj.child(entry.getKey()));
         }
     }
@@ -160,8 +169,8 @@ public class PhaseStateTransitioner {
     public void readAdditionalSaveData(ValueInput input){
         input.getString("Phase").filter(this.possiblePhaseState::containsKey).ifPresent(v -> this.currentState = v);
         var maybePhaseData = input.childOrEmpty("PhaseData");
-        for (Map.Entry<String, WeakReference<IPhaseState>> entry : this.possiblePhaseState.entrySet()) {
-            var state = entry.getValue().get();
+        for (Map.Entry<String, IPhaseState> entry : this.possiblePhaseState.entrySet()) {
+            var state = entry.getValue();
             if(state != null) state.readAdditionalSaveData(maybePhaseData.childOrEmpty(entry.getKey()));
         }
     }

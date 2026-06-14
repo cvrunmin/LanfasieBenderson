@@ -11,6 +11,7 @@ import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.entity.EntityTypeTest;
 import net.minecraft.world.level.storage.ValueInput;
@@ -81,13 +82,16 @@ public class PartialArenaAoePhaseState implements IPhaseState{
             if(pastTicks == 134){
                 if(!this.owner.level().isClientSide()){
                     var acceptingTargets = this.owner.level().getEntities(EntityTypeTest.forClass(LivingEntity.class),
-                            AABB.ofSize(this.owner.getCombatArenaCenter(), this.owner.getArenaRadius() * 2, 10, this.owner.getArenaRadius() * 2).contract(0, 0, -this.owner.getArenaRadius() * 0.5f),
+                            AABB.ofSize(this.owner.getCombatArenaCenter(), this.owner.getArenaRadius() * 2, 20, this.owner.getArenaRadius() * 2).contract(0, 0, -this.owner.getArenaRadius() * 0.5f)
+                                    .intersect(this.owner.getCombatArena()),
                             LivingEntity::canBeSeenByAnyone);
                     for (LivingEntity acceptingTarget : acceptingTargets) {
                         if(acceptingTarget.canBeSeenByAnyone()){
+                            float damage = acceptingTarget instanceof Player ? attackDamage : attackDamage * Math.min(1.0f, acceptingTarget.getMaxHealth() / 20f);
+                            damage *= (float) this.owner.getAttributeValue(Attributes.ATTACK_DAMAGE);
                             acceptingTarget.hurtServer(((ServerLevel) this.owner.level()),
                                     this.owner.damageSources().source(AllDamageTypes.BOSS_ABILITY_ATTACK, this.owner),
-                                    acceptingTarget instanceof Player ? attackDamage : attackDamage * Math.min(1.0f, acceptingTarget.getMaxHealth() / 20f));
+                                    damage);
                             if(acceptingTarget instanceof Player player) {
                                 VulnerabilityHelper.addVulnerabilityUp(player);
                             }
