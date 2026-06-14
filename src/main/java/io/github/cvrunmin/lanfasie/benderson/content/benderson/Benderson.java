@@ -6,6 +6,8 @@ import com.geckolib.animatable.manager.AnimatableManager;
 import com.geckolib.animation.AnimationController;
 import com.geckolib.animation.RawAnimation;
 import com.geckolib.animation.object.PlayState;
+import com.geckolib.animation.state.KeyFrameEvent;
+import com.geckolib.cache.animation.keyframeevent.CustomInstructionKeyframeData;
 import com.geckolib.constant.DataTickets;
 import com.geckolib.constant.DefaultAnimations;
 import com.geckolib.util.GeckoLibUtil;
@@ -80,6 +82,7 @@ public class Benderson extends Monster implements GeoEntity {
     private CircleStackAttackPhaseState circleStackAttackPhaseState = new CircleStackAttackPhaseState(this, 20);
     private PartialArenaAoePhaseState threeforthAreanAoePhaseState = new PartialArenaAoePhaseState(this, 22);
     private SummonAnticalabrumPhaseState summonAnticalabrumPhaseState = new SummonAnticalabrumPhaseState(this);
+    private ElevateToExtremeState elevateToExtremeState = new ElevateToExtremeState(this);
     private int globalCooldown;
     private PhaseStateTransitioner transitioner;
 
@@ -107,6 +110,7 @@ public class Benderson extends Monster implements GeoEntity {
                 .addPhaseStateInstance("circle_stack", circleStackAttackPhaseState)
                 .addPhaseStateInstance("three-fourth_arena_aoe", threeforthAreanAoePhaseState)
                 .addPhaseStateInstance("summon_anticalabrum", summonAnticalabrumPhaseState)
+                .addPhaseStateInstance("elevate_to_extreme", elevateToExtremeState)
                 .addTransition("idle", "idle", 0)
                 .addTransition("idle", "summon_anticalabrum")
                 .addTransition("idle", "attack")
@@ -128,7 +132,9 @@ public class Benderson extends Monster implements GeoEntity {
                 .addTransition("three-fourth_arena_aoe", "idle", 0)
                 .addTransition("three-fourth_arena_aoe", "attack")
                 .addTransition("summon_anticalabrum", "idle", 0)
-                .addTransition("summon_anticalabrum", "attack");
+                .addTransition("summon_anticalabrum", "attack")
+                .addTransition("elevate_to_extreme", "idle")
+        ;
     }
 
     public Benderson(Level level, double x, double y, double z) {
@@ -203,18 +209,27 @@ public class Benderson extends Monster implements GeoEntity {
     @Override
     public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
         controllers.add(new AnimationController<Benderson>("Idle", test -> {
-                    if(test.animatable().getBodyState() == BodyState.ENTRANCE) return PlayState.STOP;
+                    if(test.animatable().getBodyState().isTransition()) {
+                        test.controller().reset();
+                        return PlayState.STOP;
+                    }
                     return test.setAndContinue(DefaultAnimations.IDLE);
                 }),
                 new AnimationController<Benderson>("Attack", test -> {
-                    if(test.animatable().getBodyState() == BodyState.ENTRANCE) return PlayState.STOP;
+                    if(test.animatable().getBodyState().isTransition()) {
+                        test.controller().reset();
+                        return PlayState.STOP;
+                    }
                     if (test.getDataOrDefault(DataTickets.SWINGING_ARM, false))
                         return test.setAndContinue(DefaultAnimations.ATTACK_SWING);
                     return test.setAndContinue(DefaultAnimations.IDLE);
 //                    return PlayState.STOP;
                 }),
                 new AnimationController<Benderson>("Special Attack", test -> {
-                    if(test.animatable().getBodyState() == BodyState.ENTRANCE) return PlayState.STOP;
+                    if(test.animatable().getBodyState().isTransition()) {
+                        test.controller().reset();
+                        return PlayState.STOP;
+                    }
                     var animateState = test.getDataOrDefault(BendersonDataTickets.ANIMATE_STATE, "");
                     return switch (animateState) {
                         case LethalAttackPhaseState.ANIMATE_STATE_LETHAL_ATTACK_START ->
@@ -255,6 +270,10 @@ public class Benderson extends Monster implements GeoEntity {
                     if(test.animatable().getBodyState() == BodyState.ENTRANCE
                             && Objects.equals(animateState, ArenaEnteringPhaseState.ANIMATE_STATE_START)){
                         return test.setAndContinue(RawAnimation.begin().thenPlay("sweep_arena"));
+                    }else if(test.animatable().getBodyState() == BodyState.TRANSITION_UNFORGIVEN){
+                        return test.setAndContinue(RawAnimation.begin().thenPlay("change_to_unforgiven"));
+                    }else if(test.animatable().getBodyState() == BodyState.TRANSITION_UNFORGIVEN_POST){
+                        return test.setAndContinue(RawAnimation.begin().thenPlay("change_to_unforgiven_p2"));
                     }
                     test.controller().reset();
                     return PlayState.STOP;
@@ -354,6 +373,8 @@ public class Benderson extends Monster implements GeoEntity {
 
     public void setBodyState(BodyState bodyState){
         entityData.set(BODY_STATE, bodyState);
+        bossEvent.setName(getDisplayName());
+        level().environmentAttributes();
     }
 
     @Override
@@ -381,6 +402,9 @@ public class Benderson extends Monster implements GeoEntity {
     @Override
     public Component getName() {
         if(this.hasCustomName()) return super.getName();
+        if(this.getBodyState() == BodyState.UNFORGIVEN || this.getBodyState() == BodyState.TRANSITION_UNFORGIVEN_POST){
+            return Component.translatable("entity.lanfasie_benderson.benderson.name.unforgiven");
+        }
         return Component.translatable("entity.lanfasie_benderson.benderson.name.deep_latent");
     }
 
@@ -530,6 +554,10 @@ public class Benderson extends Monster implements GeoEntity {
         }
         var inputDamage = damage;
         if(!source.is(DamageTypeTags.BYPASSES_INVULNERABILITY)){
+            if(this.getHealth() / this.getMaxHealth() > 0.9 && this.getBodyState() == BodyState.DEEP_LATENT && damage > this.getHealth()){
+                this.setPhaseState("elevate_to_extreme");
+                damage = 0.01f;
+            }
             damage = Math.min(damage, this.getMaxHealth() * 0.01f);
             var totalDamageInGate = damageGate.getTotalDamage();
             var timegatedDamage = this.getMaxHealth() * 0.01f;

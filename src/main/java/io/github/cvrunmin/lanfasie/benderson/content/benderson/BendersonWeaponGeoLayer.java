@@ -12,6 +12,7 @@ import com.mojang.blaze3d.vertex.QuadInstance;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
 import io.github.cvrunmin.lanfasie.benderson.content.benderson.phases.ArenaEnteringPhaseState;
+import io.github.cvrunmin.lanfasie.benderson.content.benderson.phases.ElevateToExtremeState;
 import io.github.cvrunmin.lanfasie.benderson.index.AllItems;
 import io.github.cvrunmin.lanfasie.benderson.mixin.ItemLayerRenderStateAccessor;
 import io.github.cvrunmin.lanfasie.benderson.mixin.ItemStackRenderStateAccessor;
@@ -26,6 +27,7 @@ import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.resources.model.geometry.BakedQuad;
 import net.minecraft.util.ARGB;
+import net.minecraft.util.Mth;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
@@ -74,27 +76,39 @@ public class BendersonWeaponGeoLayer<O, R extends GeoRenderState> extends BlockA
             poseStack.translate(0, 0.125f, -0.0625f);
         }
         var performController = Optional.ofNullable(renderState.getGeckolibData(DataTickets.ANIMATABLE_MANAGER)).map(AnimatableManager::getAnimationControllers).map(map -> map.get("Special Performing")).orElse(null);
-        if(performController != null && Objects.equals(renderState.getGeckolibData(BendersonDataTickets.ANIMATE_STATE), ArenaEnteringPhaseState.ANIMATE_STATE_START)){
-            var tSec= performController.getCurrentTimelineTime();
-            if(tSec > 1.25 && tSec < 6.5){
-                float whiteOverlayProgress;
-                if(tSec < 1.75){
-                    whiteOverlayProgress = 1-(float) Math.pow((1 - (tSec - 1.25) / 0.5f), 3);
-                }else if(tSec > 6.0){
-                    whiteOverlayProgress = ((float) Math.pow((1 - (tSec - 6) / 0.5f), 3));
-                }else{
-                    whiteOverlayProgress = 1;
+        if (performController != null) {
+            if (Objects.equals(renderState.getGeckolibData(BendersonDataTickets.ANIMATE_STATE), ArenaEnteringPhaseState.ANIMATE_STATE_START)) {
+                var tSec = performController.getCurrentTimelineTime();
+                if (tSec > 1.25 && tSec < 6.5) {
+                    float alpha;
+                    if (tSec < 1.75) {
+                        alpha = 1 - (float) Math.pow((1 - (tSec - 1.25) / 0.5f), 3);
+                    } else if (tSec > 6.0) {
+                        alpha = ((float) Math.pow((1 - (tSec - 6) / 0.5f), 3));
+                    } else {
+                        alpha = 1;
+                    }
+                    customSubmitItemStackState(stackState, poseStack, submitNodeCollector, packedLight, OverlayTexture.NO_OVERLAY, alpha);
                 }
-                customSubmitItemStackState(stackState, poseStack, submitNodeCollector, packedLight, OverlayTexture.NO_OVERLAY, whiteOverlayProgress);
+            } else if(Objects.equals(renderState.getGeckolibData(BendersonDataTickets.ANIMATE_STATE), ElevateToExtremeState.ANIMATE_STATE_P1)){
+                var tSec = performController.getCurrentTimelineTime();
+                if (tSec >= 0.38) {
+                    float alpha = (float) Mth.clamp(1 - (tSec - 0.38) / 0.25, 0, 1);
+                    customSubmitItemStackState(stackState, poseStack, submitNodeCollector, packedLight, OverlayTexture.NO_OVERLAY, alpha);
+                } else {
+                    stackState.submit(poseStack, submitNodeCollector, packedLight, OverlayTexture.NO_OVERLAY, renderState instanceof EntityRenderState entityState ? entityState.outlineColor : 0);
+                }
+            } else {
+                stackState.submit(poseStack, submitNodeCollector, packedLight, OverlayTexture.NO_OVERLAY, renderState instanceof EntityRenderState entityState ? entityState.outlineColor : 0);
             }
-        }
-        else{
+        } else {
             stackState.submit(poseStack, submitNodeCollector, packedLight, OverlayTexture.NO_OVERLAY, renderState instanceof EntityRenderState entityState ? entityState.outlineColor : 0);
         }
         poseStack.popPose();
     }
 
-    private void customSubmitItemStackState(ItemStackRenderState stackState, PoseStack poseStack, SubmitNodeCollector submitNodeCollector, int packedLight, int overlay, float whiteOverlayProgress){
+    private void customSubmitItemStackState(ItemStackRenderState stackState, PoseStack poseStack, SubmitNodeCollector submitNodeCollector, int packedLight, int overlay, float alpha){
+        if(alpha < 0.1) return;
         for (int i = 0; i < ((ItemStackRenderStateAccessor) stackState).getActiveLayerCount(); i++) {
             var layerState = ((ItemStackRenderStateAccessor) stackState).getLayers()[i];
             poseStack.pushPose();
@@ -133,7 +147,7 @@ public class BendersonWeaponGeoLayer<O, R extends GeoRenderState> extends BlockA
                             buffer.applyBakedNormals(normal, quad.bakedNormals(), vertex, inPose.normal()); // Neo: apply baked normals from the quad
                             buffer.addVertex(pos)
                                     .setUv(u, v)
-                                    .setColor(ARGB.redFloat(vertexColor), ARGB.greenFloat(vertexColor), ARGB.blueFloat(vertexColor), ARGB.alphaFloat(vertexColor) * whiteOverlayProgress)
+                                    .setColor(ARGB.redFloat(vertexColor), ARGB.greenFloat(vertexColor), ARGB.blueFloat(vertexColor), ARGB.alphaFloat(vertexColor) * alpha)
                                     .setOverlay(overlay)
                                     .setLight(light)
                                     .setNormal(normal.x, normal.y, normal.z);

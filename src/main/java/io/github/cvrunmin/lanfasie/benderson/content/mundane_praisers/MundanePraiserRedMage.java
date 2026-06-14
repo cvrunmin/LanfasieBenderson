@@ -3,6 +3,7 @@ package io.github.cvrunmin.lanfasie.benderson.content.mundane_praisers;
 import com.geckolib.animatable.GeoEntity;
 import com.geckolib.animatable.instance.AnimatableInstanceCache;
 import com.geckolib.animatable.manager.AnimatableManager;
+import com.geckolib.constant.DefaultAnimations;
 import com.geckolib.util.GeckoLibUtil;
 import io.github.cvrunmin.lanfasie.benderson.index.AllItems;
 import net.minecraft.server.level.ServerLevel;
@@ -24,7 +25,7 @@ public class MundanePraiserRedMage extends Mob implements GeoEntity {
 
     @Override
     public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
-
+        controllers.add(DefaultAnimations.genericIdleController());
     }
 
     @Override

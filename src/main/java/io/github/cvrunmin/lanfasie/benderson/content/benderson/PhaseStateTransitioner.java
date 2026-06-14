@@ -109,7 +109,14 @@ public class PhaseStateTransitioner {
         }
         this.currentState = key;
         var state = possiblePhaseState.get(currentState).get();
-        if(state != null) state.start();
+        if(state != null) {
+            if(state.canUse()) {
+                state.start();
+                shouldChangePhase = false;
+            }else{
+                shouldChangePhase = true;
+            }
+        }
     }
 
     public PhaseStateTransitioner addPhaseStateInstance(String key, IPhaseState phaseState){

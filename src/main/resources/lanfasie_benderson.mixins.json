@@ -17,6 +17,7 @@
   "client": [
     "ItemLayerRenderStateAccessor",
     "ItemStackRenderStateAccessor",
+    "LevelRendererAccessor",
     "SoundEngineAccessor",
     "SoundManagerAccessor"
   ],

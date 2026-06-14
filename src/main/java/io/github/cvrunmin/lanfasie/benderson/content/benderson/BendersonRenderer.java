@@ -6,13 +6,19 @@ import com.geckolib.renderer.GeoEntityRenderer;
 import com.geckolib.renderer.base.BoneSnapshots;
 import com.geckolib.renderer.base.GeoRenderState;
 import com.geckolib.renderer.base.RenderPassInfo;
+import com.geckolib.util.RenderUtil;
+import com.mojang.blaze3d.pipeline.DepthStencilState;
 import com.mojang.blaze3d.pipeline.RenderPipeline;
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.QuadInstance;
+import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.math.Axis;
 import io.github.cvrunmin.lanfasie.benderson.LanfasieBenderson;
 import io.github.cvrunmin.lanfasie.benderson.content.anticalabrum.Anticalabrum;
 import io.github.cvrunmin.lanfasie.benderson.content.anticalabrum.AnticalabrumModel;
 import io.github.cvrunmin.lanfasie.benderson.content.benderson.phases.ArenaEnteringPhaseState;
+import io.github.cvrunmin.lanfasie.benderson.content.benderson.phases.ElevateToExtremeState;
 import io.github.cvrunmin.lanfasie.benderson.content.benderson.phases.SummonAnticalabrumPhaseState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.FaceInfo;
@@ -30,6 +36,8 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.util.ARGB;
 import net.minecraft.util.LightCoordsUtil;
 import net.minecraft.util.Mth;
+import net.minecraft.world.phys.Vec3;
+import org.joml.Matrix4f;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 import org.jspecify.annotations.Nullable;
@@ -39,14 +47,36 @@ import java.util.Optional;
 
 public class BendersonRenderer<R extends LivingEntityRenderState & GeoRenderState> extends GeoEntityRenderer<Benderson, R> {
 
+    private static final RenderPipeline.Snippet END_PORTAL_TRIANGLE_SNIPPET = RenderPipeline.builder(RenderPipelines.MATRICES_PROJECTION_SNIPPET, RenderPipelines.FOG_SNIPPET, RenderPipelines.GLOBALS_SNIPPET)
+            .withVertexShader("core/rendertype_end_portal")
+            .withFragmentShader("core/rendertype_end_portal")
+            .withSampler("Sampler0")
+            .withSampler("Sampler1")
+            .withVertexFormat(DefaultVertexFormat.POSITION, VertexFormat.Mode.TRIANGLES)
+            .withDepthStencilState(DepthStencilState.DEFAULT)
+            .buildSnippet();
+
     private static final RenderPipeline PORTAL_PIPELINE = RenderPipeline.builder(RenderPipelines.END_PORTAL_SNIPPET)
             .withLocation(Identifier.fromNamespaceAndPath(LanfasieBenderson.MODID, "pipeline/deep_latent_portal"))
+            .withShaderDefine("PORTAL_LAYERS", 15)
+            .withCull(false).build();
+
+    private static final RenderPipeline PORTAL_TRIANGLE_PIPELINE = RenderPipeline.builder(END_PORTAL_TRIANGLE_SNIPPET)
+            .withLocation(Identifier.fromNamespaceAndPath(LanfasieBenderson.MODID, "pipeline/deep_latent_portal_triangle"))
             .withShaderDefine("PORTAL_LAYERS", 15)
             .withCull(false).build();
 
     private static final RenderType PORTAL = RenderType.create(
             "deep_latent_portal",
             RenderSetup.builder(PORTAL_PIPELINE)
+            .withTexture("Sampler0",AbstractEndPortalRenderer.END_SKY_LOCATION)
+            .withTexture("Sampler1", AbstractEndPortalRenderer.END_PORTAL_LOCATION)
+            .createRenderSetup()
+    );
+
+    private static final RenderType PORTAL_TRIANGLE = RenderType.create(
+            "deep_latent_portal_triangle",
+            RenderSetup.builder(PORTAL_TRIANGLE_PIPELINE)
             .withTexture("Sampler0",AbstractEndPortalRenderer.END_SKY_LOCATION)
             .withTexture("Sampler1", AbstractEndPortalRenderer.END_PORTAL_LOCATION)
             .createRenderSetup()
@@ -68,6 +98,14 @@ public class BendersonRenderer<R extends LivingEntityRenderState & GeoRenderStat
             renderState.z = arenaCenter.z - animatable.getArenaRadius() - 1;
             renderState.scale = 24;
         }
+    }
+
+    @Override
+    public void preRenderPass(RenderPassInfo<R> renderPassInfo, SubmitNodeCollector renderTasks) {
+        super.preRenderPass(renderPassInfo, renderTasks);
+        renderPassInfo.addBonePositionListener("root", (worldPos, modelPos, localPos) -> {
+            renderPassInfo.renderState().addGeckolibData(BendersonDataTickets.MODEL_ROOT_POS, localPos);
+        });
     }
 
     @Override
@@ -167,6 +205,32 @@ public class BendersonRenderer<R extends LivingEntityRenderState & GeoRenderStat
                             buffer.addVertex(inPose, faceInfo.getVertexInfo(i).select(vfrom, vto));
                         }
                     }
+                });
+                poseStack.popPose();
+            }
+        }
+        if(renderPassInfo.getGeckolibData(BendersonDataTickets.BODY_STATE) == Benderson.BodyState.TRANSITION_UNFORGIVEN
+                && performController != null
+                && Objects.equals(renderPassInfo.renderState().getGeckolibData(BendersonDataTickets.ANIMATE_STATE), ElevateToExtremeState.ANIMATE_STATE_P1)){
+            var tSec = performController.getCurrentTimelineTime();
+            if(tSec >= 2){
+                var rootY = Mth.clampedLerp((tSec - 0.67) / (3.0-0.67), 0, 5);
+
+                var poseStack = renderPassInfo.poseStack();
+                poseStack.pushPose();
+                poseStack.last().set(renderPassInfo.getModelRenderMatrixPose());
+                poseStack.translate(0, rootY + 1.0f, 0);
+                var scale = (float) Mth.clamp((tSec - 2) / 2.8, 0, 1);
+                poseStack.scale(scale, scale, scale);
+                submitNodeCollector.submitCustomGeometry(poseStack, PORTAL_TRIANGLE, (inPose, buffer) -> {
+                    buffer.addVertex(inPose, -2, 0, -2).addVertex(inPose, -2, 0, 2).addVertex(inPose, 0, 4, 0);
+                    buffer.addVertex(inPose, -2, 0, 2).addVertex(inPose, 2, 0, 2).addVertex(inPose, 0, 4, 0);
+                    buffer.addVertex(inPose, 2, 0, 2).addVertex(inPose, 2, 0, -2).addVertex(inPose, 0, 4, 0);
+                    buffer.addVertex(inPose, 2, 0, -2).addVertex(inPose, -2, 0, -2).addVertex(inPose, 0, 4, 0);
+                    buffer.addVertex(inPose, -2, 0, -2).addVertex(inPose, 0, -4, 0).addVertex(inPose, -2, 0, 2);
+                    buffer.addVertex(inPose, -2, 0, 2).addVertex(inPose, 0, -4, 0).addVertex(inPose, 2, 0, 2);
+                    buffer.addVertex(inPose, 2, 0, 2).addVertex(inPose, 0, -4, 0).addVertex(inPose, 2, 0, -2);
+                    buffer.addVertex(inPose, 2, 0, -2).addVertex(inPose, 0, -4, 0).addVertex(inPose, -2, 0, -2);
                 });
                 poseStack.popPose();
             }

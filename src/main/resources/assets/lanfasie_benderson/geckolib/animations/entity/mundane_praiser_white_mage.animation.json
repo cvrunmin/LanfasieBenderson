@@ -2,7 +2,24 @@
 	"format_version": "1.8.0",
 	"animations": {
 		"misc.idle": {
-			"loop": true
+			"loop": true,
+			"bones": {
+				"rightArm": {
+					"rotation": {
+						"vector": [-69.7165, -9.3913, -3.4511]
+					}
+				},
+				"leftArm": {
+					"rotation": {
+						"vector": [-62.8242, -14.941, 4.9694]
+					}
+				},
+				"leftForearm": {
+					"rotation": {
+						"vector": [0, 0, 72.5]
+					}
+				}
+			}
 		}
 	}
 }
