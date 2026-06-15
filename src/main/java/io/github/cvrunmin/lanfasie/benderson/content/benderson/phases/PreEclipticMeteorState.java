@@ -32,6 +32,7 @@ public class PreEclipticMeteorState implements IPhaseState{
     @Override
     public void start() {
         if(this.owner.level().isClientSide()) return;
+        this.owner.setShouldHideBoundingBox(true);
         for (int i = 0; i < 4; i++) {
             int offset = this.owner.getArenaRadius() - 8;
             summonPilePoses[i] = this.owner.getCombatArenaCenter().add(offset * (i / 2 == 0 ? -1 : 1), 0, offset * (i == 2 || i == 3 ? 1 : -1));
@@ -49,7 +50,7 @@ public class PreEclipticMeteorState implements IPhaseState{
 
     @Override
     public void end() {
-
+        this.owner.setShouldHideBoundingBox(false);
     }
 
     @Override

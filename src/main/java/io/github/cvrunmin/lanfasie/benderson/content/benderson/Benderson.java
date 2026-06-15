@@ -6,8 +6,6 @@ import com.geckolib.animatable.manager.AnimatableManager;
 import com.geckolib.animation.AnimationController;
 import com.geckolib.animation.RawAnimation;
 import com.geckolib.animation.object.PlayState;
-import com.geckolib.animation.state.KeyFrameEvent;
-import com.geckolib.cache.animation.keyframeevent.CustomInstructionKeyframeData;
 import com.geckolib.constant.DataTickets;
 import com.geckolib.constant.DefaultAnimations;
 import com.geckolib.util.GeckoLibUtil;
@@ -27,6 +25,7 @@ import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerBossEvent;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -46,11 +45,13 @@ import net.minecraft.world.entity.ai.control.FlyingMoveControl;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.ai.navigation.FlyingPathNavigation;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
+import net.minecraft.world.level.storage.loot.LootTable;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.common.CommonHooks;
@@ -69,11 +70,12 @@ public class Benderson extends Monster implements GeoEntity {
     private static final EntityDataAccessor<Integer> ARENA_RADIUS = SynchedEntityData.defineId(Benderson.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<BlockPos> ARENA_CENTER = SynchedEntityData.defineId(Benderson.class, EntityDataSerializers.BLOCK_POS);
 
-    private static final EntityDimensions ARENA_ENTERING_DIMENSIONS = EntityDimensions.fixed(0.0F, 0.0F);
+    private static final EntityDimensions NO_DIMENSIONS = EntityDimensions.fixed(0.0F, 0.0F);
 
     private final AnimatableInstanceCache geoCache = GeckoLibUtil.createInstanceCache(this);
     private DamageSource lastDamageSource;
     private long lastDamageStamp;
+    private boolean shouldHideBoundingBox = false;
 
     protected HashMap<UUID, Float> enmityList = new HashMap<>();
 
@@ -99,6 +101,7 @@ public class Benderson extends Monster implements GeoEntity {
     private BlockPos arenaCenter;
     private int arenaRadius = 24;
     private final DamageGate damageGate = new DamageGate(20);
+    private float lastDeltaHealth;
 
     public Benderson(EntityType<? extends Benderson> type, Level level) {
         super(type, level);
@@ -330,8 +333,17 @@ public class Benderson extends Monster implements GeoEntity {
 
     @Override
     protected EntityDimensions getDefaultDimensions(Pose pose) {
-        if(this.getBodyState() == BodyState.ENTRANCE) return ARENA_ENTERING_DIMENSIONS;
+        if(this.getBodyState().isTransition()) return NO_DIMENSIONS;
+        if(isShouldHideBoundingBox()) return NO_DIMENSIONS;
         return super.getDefaultDimensions(pose);
+    }
+
+    public boolean isShouldHideBoundingBox(){
+        return shouldHideBoundingBox;
+    }
+
+    public void setShouldHideBoundingBox(boolean flag){
+        shouldHideBoundingBox = flag;
     }
 
     @Override
@@ -575,6 +587,7 @@ public class Benderson extends Monster implements GeoEntity {
         }
         if(damage > 0){
             this.actuallyHurt(level, source, damage);
+            damage = damageContainers.peek().getNewDamage();
             this.lastHurt = damage;
             this.damageGate.addRecord(damage);
         }
@@ -613,7 +626,12 @@ public class Benderson extends Monster implements GeoEntity {
         return success;
     }
 
-
+    @Override
+    public void setHealth(float health) {
+        var oldHealth = getHealth();
+        super.setHealth(health);
+        this.lastDeltaHealth = oldHealth - getHealth();
+    }
 
     @Override
     public void die(DamageSource source) {
@@ -621,6 +639,52 @@ public class Benderson extends Monster implements GeoEntity {
             arenaHintMarker.discard();
         }
         super.die(source);
+    }
+
+    @Override
+    protected void dropAllDeathLoot(ServerLevel level, DamageSource source) {
+        StackWalker walker = StackWalker.getInstance(Set.of(StackWalker.Option.RETAIN_CLASS_REFERENCE));
+        var naturalDie = walker.walk(stream -> stream.skip(1).limit(5)
+                .anyMatch(frame -> frame.getDeclaringClass().equals(Benderson.class) && frame.getMethodName().equals("hurtServer")));
+        this.captureDrops(new java.util.ArrayList<>());
+        boolean playerKilled = this.lastHurtByPlayerMemoryTime > 0;
+        if (this.shouldDropLoot(level)) {
+            this.handleDropFromLootTable(level, source, playerKilled, naturalDie);
+            this.dropCustomDeathLoot(level, source, playerKilled);
+        }
+
+        this.dropEquipment(level);
+        this.handleDropExperience(level, source.getEntity(), naturalDie);
+
+        Collection<ItemEntity> drops = captureDrops(null);
+        if (!net.neoforged.neoforge.common.CommonHooks.onLivingDrops(this, source, drops, lastHurtByPlayerMemoryTime > 0))
+            drops.forEach(e -> level().addFreshEntity(e));
+    }
+
+    private void handleDropFromLootTable(ServerLevel level, DamageSource source, boolean playerKilled, boolean naturalDieFlag){
+        if(naturalDieFlag && lastDeltaHealth <= damageGate.getLastDamage()){
+            this.getLootTable().ifPresent(lootTableResourceKey -> this.dropFromLootTable(level, source, playerKilled, lootTableResourceKey));
+        }
+    }
+
+    @Override
+    protected void dropFromLootTable(ServerLevel level, DamageSource source, boolean playerKilled) {
+        handleDropFromLootTable(level, source, playerKilled, false);
+    }
+
+    private void handleDropExperience(ServerLevel level, Entity killer, boolean naturalDieFlag){
+        if(naturalDieFlag) super.dropExperience(level, killer);
+    }
+
+    @Override
+    protected void dropExperience(ServerLevel level, Entity killer) {
+        handleDropExperience(level, killer, false);
+    }
+
+    @Override
+    public boolean shouldDropExperience() {
+        if(lastDeltaHealth > damageGate.getLastDamage()) return false;
+        return super.shouldDropExperience();
     }
 
     @Override
@@ -902,6 +966,11 @@ public class Benderson extends Monster implements GeoEntity {
         public float getTotalDamage(){
             clearOutdatedRecord();
             return (float) records.stream().mapToDouble(DamageGateRecord::damage).sum();
+        }
+
+        public float getLastDamage(){
+            clearOutdatedRecord();
+            return records.getLast().damage;
         }
     }
 
