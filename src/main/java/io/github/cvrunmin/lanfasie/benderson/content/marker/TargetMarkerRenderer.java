@@ -19,6 +19,7 @@ import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.state.level.CameraRenderState;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.Identifier;
+import net.minecraft.util.LightCoordsUtil;
 import net.minecraft.util.Mth;
 import net.minecraft.util.Util;
 import net.minecraft.world.entity.LivingEntity;
@@ -33,6 +34,8 @@ public class TargetMarkerRenderer extends EntityRenderer<TargetMarker, TargetMar
     private static final Identifier STACK_ATTACK_MARKER_TEXTURE = Identifier.fromNamespaceAndPath(LanfasieBenderson.MODID, "textures/entity/omen/stack_attack_omen.png");
     private static final Identifier COLOR_SCHEME_MARKER_TEXTURE = Identifier.fromNamespaceAndPath(LanfasieBenderson.MODID, "textures/entity/omen/color_scheme.png");
     private static final Identifier ARENA_FLAME = Identifier.fromNamespaceAndPath(LanfasieBenderson.MODID, "textures/entity/arena_flame.png");
+    private static final Identifier RADIAL_KNOCKBACK_ARROW = Identifier.fromNamespaceAndPath(LanfasieBenderson.MODID, "textures/entity/omen/radial_knockback_omen.png");
+    private static final Identifier GROUND_PROXIMITY_AIMER = Identifier.fromNamespaceAndPath(LanfasieBenderson.MODID, "textures/entity/omen/ground_proximity_aimer.png");
 
     private static final RenderPipeline.Snippet ATTACK_MARKER_SNIPPET = RenderPipeline.builder(RenderPipelines.MATRICES_FOG_LIGHT_DIR_SNIPPET)
             .withVertexShader("core/entity")
@@ -132,6 +135,8 @@ public class TargetMarkerRenderer extends EntityRenderer<TargetMarker, TargetMar
             case CIRCLE_STACK -> submitCircleStackMark(state, poseStack, submitNodeCollector, camera, alpha);
             case LINEAR_STACK -> submitLinearStackMark(state, poseStack, submitNodeCollector, camera, alpha);
             case ARENA_HINT -> submitArenaHint(state, poseStack, submitNodeCollector, camera, alpha);
+            case GROUND_PROXIMITY -> submitGroundProximityAoe(state, poseStack, submitNodeCollector, camera, alpha);
+            case KNOCKBACK_RADIAL -> submitRadialKnockback(state, poseStack, submitNodeCollector, camera, alpha);
             case null, default -> {
             }
         }
@@ -493,12 +498,85 @@ public class TargetMarkerRenderer extends EntityRenderer<TargetMarker, TargetMar
                 inStack.pushPose();
                 inStack.rotateAround(new Quaternionf().rotationY((float) (Math.PI * i / 2f)), 0, 0, 0);
                 var pose1 = inStack.last();
-                buffer.addVertex(pose1, -arenaRadius, 1.5f, -arenaRadius).setUv(0, 0).setColor(0xffffffff).setLight(0).setOverlay(OverlayTexture.NO_OVERLAY).setNormal(pose1, 0, 0, 1);
-                buffer.addVertex(pose1, -arenaRadius, -1.5f, -arenaRadius).setUv(0, 1).setColor(0xffffffff).setLight(0).setOverlay(OverlayTexture.NO_OVERLAY).setNormal(pose1, 0, 0, 1);
-                buffer.addVertex(pose1, arenaRadius, -1.5f, -arenaRadius).setUv(1, 1).setColor(0xffffffff).setLight(0).setOverlay(OverlayTexture.NO_OVERLAY).setNormal(pose1, 0, 0, 1);
-                buffer.addVertex(pose1, arenaRadius, 1.5f, -arenaRadius).setUv(1, 0).setColor(0xffffffff).setLight(0).setOverlay(OverlayTexture.NO_OVERLAY).setNormal(pose1, 0, 0, 1);
+                buffer.addVertex(pose1, -arenaRadius, 1.5f, -arenaRadius).setUv(0, 0).setColor(0xffffffff).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setNormal(pose1, 0, 0, 1);
+                buffer.addVertex(pose1, -arenaRadius, -1.5f, -arenaRadius).setUv(0, 1).setColor(0xffffffff).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setNormal(pose1, 0, 0, 1);
+                buffer.addVertex(pose1, arenaRadius, -1.5f, -arenaRadius).setUv(1, 1).setColor(0xffffffff).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setNormal(pose1, 0, 0, 1);
+                buffer.addVertex(pose1, arenaRadius, 1.5f, -arenaRadius).setUv(1, 0).setColor(0xffffffff).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setNormal(pose1, 0, 0, 1);
                 inStack.popPose();
             }
+        });
+    }
+
+    private void submitRadialKnockback(TargetMarkerRenderState state, PoseStack poseStack, SubmitNodeCollector submitNodeCollector, CameraRenderState camera, float alpha){
+        var halfRadius = ((int) Math.ceil(state.range * 0.5f));
+        for (int i = 1; i < halfRadius; i++) {
+            float iOffsetted = i + (state.ageInTicks % 10 / 10.0f) - 0.5f;
+            poseStack.pushPose();
+            float alpha1;
+            if(i == 1){
+                alpha1 = Math.clamp(1 - (i - iOffsetted) / 0.5f, 0, 1);
+            } else if (i == halfRadius - 1) {
+                alpha1 = Math.clamp(1 - (iOffsetted - i) / 0.5f, 0, 1);
+            }else{
+                alpha1 = 1;
+            }
+            submitNodeCollector.submitCustomGeometry(poseStack, RENDER_TYPE.apply(RADIAL_KNOCKBACK_ARROW), (inPose, buffer) -> {
+                var poseStack1 = new PoseStack();
+                poseStack1.last().set(inPose);
+                for (int j = 0; j < 16; j++) {
+                    poseStack1.pushPose();
+                    poseStack1.rotateAround(new Quaternionf().rotationY((float) (Math.PI * j / 8.0)), 0, 0, 0);
+                    float x1 = (float) (iOffsetted * Math.cos(Math.PI * 7 / 128));
+                    float x2 = x1 * (iOffsetted + 1) / iOffsetted;
+                    float z1 = (float) (iOffsetted * Math.sin(Math.PI * 7 / 128));
+                    float z2 = z1 * (iOffsetted + 1) / iOffsetted;
+                    var pose = poseStack1.last();
+                    buffer.addVertex(pose, x1, 1e-3f, -z1).setUv(1, 0).setColor(1f, 1f, 1f, alpha * alpha1).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setNormal(pose, 0, 1, 0);
+                    buffer.addVertex(pose, x1, 1e-3f, z1).setUv(0, 0).setColor(1f, 1f, 1f, alpha * alpha1).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setNormal(pose, 0, 1, 0);
+                    buffer.addVertex(pose, x2, 1e-3f, z2).setUv(0, 1).setColor(1f, 1f, 1f, alpha * alpha1).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setNormal(pose, 0, 1, 0);
+                    buffer.addVertex(pose, x2, 1e-3f, -z2).setUv(1, 1).setColor(1f, 1f, 1f, alpha * alpha1).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setNormal(pose, 0, 1, 0);
+                    poseStack1.popPose();
+                }
+            });
+            poseStack.popPose();
+        }
+    }
+
+    private void submitGroundProximityAoe(TargetMarkerRenderState state, PoseStack poseStack, SubmitNodeCollector submitNodeCollector, CameraRenderState camera, float alpha){
+        float t1 = state.ageInTicks % 20;
+        float a1;
+        if(t1 < 5){
+            a1 = t1 / 5f * 0.8f;
+        }else if(t1 < 15){
+            a1 = 0.8f;
+        }else{
+            a1 = (20 - t1) / 5f * 0.8f;
+        }
+        submitNodeCollector.submitCustomGeometry(poseStack, RENDER_TYPE.apply(GROUND_PROXIMITY_AIMER), (inPose, buffer) -> {
+            var innerStack = new PoseStack();
+            innerStack.last().set(inPose);
+            innerStack.pushPose();
+            innerStack.rotateAround(new Quaternionf().rotateY((float) (Math.PI * state.ageInTicks * 0.05)), 0, 0, 0);
+            innerStack.translate(0, 1e-3f, 0);
+            var pose = innerStack.last();
+            buffer.addVertex(pose, -1, 0, -1).setUv(0, 0).setUv1(0, 0).setUv2(0, 0).setColor(1f, 1f, 1f, alpha).setNormal(0, 1, 0);
+            buffer.addVertex(pose, -1, 0, 1).setUv(0, 1).setUv1(0, 0).setUv2(0, 0).setColor(1f, 1f, 1f, alpha).setNormal(0, 1, 0);
+            buffer.addVertex(pose, 1, 0, 1).setUv(1, 1).setUv1(0, 0).setUv2(0, 0).setColor(1f, 1f, 1f, alpha).setNormal(0, 1, 0);
+            buffer.addVertex(pose, 1, 0, -1).setUv(1, 0).setUv1(0, 0).setUv2(0, 0).setColor(1f, 1f, 1f, alpha).setNormal(0, 1, 0);
+            innerStack.popPose();
+        });
+        submitNodeCollector.submitCustomGeometry(poseStack, TRIANGLE_STRIP_RENDER_TYPE.apply(COLOR_SCHEME_MARKER_TEXTURE), (inPose, buffer) -> {
+            var innerStack = new PoseStack();
+            var halfRange = state.range * 0.5f * (t1 / 20f);
+            buffer.addVertex(inPose, Math.max(0, halfRange - 0.125f), 2e-3f, 0).setColor(1f, 1f, 1f, alpha * a1).setUv(0f, 0f).setUv1(0, 0).setUv2(0, 0).setNormal(0, 1, 0);
+            for (int i = 0; i < 361; i++) {
+                var rad = Math.PI * i / 180f;
+                var cr = (float)Math.cos(rad);
+                var sr = (float)Math.sin(rad);
+                buffer.addVertex(inPose, Math.max(0, halfRange - 0.125f) * cr, 2e-3f, Math.max(0, halfRange - 0.125f) * sr).setColor(1f, 1f, 1f, alpha * a1).setUv(0f, 0f).setUv1(0, 0).setUv2(0, 0).setNormal(0, 1, 0);
+                buffer.addVertex(inPose, halfRange * cr, 2e-3f, halfRange * sr).setColor(1f, 1f, 1f, alpha * a1).setUv(0f, 0f).setUv1(0, 0).setUv2(0, 0).setNormal(0, 1, 0);
+            }
+            buffer.addVertex(inPose, halfRange, 2e-3f, 0).setColor(1f, 1f, 1f, alpha * a1).setUv(0f, 0f).setUv1(0, 0).setUv2(0, 0).setNormal(0, 1, 0);
         });
     }
 }

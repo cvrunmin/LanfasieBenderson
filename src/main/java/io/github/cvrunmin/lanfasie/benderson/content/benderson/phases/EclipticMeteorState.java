@@ -1,11 +1,16 @@
 package io.github.cvrunmin.lanfasie.benderson.content.benderson.phases;
 
 import io.github.cvrunmin.lanfasie.benderson.content.benderson.Benderson;
+import io.github.cvrunmin.lanfasie.benderson.content.marker.DelayedAttackMarker;
 import io.github.cvrunmin.lanfasie.benderson.content.marker.TargetMarker;
 import io.github.cvrunmin.lanfasie.benderson.index.AllBlocks;
 import io.github.cvrunmin.lanfasie.benderson.index.AllDamageTypes;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.util.Mth;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityReference;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.ServerExplosion;
@@ -36,7 +41,7 @@ public class EclipticMeteorState implements IPhaseState{
         Vec3 center = this.owner.getCombatArenaCenter();
         this.owner.teleportTo(center.x, center.y, center.z);
         this.owner.setAnimateState(ANIMATE_STATE_START);
-        this.trackingMarker = new TargetMarker(this.owner.level(), center, TargetMarker.MarkerArgs.simple(TargetMarker.MarkerType.CIRCLE_AOE, this.owner.getArenaRadius(), 200));
+        this.trackingMarker = new TargetMarker(this.owner.level(), center, TargetMarker.MarkerArgs.simple(TargetMarker.MarkerType.CIRCLE_AOE, (float) (this.owner.getArenaRadius() * 2 * Math.sqrt(2)), 200));
         this.owner.level().addFreshEntity(trackingMarker);
         this.owner.setShouldHideBoundingBox(true);
         this.currentTick = this.maxTicks;
@@ -46,8 +51,18 @@ public class EclipticMeteorState implements IPhaseState{
     public boolean tick() {
         currentTick--;
         int pastTicks = maxTicks - currentTick;
+        if(pastTicks < 240){
+            if(pastTicks % 2 == 0){
+                var alpha = (float) Mth.clamp(pastTicks / 200.0f, 0.1, 1);
+                this.owner.level().playSound(null, BlockPos.containing(this.owner.getCombatArenaCenter()), SoundEvents.FIRE_EXTINGUISH, SoundSource.HOSTILE, 0.1f + alpha, alpha);
+            }
+        }
         if(pastTicks == 5){
             this.owner.setAnimateState(ANIMATE_STATE_LOOP);
+        } else if (pastTicks == 160) {
+            Vec3 arenaCenter = this.owner.getCombatArenaCenter();
+            var remoteMeteor = DelayedAttackMarker.createRemoteMeteor(this.owner.level(), arenaCenter.subtract(0, 1, 0), this.owner, 84, true);
+            this.owner.level().addFreshEntity(remoteMeteor);
         } else if (pastTicks == 200) {
             this.owner.setAnimateState(ANIMATE_STATE_END);
             Vec3 arenaCenter = this.owner.getCombatArenaCenter();
@@ -57,19 +72,29 @@ public class EclipticMeteorState implements IPhaseState{
                 var calculatingCenter = arenaCenter.add(0, livingEntity.getY(0.5) - arenaCenter.y, 0);
                 return ServerExplosion.getSeenPercent(calculatingCenter, livingEntity) > 0.5;
             }).forEach(livingEntity -> targetingEntitySnapshot.add(EntityReference.of(livingEntity)));
-        } else if(pastTicks == 240){
-            for (EntityReference<LivingEntity> reference : targetingEntitySnapshot) {
-                var entity = reference.getEntity(this.owner.level(), LivingEntity.class);
-                if(entity != null && this.owner.canAttack(entity) && this.owner.getCombatArena().contains(entity.position())){
-                    entity.hurtServer(((ServerLevel) this.owner.level()), this.owner.damageSources().source(AllDamageTypes.ECLIPTIC_METEOR), Float.MAX_VALUE);
+        } else if(currentTick == 0) {
+            return false;
+        } else {
+            if(pastTicks > 210 && pastTicks <= 240){
+                if(pastTicks % 5 == 0){
+                    this.owner.level().playSound(null, BlockPos.containing(this.owner.getCombatArenaCenter()), SoundEvents.LIGHTNING_BOLT_THUNDER, SoundSource.HOSTILE, 4, 0.5f);
+                }
+                if(pastTicks == 239){
+                    this.owner.level().playSound(null, BlockPos.containing(this.owner.getCombatArenaCenter()), SoundEvents.GENERIC_EXPLODE.value(), SoundSource.HOSTILE, 4, 0.5f);
                 }
             }
-        } else if (pastTicks == 245) {
-            BlockPos.betweenClosedStream(this.owner.getCombatArena().setMinY(this.owner.getCombatArenaCenter().y))
-                    .filter(pos -> this.owner.level().getBlockState(pos).is(AllBlocks.DEEP_LATENT_BLOCK))
-                    .forEach(pos -> this.owner.level().destroyBlock(pos, true, this.owner));
-        } else if(currentTick == 0){
-            return false;
+            if (pastTicks == 240) {
+                for (EntityReference<LivingEntity> reference : targetingEntitySnapshot) {
+                    var entity = reference.getEntity(this.owner.level(), LivingEntity.class);
+                    if (entity != null && this.owner.canAttack(entity) && this.owner.getCombatArena().contains(entity.position())) {
+                        entity.hurtServer(((ServerLevel) this.owner.level()), this.owner.damageSources().source(AllDamageTypes.ECLIPTIC_METEOR, this.owner), Float.MAX_VALUE);
+                    }
+                }
+            } else if (pastTicks == 245) {
+                BlockPos.betweenClosedStream(this.owner.getCombatArena().setMinY(this.owner.getCombatArenaCenter().y))
+                        .filter(pos -> this.owner.level().getBlockState(pos).is(AllBlocks.DEEP_LATENT_BLOCK))
+                        .forEach(pos -> this.owner.level().destroyBlock(pos, true, this.owner));
+            }
         }
         return true;
     }

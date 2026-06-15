@@ -10,9 +10,6 @@ public interface LivingEntityAccessor {
     @Accessor("lastDamageSource")
     void setLastDamageSource(DamageSource source);
 
-    @Accessor("lastDamageSource")
-    DamageSource getLastDamageSource();
-
     @Accessor("lastDamageStamp")
     void setLastDamageStamp(long value);
 

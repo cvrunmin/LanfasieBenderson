@@ -64,7 +64,7 @@ public class CircleStackAttackPhaseState implements IPhaseState{
             this.owner.setAnimateState(ANIMATE_STATE_CIRCLE_STACK_ATTACK_LOOP);
         } else if (maxTicks - currentTick == 100) {
             this.owner.setAnimateState(ANIMATE_STATE_CIRCLE_STACK_ATTACK_END);
-            var remoteMeteor = DelayedAttackMarker.createRemoteMeteor(this.owner.level(), this.currentTarget.position(), this.owner, 15);
+            var remoteMeteor = DelayedAttackMarker.createRemoteMeteor(this.owner.level(), this.currentTarget.position(), this.owner, 15, false);
             this.owner.level().addFreshEntity(remoteMeteor);
         } else if (maxTicks - currentTick == 115) {
             if(!this.owner.level().isClientSide() && currentTarget != null){

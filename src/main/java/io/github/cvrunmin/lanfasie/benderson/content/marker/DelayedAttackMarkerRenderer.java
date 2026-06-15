@@ -14,17 +14,14 @@ import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.state.level.CameraRenderState;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.ARGB;
 import net.minecraft.util.LightCoordsUtil;
 import net.minecraft.util.Mth;
-import net.minecraft.world.entity.animal.feline.CatVariants;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import org.joml.Quaternionf;
-import org.joml.Vector3f;
 
 public class DelayedAttackMarkerRenderer extends EntityRenderer<DelayedAttackMarker, DelayedAttackMarkerRenderState> {
     public static final BlockDisplayContext BLOCK_DISPLAY_CONTEXT = BlockDisplayContext.create();
@@ -59,7 +56,7 @@ public class DelayedAttackMarkerRenderer extends EntityRenderer<DelayedAttackMar
         }else if(entity.getAttackType() == DelayedAttackMarker.AttackType.BLACK_CAT_SMASH){
             state.catRenderState.lightCoords = LightCoordsUtil.FULL_SKY;
             state.catRenderState.partialTick = partialTicks;
-        }else if(entity.getAttackType() == DelayedAttackMarker.AttackType.BENDERSON_REMOTE_STACKABLE_METEOR){
+        }else if(entity.getAttackType() == DelayedAttackMarker.AttackType.BENDERSON_REMOTE_STACKABLE_METEOR || entity.getAttackType() == DelayedAttackMarker.AttackType.BENDERSON_REMOTE_ECLIPTIC_METEOR){
             blockModelResolver.update(state.blockModelRenderState, AllBlocks.DEEP_LATENT_BLOCK.get().defaultBlockState(), BLOCK_DISPLAY_CONTEXT);
         }
     }
@@ -79,7 +76,8 @@ public class DelayedAttackMarkerRenderer extends EntityRenderer<DelayedAttackMar
         switch (state.attackType){
             case BLACK_CAT_SMASH -> submitBlackCatSmash(state, poseStack, submitNodeCollector, camera);
             case FIREBALL_METEOR -> submitFireball(state, poseStack, submitNodeCollector, camera);
-            case BENDERSON_REMOTE_STACKABLE_METEOR -> submitRemoteMeteor(state, poseStack, submitNodeCollector, camera);
+            case BENDERSON_REMOTE_STACKABLE_METEOR -> submitRemoteMeteor(state, poseStack, submitNodeCollector, camera, 3);
+            case BENDERSON_REMOTE_ECLIPTIC_METEOR -> submitRemoteMeteor(state, poseStack, submitNodeCollector, camera, 10);
             case null, default -> {}
         }
         super.submit(state, poseStack, submitNodeCollector, camera);
@@ -136,12 +134,12 @@ public class DelayedAttackMarkerRenderer extends EntityRenderer<DelayedAttackMar
         poseStack.popPose();
     }
 
-    private void submitRemoteMeteor(DelayedAttackMarkerRenderState state, PoseStack poseStack, SubmitNodeCollector submitNodeCollector, CameraRenderState camera){
+    private void submitRemoteMeteor(DelayedAttackMarkerRenderState state, PoseStack poseStack, SubmitNodeCollector submitNodeCollector, CameraRenderState camera, float scale){
         if(state.maxLifeTick - state.lifeTick < 5) return;
         float tGround = state.maxLifeTick - 8 - state.lifeTick;
         float tAll = state.maxLifeTick - 5;
         poseStack.pushPose();
-        poseStack.scale(3, 3, 3);
+        poseStack.scale(scale, scale, scale);
         poseStack.translate(-0.5f, 10f * tGround / tAll, -0.5f);
         poseStack.rotateAround(new Quaternionf().rotationZYX((float) (Math.PI * 30 / 180), (float) (Math.PI * 0.25), 0), 0, 10 * tGround / 20f * 0, 0);
         state.blockModelRenderState.submit(poseStack, submitNodeCollector, state.lightCoords, OverlayTexture.NO_OVERLAY, state.outlineColor);

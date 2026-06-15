@@ -17,6 +17,9 @@ public class BossBarWithEnmityDrawer {
             var level = mc.level;
             var maybeEntity = level.getEntity(event.getBossEvent().getId());
             if(!(maybeEntity instanceof Benderson boss)) return;
+            Component msg = Component.literal("%.1f%%".formatted(event.getBossEvent().getProgress() * 100));
+            int width = mc.font.width(msg);
+            event.getGuiGraphics().text(mc.font, msg, event.getX() + 182 - width, event.getY() + 5, 0xffffffff);
             var enmityList = boss.enmityList;
             if(enmityList == null) return;
             var player = mc.player;

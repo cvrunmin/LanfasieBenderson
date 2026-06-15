@@ -4,10 +4,8 @@ import com.mojang.serialization.Codec;
 import io.github.cvrunmin.lanfasie.benderson.index.AllDamageTypes;
 import io.github.cvrunmin.lanfasie.benderson.index.AllEntityDataSerializers;
 import io.github.cvrunmin.lanfasie.benderson.index.AllEntityTypes;
-import io.github.cvrunmin.lanfasie.benderson.index.AllSoundEvents;
 import io.github.cvrunmin.lanfasie.benderson.utils.VulnerabilityHelper;
 import io.netty.buffer.ByteBuf;
-import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -47,7 +45,8 @@ public class DelayedAttackMarker extends Entity implements TraceableEntity, IEnt
     public enum AttackType implements StringRepresentable{
         BLACK_CAT_SMASH("black_cat_smash"),
         FIREBALL_METEOR("fireball_meteor"),
-        BENDERSON_REMOTE_STACKABLE_METEOR("benderson_remote_stackable_meteor");
+        BENDERSON_REMOTE_STACKABLE_METEOR("benderson_remote_stackable_meteor"),
+        BENDERSON_REMOTE_ECLIPTIC_METEOR("benderson_remote_ecliptic_meteor");
 
         public static final Codec<AttackType> CODEC = StringRepresentable.fromEnum(AttackType::values);
         public static final StreamCodec<ByteBuf, AttackType> STREAM_CODEC = ByteBufCodecs.fromCodec(CODEC);
@@ -107,9 +106,9 @@ public class DelayedAttackMarker extends Entity implements TraceableEntity, IEnt
         return instance;
     }
 
-    public static DelayedAttackMarker createRemoteMeteor(Level level, Vec3 location, @Nullable LivingEntity owner, int lifeTick){
+    public static DelayedAttackMarker createRemoteMeteor(Level level, Vec3 location, @Nullable LivingEntity owner, int lifeTick, boolean isEcliptic){
         var instance = new DelayedAttackMarker(AllEntityTypes.DELAYED_ATTACK_MARKER.get(), level);
-        instance.setAttackType(AttackType.BENDERSON_REMOTE_STACKABLE_METEOR);
+        instance.setAttackType(isEcliptic ? AttackType.BENDERSON_REMOTE_ECLIPTIC_METEOR : AttackType.BENDERSON_REMOTE_STACKABLE_METEOR);
         instance.owner = EntityReference.of(owner);
         instance.setPos(location);
         instance.setMaxLifeTick(lifeTick + 5);

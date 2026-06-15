@@ -17,6 +17,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.entity.EntityTypeTest;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
+import net.minecraft.world.phys.Vec3;
 
 public class KnockbackFromCenterPhaseState implements IPhaseState{
     public static final String ANIMATE_STATE_START = "knockback_radial.start";
@@ -41,7 +42,7 @@ public class KnockbackFromCenterPhaseState implements IPhaseState{
     public void start() {
         if(this.owner.level().isClientSide()) return;
         this.owner.setShouldHideBoundingBox(true);
-        trackingMarker = new TargetMarker(this.owner.level(), this.owner.getCombatArenaCenter(), TargetMarker.MarkerArgs.simple(TargetMarker.MarkerType.KNOCKBACK_RADIAL, (float) (this.owner.getArenaRadius() * Math.sqrt(2)), 110));
+        trackingMarker = new TargetMarker(this.owner.level(), this.owner.getCombatArenaCenter(), TargetMarker.MarkerArgs.simple(TargetMarker.MarkerType.KNOCKBACK_RADIAL, (float) (knockbackDistance * 2), 110));
         this.owner.level().addFreshEntity(trackingMarker);
         this.owner.setAnimateState(ANIMATE_STATE_START);
         this.currentTick = this.maxTicks;
@@ -56,11 +57,16 @@ public class KnockbackFromCenterPhaseState implements IPhaseState{
             this.owner.setAnimateState(ANIMATE_STATE_LOOP);
         } else if (pastTicks == 110) {
             this.owner.setAnimateState(ANIMATE_STATE_END);
+            Vec3 center = this.owner.getCombatArenaCenter();
+            this.owner.teleportTo(center.x, center.y, center.z);
         } else if(pastTicks > 110 && pastTicks <= 120){
+            if(pastTicks == 111){
+                this.owner.level().playSound(null, this.owner.getX(), this.owner.getY(), this.owner.getZ(), SoundEvents.MACE_SMASH_GROUND_HEAVY, SoundSource.HOSTILE, 1, 0.5f);
+            }
             if(pastTicks % 2 == 1){
                 this.owner.level().playSound(null, this.owner.getX(), this.owner.getY(), this.owner.getZ(), SoundEvents.STONE_FALL, SoundSource.HOSTILE, 1, 0.5f);
-                ((ServerLevel) this.owner.level()).sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.STONE.defaultBlockState()),
-                        this.owner.getX(), this.owner.getY(), this.owner.getZ(), 0, 0, 0.0, 0, 0.0);
+                ((ServerLevel) this.owner.level()).sendParticles(new BlockParticleOption(ParticleTypes.DUST_PILLAR, Blocks.STONE.defaultBlockState()),
+                        this.owner.getX(), this.owner.getY(), this.owner.getZ(), 16, 1, 0.0, 1, 0.0);
             }
             if (pastTicks == 114) {
                 if(!this.owner.level().isClientSide()){
@@ -74,7 +80,7 @@ public class KnockbackFromCenterPhaseState implements IPhaseState{
                         acceptingTarget.hurtServer(((ServerLevel) this.owner.level()),
                                 this.owner.damageSources().source(AllDamageTypes.BOSS_ABILITY_ATTACK, this.owner),
                                 damage);
-                        acceptingTarget.knockback(knockbackDistance, dir.x, dir.z);
+                        acceptingTarget.knockback(knockbackDistance * 0.5, dir.x, dir.z);
                     }
                 }
             }

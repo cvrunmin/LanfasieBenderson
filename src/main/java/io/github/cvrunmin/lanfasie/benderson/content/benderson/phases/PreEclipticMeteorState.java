@@ -1,6 +1,7 @@
 package io.github.cvrunmin.lanfasie.benderson.content.benderson.phases;
 
 import io.github.cvrunmin.lanfasie.benderson.content.benderson.Benderson;
+import io.github.cvrunmin.lanfasie.benderson.content.marker.DelayedAttackMarker;
 import io.github.cvrunmin.lanfasie.benderson.content.marker.TargetMarker;
 import io.github.cvrunmin.lanfasie.benderson.index.AllBlocks;
 import io.github.cvrunmin.lanfasie.benderson.index.AllDamageTypes;
@@ -11,6 +12,7 @@ import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.EntityReference;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -24,7 +26,6 @@ import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.phys.Vec3;
 
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.Objects;
 
 public class PreEclipticMeteorState implements IPhaseState{
@@ -35,7 +36,7 @@ public class PreEclipticMeteorState implements IPhaseState{
     private TargetMarker[] trackingMarkers = new TargetMarker[4];
     private Vec3[] summonPilePoses = new Vec3[4];
     private int currentTick = 0;
-    private int maxTicks = 145;
+    private int maxTicks = 146;
     private final float attackDamage;
 
     public PreEclipticMeteorState(Benderson owner, float attackDamage) {
@@ -48,7 +49,7 @@ public class PreEclipticMeteorState implements IPhaseState{
         if(this.owner.level().isClientSide()) return;
         for (int i = 0; i < 4; i++) {
             int offset = this.owner.getArenaRadius() - 8;
-            summonPilePoses[i] = this.owner.getCombatArenaCenter().add(offset * (i / 2 == 0 ? -1 : 1), 0, offset * (i == 2 || i == 3 ? 1 : -1));
+            summonPilePoses[i] = this.owner.getCombatArenaCenter().add(offset * (i / 2 == 0 ? -1 : 1), 0, offset * (i == 1 || i == 2 ? 1 : -1));
             trackingMarkers[i] = new TargetMarker(this.owner.level(), summonPilePoses[i], TargetMarker.MarkerArgs.simple(TargetMarker.MarkerType.GROUND_PROXIMITY, (float) (this.owner.getArenaRadius() * 0.5 * Math.sqrt(2)), 90));
             this.owner.level().addFreshEntity(trackingMarkers[i]);
         }
@@ -69,9 +70,12 @@ public class PreEclipticMeteorState implements IPhaseState{
         } else if(currentTick == 0) {
             return false;
         } else {
-            var withinPhaseNormalAttackTick = (pastTicks - 25) % 30;
+            var withinPhaseNormalAttackTick = (pastTicks - 26) % 30;
             if(this.owner.getTarget() != null){
                 var currentTarget = this.owner.getTarget();
+                if(withinPhaseNormalAttackTick == 0){
+                    this.owner.swing(InteractionHand.MAIN_HAND);
+                }
                 if(withinPhaseNormalAttackTick < 10){
                     var distVec = currentTarget.position().subtract(this.owner.position()).horizontal();
                     if(distVec.length() > 3.0f){
@@ -82,6 +86,14 @@ public class PreEclipticMeteorState implements IPhaseState{
                 }
                 if(withinPhaseNormalAttackTick == 7){
                     this.owner.doHurtTarget(((ServerLevel) this.owner.level()), currentTarget);
+                }
+            }
+            if(pastTicks == 85){
+                for (Vec3 pilePose : summonPilePoses) {
+                    if(pilePose != null){
+                        var remoteMeteor = DelayedAttackMarker.createRemoteMeteor(this.owner.level(), pilePose, this.owner, 10, false);
+                        this.owner.level().addFreshEntity(remoteMeteor);
+                    }
                 }
             }
             if (pastTicks == 94) {
@@ -128,6 +140,10 @@ public class PreEclipticMeteorState implements IPhaseState{
                             }
                         }
                     }
+
+                    this.owner.level().playSound(null, pilePose.x, pilePose.y, pilePose.z, SoundEvents.MACE_SMASH_GROUND, SoundSource.HOSTILE, 1, 0.5f);
+                    ((ServerLevel) this.owner.level()).sendParticles(new BlockParticleOption(ParticleTypes.DUST_PILLAR, Blocks.STONE.defaultBlockState()),
+                            pilePose.x, pilePose.y, pilePose.z, 8, 1, 0.0, 1, 0.0);
                 }
             }
         }

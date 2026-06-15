@@ -3,6 +3,7 @@
   "package": "io.github.cvrunmin.lanfasie.benderson.mixin",
   "compatibilityLevel": "JAVA_25",
   "mixins": [
+    "AttributesMixin",
     "EffectCommandsMixin",
     "EnderpearlItemMixin",
     "FoodDataMixin",

@@ -72,11 +72,11 @@ public class Benderson extends Monster implements GeoEntity {
     private static final EntityDataAccessor<BodyState> BODY_STATE = SynchedEntityData.defineId(Benderson.class, AllEntityDataSerializers.BENDERSON_BODY_STATE.get());
     private static final EntityDataAccessor<Integer> ARENA_RADIUS = SynchedEntityData.defineId(Benderson.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<BlockPos> ARENA_CENTER = SynchedEntityData.defineId(Benderson.class, EntityDataSerializers.BLOCK_POS);
+    private static final EntityDataAccessor<Boolean> SHOULD_HIDE_BOUNDING_BOX = SynchedEntityData.defineId(Benderson.class, EntityDataSerializers.BOOLEAN);
 
     private static final EntityDimensions NO_DIMENSIONS = EntityDimensions.fixed(0.0F, 0.0F);
 
     private final AnimatableInstanceCache geoCache = GeckoLibUtil.createInstanceCache(this);
-    private boolean shouldHideBoundingBox = false;
 
     protected HashMap<UUID, Float> enmityList = new HashMap<>();
 
@@ -211,6 +211,7 @@ public class Benderson extends Monster implements GeoEntity {
         entityData.define(BODY_STATE, BodyState.DEEP_LATENT);
         entityData.define(ARENA_CENTER, BlockPos.ZERO);
         entityData.define(ARENA_RADIUS, 24);
+        entityData.define(SHOULD_HIDE_BOUNDING_BOX, false);
     }
 
 
@@ -353,11 +354,11 @@ public class Benderson extends Monster implements GeoEntity {
     }
 
     public boolean isShouldHideBoundingBox(){
-        return shouldHideBoundingBox;
+        return entityData.get(SHOULD_HIDE_BOUNDING_BOX);
     }
 
     public void setShouldHideBoundingBox(boolean flag){
-        shouldHideBoundingBox = flag;
+        entityData.set(SHOULD_HIDE_BOUNDING_BOX, flag);
     }
 
     @Override
@@ -490,6 +491,7 @@ public class Benderson extends Monster implements GeoEntity {
                 }
             }
         });
+        setShouldHideBoundingBox(input.getBooleanOr("ShouldHideBoundingBox", false));
         setAnimateState(input.getStringOr("AnimateState", "idle"));
         globalCooldown = input.getIntOr("GCD", 0);
         ensureBossEventUidMatch();
@@ -511,6 +513,9 @@ public class Benderson extends Monster implements GeoEntity {
         transitioner.addAdditionalSaveData(output);
         if(this.arenaCenter != null) {
             output.store("ArenaCenter", BlockPos.CODEC, this.arenaCenter);
+        }
+        if(isShouldHideBoundingBox()){
+            output.putBoolean("ShouldHideBoundingBox", true);
         }
         output.putString("AnimateState", getAnimateState());
         output.putInt("GCD", globalCooldown);
@@ -650,6 +655,9 @@ public class Benderson extends Monster implements GeoEntity {
     public void die(DamageSource source) {
         if(arenaHintMarker != null && arenaHintMarker.isAlive()){
             arenaHintMarker.discard();
+        }
+        if(!level().isClientSide()) {
+            this.bossEvent.setProgress(0);
         }
         super.die(source);
     }
