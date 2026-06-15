@@ -39,6 +39,7 @@ import net.minecraft.world.BossEvent;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.*;
+import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -88,6 +89,9 @@ public class Benderson extends Monster implements GeoEntity {
     private PartialArenaAoePhaseState threeforthAreanAoePhaseState = new PartialArenaAoePhaseState(this, 22);
     private SummonAnticalabrumPhaseState summonAnticalabrumPhaseState = new SummonAnticalabrumPhaseState(this);
     private ElevateToExtremeState elevateToExtremeState = new ElevateToExtremeState(this);
+    private KnockbackFromCenterPhaseState knockbackFromCenterPhaseState = new KnockbackFromCenterPhaseState(this, 18, 2);
+    private PreEclipticMeteorState summonBlockPilePhaseState = new PreEclipticMeteorState(this, 10);
+    private EclipticMeteorState eclipticMeteorState = new EclipticMeteorState(this);
     private int globalCooldown;
     private PhaseStateTransitioner transitioner;
 
@@ -117,6 +121,9 @@ public class Benderson extends Monster implements GeoEntity {
                 .addPhaseStateInstance("three-fourth_arena_aoe", threeforthAreanAoePhaseState)
                 .addPhaseStateInstance("summon_anticalabrum", summonAnticalabrumPhaseState)
                 .addPhaseStateInstance("elevate_to_extreme", elevateToExtremeState)
+                .addPhaseStateInstance("knockback_from_center", knockbackFromCenterPhaseState)
+                .addPhaseStateInstance("summon_blocking_pile", summonBlockPilePhaseState)
+                .addPhaseStateInstance("ecliptic_meteor", eclipticMeteorState)
                 .addTransition("idle", "idle", 0)
                 .addTransition("idle", "summon_anticalabrum")
                 .addTransition("idle", "attack")
@@ -129,6 +136,7 @@ public class Benderson extends Monster implements GeoEntity {
                 .addTransition("attack", "circle_aoe_self")
                 .addTransition("attack", "circle_stack")
                 .addTransition("attack", "three-fourth_arena_aoe")
+                .addTransition("attack", "knockback_from_center")
                 .addTransition("lethal_attack", "idle", 0)
                 .addTransition("lethal_attack", "attack")
                 .addTransition("circle_aoe_self", "idle", 0)
@@ -140,6 +148,12 @@ public class Benderson extends Monster implements GeoEntity {
                 .addTransition("summon_anticalabrum", "idle", 0)
                 .addTransition("summon_anticalabrum", "attack")
                 .addTransition("elevate_to_extreme", "idle")
+                .addTransition("knockback_from_center", "summon_blocking_pile", 10)
+                .addTransition("knockback_from_center", "idle", -1)
+                .addTransition("summon_blocking_pile", "ecliptic_meteor", 10)
+                .addTransition("summon_blocking_pile", "idle", -1)
+                .addTransition("ecliptic_meteor", "attack")
+                .addTransition("ecliptic_meteor", "idle", 0)
         ;
     }
 
@@ -348,7 +362,7 @@ public class Benderson extends Monster implements GeoEntity {
 
     @Override
     public boolean shouldRenderAtSqrDistance(double distance) {
-        if(this.getBodyState() == BodyState.ENTRANCE) return distance < Mth.square(64.0 * getViewScale());
+        if(this.getBodyState().isTransition() || this.isShouldHideBoundingBox()) return distance < Mth.square(64.0 * getViewScale());
         return super.shouldRenderAtSqrDistance(distance);
     }
 
@@ -693,6 +707,18 @@ public class Benderson extends Monster implements GeoEntity {
             int reward = net.neoforged.neoforge.event.EventHooks.getExperienceDrop(this, this.getLastHurtByPlayer(), this.getExperienceReward(level, killer));
             ExperienceOrb.award((ServerLevel) this.level(), this.position(), reward);
         }
+    }
+
+    @Override
+    protected int getBaseExperienceReward(ServerLevel level) {
+        int base = super.getBaseExperienceReward(level);
+        AttributeInstance attr = this.getAttribute(Attributes.MAX_HEALTH);
+        if (attr == null) {
+            return base;
+        }
+        double multiplier = Math.max(0, (attr.getValue() / attr.getBaseValue()));
+        if(!Double.isFinite(multiplier)) multiplier = 1;
+        return (int) (base * multiplier);
     }
 
     /**

@@ -10,6 +10,7 @@ import net.minecraft.world.damagesource.DamageType;
 
 public class AllDamageTypes {
     public static final ResourceKey<DamageType> LETHAL_ATTACK = create("lethal_attack");
+    public static final ResourceKey<DamageType> ECLIPTIC_METEOR = create("ecliptic_meteor");
     public static final ResourceKey<DamageType> BOSS_NORMAL_ATTACK = create("boss_normal_attack");
     public static final ResourceKey<DamageType> BOSS_ABILITY_ATTACK = create("boss_ability_attack");
 
@@ -19,6 +20,7 @@ public class AllDamageTypes {
 
     public static void bootstrap(BootstrapContext<DamageType> bootstrapContext){
         bootstrapContext.register(LETHAL_ATTACK, new DamageType("lethal_attack", DamageScaling.NEVER, 0.2f));
+        bootstrapContext.register(ECLIPTIC_METEOR, new DamageType("ecliptic_meteor", DamageScaling.NEVER, 0.0f));
         bootstrapContext.register(BOSS_NORMAL_ATTACK, new DamageType("mob", DamageScaling.WHEN_CAUSED_BY_LIVING_NON_PLAYER, 0f));
         bootstrapContext.register(BOSS_ABILITY_ATTACK, new DamageType("boss_ability_attack", DamageScaling.WHEN_CAUSED_BY_LIVING_NON_PLAYER, 0.05f));
     }

@@ -2,8 +2,23 @@ package io.github.cvrunmin.lanfasie.benderson.content.benderson.phases;
 
 import io.github.cvrunmin.lanfasie.benderson.content.benderson.Benderson;
 import io.github.cvrunmin.lanfasie.benderson.content.marker.TargetMarker;
+import io.github.cvrunmin.lanfasie.benderson.index.AllBlocks;
+import io.github.cvrunmin.lanfasie.benderson.index.AllDamageTypes;
+import net.minecraft.commands.arguments.EntityAnchorArgument;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.particles.BlockParticleOption;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.EntityReference;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.entity.EntityTypeTest;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.phys.Vec3;
@@ -17,11 +32,10 @@ public class PreEclipticMeteorState implements IPhaseState{
     public static final String ANIMATE_STATE_LOOP = "summon_blocking_pile.loop";
     public static final String ANIMATE_STATE_END = "summon_blocking_pile.end";
     private final Benderson owner;
-    private TargetMarker trackingMarker;
     private TargetMarker[] trackingMarkers = new TargetMarker[4];
     private Vec3[] summonPilePoses = new Vec3[4];
     private int currentTick = 0;
-    private int maxTicks = (int) (20 * (4.5f + 2.5f));
+    private int maxTicks = 145;
     private final float attackDamage;
 
     public PreEclipticMeteorState(Benderson owner, float attackDamage) {
@@ -32,7 +46,6 @@ public class PreEclipticMeteorState implements IPhaseState{
     @Override
     public void start() {
         if(this.owner.level().isClientSide()) return;
-        this.owner.setShouldHideBoundingBox(true);
         for (int i = 0; i < 4; i++) {
             int offset = this.owner.getArenaRadius() - 8;
             summonPilePoses[i] = this.owner.getCombatArenaCenter().add(offset * (i / 2 == 0 ? -1 : 1), 0, offset * (i == 2 || i == 3 ? 1 : -1));
@@ -45,12 +58,90 @@ public class PreEclipticMeteorState implements IPhaseState{
 
     @Override
     public boolean tick() {
-        return false;
+        currentTick--;
+        int pastTicks = maxTicks - currentTick;
+        if(pastTicks == 5){
+            this.owner.setAnimateState(ANIMATE_STATE_LOOP);
+        } else if (pastTicks == 10) {
+            this.owner.setAnimateState(ANIMATE_STATE_END);
+        } else if(pastTicks == 25){
+            this.owner.setAnimateState("idle");
+        } else if(currentTick == 0) {
+            return false;
+        } else {
+            var withinPhaseNormalAttackTick = (pastTicks - 25) % 30;
+            if(this.owner.getTarget() != null){
+                var currentTarget = this.owner.getTarget();
+                if(withinPhaseNormalAttackTick < 10){
+                    var distVec = currentTarget.position().subtract(this.owner.position()).horizontal();
+                    if(distVec.length() > 3.0f){
+                        var newPos = this.owner.position().add(distVec).subtract(distVec.normalize());
+                        this.owner.getMoveControl().setWantedPosition(newPos.x, newPos.y, newPos.z, 1.0);
+                    }
+                    this.owner.lookAt(EntityAnchorArgument.Anchor.FEET, currentTarget.position());
+                }
+                if(withinPhaseNormalAttackTick == 7){
+                    this.owner.doHurtTarget(((ServerLevel) this.owner.level()), currentTarget);
+                }
+            }
+            if (pastTicks == 94) {
+                if(!this.owner.level().isClientSide()){
+                    var acceptingTargets = this.owner.level().getEntities(EntityTypeTest.forClass(LivingEntity.class),
+                            this.owner.getCombatArena(),
+                            LivingEntity::canBeSeenByAnyone);
+                    for (LivingEntity acceptingTarget : acceptingTargets) {
+                        float damage = acceptingTarget instanceof Player ? attackDamage : attackDamage * Math.min(1.0f, acceptingTarget.getMaxHealth() / 20f);
+                        damage *= (float) this.owner.getAttributeValue(Attributes.ATTACK_DAMAGE);
+                        float sumDamage = 0;
+                        for (Vec3 pilePose : summonPilePoses) {
+                            if(pilePose != null){
+                                sumDamage += (float) (damage / acceptingTarget.position().distanceToSqr(pilePose));
+                            }
+                        }
+                        acceptingTarget.hurtServer(((ServerLevel) this.owner.level()),
+                                this.owner.damageSources().source(AllDamageTypes.BOSS_ABILITY_ATTACK, this.owner),
+                                sumDamage);
+                    }
+                }
+            } else if(pastTicks == 95) {
+                for (Vec3 pilePose : summonPilePoses) {
+                    BlockPos pileBottomCenter = BlockPos.containing(pilePose);
+                    var random = this.owner.level().getRandom().forkPositional().at(pileBottomCenter);
+                    var heights = new int[9];
+                    heights[4] = random.nextInt(3, 8);
+                    heights[1] = random.nextInt(2, heights[4]);
+                    heights[3] = random.nextInt(2, heights[4]);
+                    heights[5] = random.nextInt(2, heights[4]);
+                    heights[7] = random.nextInt(2, heights[4]);
+                    heights[0] = random.nextInt(1, Math.min(heights[1], heights[3]));
+                    heights[2] = random.nextInt(1, Math.min(heights[1], heights[5]));
+                    heights[6] = random.nextInt(1, Math.min(heights[7], heights[3]));
+                    heights[8] = random.nextInt(1, Math.min(heights[7], heights[5]));
+                    for (int i = 0; i < 9; i++) {
+                        int xOff = (i % 3) - 1;
+                        int zOff = (i / 3) - 1;
+                        for (int yOff = 0; yOff < heights[i]; yOff++) {
+                            BlockPos pos = pileBottomCenter.offset(xOff, yOff, zOff);
+                            BlockState blockState = AllBlocks.DEEP_LATENT_BLOCK.get().defaultBlockState();
+                            if (this.owner.level().getBlockState(pos).canBeReplaced()) {
+                                this.owner.level().setBlockAndUpdate(pos, blockState);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return true;
     }
 
     @Override
     public void end() {
-        this.owner.setShouldHideBoundingBox(false);
+        this.owner.setAnimateState("idle");
+        for (TargetMarker trackingMarker : trackingMarkers) {
+            if(trackingMarker != null && trackingMarker.isAlive()) trackingMarker.discard();
+        }
+        Arrays.fill(summonPilePoses, null);
+        Arrays.fill(trackingMarkers, null);
     }
 
     @Override

@@ -40,6 +40,7 @@ public class KnockbackFromCenterPhaseState implements IPhaseState{
     @Override
     public void start() {
         if(this.owner.level().isClientSide()) return;
+        this.owner.setShouldHideBoundingBox(true);
         trackingMarker = new TargetMarker(this.owner.level(), this.owner.getCombatArenaCenter(), TargetMarker.MarkerArgs.simple(TargetMarker.MarkerType.KNOCKBACK_RADIAL, (float) (this.owner.getArenaRadius() * Math.sqrt(2)), 110));
         this.owner.level().addFreshEntity(trackingMarker);
         this.owner.setAnimateState(ANIMATE_STATE_START);
@@ -85,6 +86,7 @@ public class KnockbackFromCenterPhaseState implements IPhaseState{
 
     @Override
     public void end() {
+        this.owner.setShouldHideBoundingBox(false);
         this.owner.setAnimateState("idle");
         if(this.trackingMarker != null && this.trackingMarker.isAlive()){
             this.trackingMarker.remove(Entity.RemovalReason.DISCARDED);

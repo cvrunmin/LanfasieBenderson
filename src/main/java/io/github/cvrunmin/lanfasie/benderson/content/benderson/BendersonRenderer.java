@@ -138,7 +138,9 @@ public class BendersonRenderer<R extends LivingEntityRenderState & GeoRenderStat
 
     @Override
     protected boolean affectedByCulling(Benderson entity) {
-        return entity.getBodyState() == Benderson.BodyState.DEEP_LATENT || entity.getBodyState() == Benderson.BodyState.UNVEILED || entity.getBodyState() == Benderson.BodyState.UNFORGIVEN;
+        if(entity.getBodyState().isTransition()) return false;
+        if(entity.isShouldHideBoundingBox()) return false;
+        return true;
     }
 
     @Override

@@ -18,10 +18,10 @@ public class MyDamageTypeTagsProvider extends KeyTagProvider<DamageType> {
 
     @Override
     protected void addTags(HolderLookup.Provider registries) {
-        this.tag(DamageTypeTags.BYPASSES_ARMOR).add(AllDamageTypes.LETHAL_ATTACK);
-        this.tag(DamageTypeTags.BYPASSES_EFFECTS).add(AllDamageTypes.LETHAL_ATTACK);
-        this.tag(DamageTypeTags.NO_KNOCKBACK).add(AllDamageTypes.LETHAL_ATTACK, AllDamageTypes.BOSS_NORMAL_ATTACK, AllDamageTypes.BOSS_ABILITY_ATTACK);
-        this.tag(DamageTypeTags.BYPASSES_SHIELD).add(AllDamageTypes.BOSS_ABILITY_ATTACK, AllDamageTypes.LETHAL_ATTACK);
+        this.tag(DamageTypeTags.BYPASSES_ARMOR).add(AllDamageTypes.LETHAL_ATTACK, AllDamageTypes.ECLIPTIC_METEOR);
+        this.tag(DamageTypeTags.BYPASSES_EFFECTS).add(AllDamageTypes.LETHAL_ATTACK, AllDamageTypes.ECLIPTIC_METEOR);
+        this.tag(DamageTypeTags.NO_KNOCKBACK).add(AllDamageTypes.LETHAL_ATTACK, AllDamageTypes.ECLIPTIC_METEOR, AllDamageTypes.BOSS_NORMAL_ATTACK, AllDamageTypes.BOSS_ABILITY_ATTACK);
+        this.tag(DamageTypeTags.BYPASSES_SHIELD).add(AllDamageTypes.BOSS_ABILITY_ATTACK, AllDamageTypes.LETHAL_ATTACK, AllDamageTypes.ECLIPTIC_METEOR);
         this.tag(DamageTypeTags.BYPASSES_RESISTANCE).add(AllDamageTypes.BOSS_ABILITY_ATTACK);
     }
 }

@@ -21,10 +21,10 @@ public class NormalAttackPhaseState implements IPhaseState{
         if(this.owner.level().isClientSide()) return;
         if(this.owner.getTarget() != null){
             currentTarget = this.owner.getTarget();
-            var distVec = this.owner.position().subtract(currentTarget.position());
+            var distVec = currentTarget.position().subtract(this.owner.position()).horizontal();
             if(distVec.length() > 3.0f){
-                var newPos = currentTarget.position().add(distVec.horizontal().normalize());
-                this.owner.teleportTo(newPos.x, newPos.y, newPos.z);
+                var newPos = this.owner.position().add(distVec).subtract(distVec.normalize());
+                this.owner.getMoveControl().setWantedPosition(newPos.x, newPos.y, newPos.z, 1.0);
             }
             this.owner.lookAt(EntityAnchorArgument.Anchor.FEET, currentTarget.position());
             this.owner.swing(InteractionHand.MAIN_HAND);
@@ -35,6 +35,14 @@ public class NormalAttackPhaseState implements IPhaseState{
     @Override
     public boolean tick() {
         currentTick++;
+        if(this.currentTarget != null && currentTick < 10){
+            var distVec = currentTarget.position().subtract(this.owner.position()).horizontal();
+            if(distVec.length() > 3.0f){
+                var newPos = this.owner.position().add(distVec).subtract(distVec.normalize());
+                this.owner.getMoveControl().setWantedPosition(newPos.x, newPos.y, newPos.z, 1.0);
+            }
+            this.owner.lookAt(EntityAnchorArgument.Anchor.FEET, currentTarget.position());
+        }
         if(currentTick == 7){
             if(this.currentTarget != null) {
                 this.owner.doHurtTarget(((ServerLevel) this.owner.level()), this.currentTarget);
