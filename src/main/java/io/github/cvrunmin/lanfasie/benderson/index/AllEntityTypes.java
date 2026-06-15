@@ -22,19 +22,19 @@ public class AllEntityTypes {
     public static final DeferredRegister.Entities ENTITY_TYPES = DeferredRegister.createEntities(LanfasieBenderson.MODID);
 
     public static final DeferredHolder<EntityType<?>, EntityType<Benderson>> BENDERSON = ENTITY_TYPES.registerEntityType("benderson", Benderson::new, MobCategory.MONSTER,
-            b -> b.fireImmune().sized(0.6f, 2.375f).immuneTo(Blocks.WITHER_ROSE).clientTrackingRange(12));
+            b -> b.fireImmune().sized(0.6f, 2.375f).noLootTable().immuneTo(Blocks.WITHER_ROSE).clientTrackingRange(12));
 
     public static final DeferredHolder<EntityType<?>, EntityType<DawnEntity>> DAWN = ENTITY_TYPES.registerEntityType("dawn", DawnEntity::new, MobCategory.CREATURE,
-            b -> b.fireImmune().sized(0.6f, 2.375f).immuneTo(Blocks.WITHER_ROSE).clientTrackingRange(8));
+            b -> b.fireImmune().sized(0.6f, 2.375f).noLootTable().immuneTo(Blocks.WITHER_ROSE).clientTrackingRange(8));
 
     public static final DeferredHolder<EntityType<?>, EntityType<MundanePraiserBard>> MUNDANE_PRAISER_BARD = ENTITY_TYPES.registerEntityType("mundane_praiser_bard", MundanePraiserBard::new, MobCategory.CREATURE,
-            b -> b.fireImmune().sized(0.6f, 2.125f).immuneTo(Blocks.WITHER_ROSE).clientTrackingRange(8));
+            b -> b.fireImmune().sized(0.6f, 2.125f).noLootTable().immuneTo(Blocks.WITHER_ROSE).clientTrackingRange(8));
 
     public static final DeferredHolder<EntityType<?>, EntityType<MundanePraiserWhiteMage>> MUNDANE_PRAISER_WHITE_MAGE = ENTITY_TYPES.registerEntityType("mundane_praiser_white_mage", MundanePraiserWhiteMage::new, MobCategory.CREATURE,
-            b -> b.fireImmune().sized(0.6f, 2.125f).immuneTo(Blocks.WITHER_ROSE).clientTrackingRange(8));
+            b -> b.fireImmune().sized(0.6f, 2.125f).noLootTable().immuneTo(Blocks.WITHER_ROSE).clientTrackingRange(8));
 
     public static final DeferredHolder<EntityType<?>, EntityType<MundanePraiserRedMage>> MUNDANE_PRAISER_RED_MAGE = ENTITY_TYPES.registerEntityType("mundane_praiser_red_mage", MundanePraiserRedMage::new, MobCategory.CREATURE,
-            b -> b.fireImmune().sized(0.6f, 2.125f).immuneTo(Blocks.WITHER_ROSE).clientTrackingRange(8));
+            b -> b.fireImmune().sized(0.6f, 2.125f).noLootTable().immuneTo(Blocks.WITHER_ROSE).clientTrackingRange(8));
 
     public static final DeferredHolder<EntityType<?>, EntityType<TargetMarker>> TARGET_MARKER = ENTITY_TYPES.registerEntityType("target_marker", TargetMarker::new, MobCategory.MISC,
             b -> b.sized(0, 0).noLootTable().clientTrackingRange(16));

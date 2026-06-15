@@ -20,10 +20,13 @@ import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.core.RegistrySetBuilder;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.data.loot.LootTableProvider;
 import net.minecraft.resources.Identifier;
+import net.minecraft.util.context.ContextKeySet;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.ModContainer;
@@ -40,6 +43,9 @@ import net.neoforged.neoforge.client.gui.ConfigurationScreen;
 import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
 import net.neoforged.neoforge.data.event.GatherDataEvent;
 import org.jspecify.annotations.Nullable;
+
+import java.util.List;
+import java.util.Set;
 
 // This class will not load on dedicated servers. Accessing client side code from here is safe.
 @Mod(value = LanfasieBenderson.MODID, dist = Dist.CLIENT)
@@ -104,6 +110,11 @@ public class LanfasieBendersonClient {
     public static void gatherData(GatherDataEvent.Client event){
         // from server side
         event.createDatapackRegistryObjects(new RegistrySetBuilder().add(Registries.DAMAGE_TYPE, AllDamageTypes::bootstrap));
+        event.createProvider((output, lookupProvider) ->
+                new LootTableProvider(output,
+                        Set.of(),
+                        List.of(new LootTableProvider.SubProviderEntry(MyCustomLootTableSubProvider::new, LootContextParamSets.ENTITY)),
+                        lookupProvider));
         // client side
         event.createProvider(MyModelProvider::new);
         event.createProvider(MyItemTagsProvider::new);

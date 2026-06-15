@@ -14,6 +14,7 @@ import io.github.cvrunmin.lanfasie.benderson.LanfasieBenderson;
 import io.github.cvrunmin.lanfasie.benderson.content.benderson.phases.*;
 import io.github.cvrunmin.lanfasie.benderson.content.marker.TargetMarker;
 import io.github.cvrunmin.lanfasie.benderson.index.*;
+import io.github.cvrunmin.lanfasie.benderson.mixin.LivingEntityAccessor;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
@@ -49,6 +50,7 @@ import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.gamerules.GameRules;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.level.storage.loot.LootTable;
@@ -73,8 +75,6 @@ public class Benderson extends Monster implements GeoEntity {
     private static final EntityDimensions NO_DIMENSIONS = EntityDimensions.fixed(0.0F, 0.0F);
 
     private final AnimatableInstanceCache geoCache = GeckoLibUtil.createInstanceCache(this);
-    private DamageSource lastDamageSource;
-    private long lastDamageStamp;
     private boolean shouldHideBoundingBox = false;
 
     protected HashMap<UUID, Float> enmityList = new HashMap<>();
@@ -606,8 +606,8 @@ public class Benderson extends Monster implements GeoEntity {
 
         boolean success = damage > 0.0F;
         if (success) {
-            this.lastDamageSource = source;
-            this.lastDamageStamp = this.level().getGameTime();
+            ((LivingEntityAccessor) this).setLastDamageSource(source);
+            ((LivingEntityAccessor) this).setLastDamageStamp(this.level().getGameTime());
 
             for (MobEffectInstance effect : this.getActiveEffects()) {
                 effect.onMobHurt(level, this, source, damage);
@@ -628,9 +628,8 @@ public class Benderson extends Monster implements GeoEntity {
 
     @Override
     public void setHealth(float health) {
-        var oldHealth = getHealth();
+        this.lastDeltaHealth = health - getHealth();
         super.setHealth(health);
-        this.lastDeltaHealth = oldHealth - getHealth();
     }
 
     @Override
@@ -643,46 +642,71 @@ public class Benderson extends Monster implements GeoEntity {
 
     @Override
     protected void dropAllDeathLoot(ServerLevel level, DamageSource source) {
-        StackWalker walker = StackWalker.getInstance(Set.of(StackWalker.Option.RETAIN_CLASS_REFERENCE));
-        var naturalDie = walker.walk(stream -> stream.skip(1).limit(5)
-                .anyMatch(frame -> frame.getDeclaringClass().equals(Benderson.class) && frame.getMethodName().equals("hurtServer")));
-        this.captureDrops(new java.util.ArrayList<>());
+        this.captureDrops(new ArrayList<>());
         boolean playerKilled = this.lastHurtByPlayerMemoryTime > 0;
         if (this.shouldDropLoot(level)) {
-            this.handleDropFromLootTable(level, source, playerKilled, naturalDie);
+            this.dropFromLootTable(level, source, playerKilled);
             this.dropCustomDeathLoot(level, source, playerKilled);
         }
 
         this.dropEquipment(level);
-        this.handleDropExperience(level, source.getEntity(), naturalDie);
+        this.dropExperience(level, source.getEntity(), source);
 
         Collection<ItemEntity> drops = captureDrops(null);
-        if (!net.neoforged.neoforge.common.CommonHooks.onLivingDrops(this, source, drops, lastHurtByPlayerMemoryTime > 0))
+        if (!CommonHooks.onLivingDrops(this, source, drops, lastHurtByPlayerMemoryTime > 0))
             drops.forEach(e -> level().addFreshEntity(e));
-    }
-
-    private void handleDropFromLootTable(ServerLevel level, DamageSource source, boolean playerKilled, boolean naturalDieFlag){
-        if(naturalDieFlag && lastDeltaHealth <= damageGate.getLastDamage()){
-            this.getLootTable().ifPresent(lootTableResourceKey -> this.dropFromLootTable(level, source, playerKilled, lootTableResourceKey));
-        }
     }
 
     @Override
     protected void dropFromLootTable(ServerLevel level, DamageSource source, boolean playerKilled) {
-        handleDropFromLootTable(level, source, playerKilled, false);
+        if(!source.is(DamageTypeTags.BYPASSES_INVULNERABILITY) && lastDeltaHealth <= damageGate.getLastDamage()){
+            if(this.getBodyState() == BodyState.UNFORGIVEN){
+                this.dropFromLootTable(level, source, playerKilled, AllCustomLootTables.BENDERSON_EXTREME_NON_UNRESTRICTED);
+            }else if(this.getBodyState() == BodyState.DEEP_LATENT || this.getBodyState() == BodyState.UNVEILED){
+                this.dropFromLootTable(level, source, playerKilled, AllCustomLootTables.BENDERSON_NON_UNRESTRICTED);
+            }
+        }
+        if(this.getBodyState() == BodyState.UNFORGIVEN){
+            this.dropFromLootTable(level, source, playerKilled, AllCustomLootTables.BENDERSON_EXTREME_TRIAL_COMPLETED);
+        }else if(this.getBodyState() == BodyState.DEEP_LATENT || this.getBodyState() == BodyState.UNVEILED){
+            this.dropFromLootTable(level, source, playerKilled, AllCustomLootTables.BENDERSON_TRIAL_COMPLETED);
+        }
     }
 
-    private void handleDropExperience(ServerLevel level, Entity killer, boolean naturalDieFlag){
-        if(naturalDieFlag) super.dropExperience(level, killer);
-    }
-
+    /**
+     * @param level
+     * @param killer
+     * @deprecated use {@link Benderson#dropExperience(ServerLevel, Entity, DamageSource)} instead
+     */
     @Override
+    @Deprecated
     protected void dropExperience(ServerLevel level, Entity killer) {
-        handleDropExperience(level, killer, false);
+
     }
 
+    protected void dropExperience(ServerLevel level, Entity killer, DamageSource source){
+        if (!this.wasExperienceConsumed()
+                && (
+                this.isAlwaysExperienceDropper()
+                        || this.lastHurtByPlayerMemoryTime > 0 && this.shouldDropExperience(source) && level.getGameRules().get(GameRules.MOB_DROPS)
+        )) {
+            int reward = net.neoforged.neoforge.event.EventHooks.getExperienceDrop(this, this.getLastHurtByPlayer(), this.getExperienceReward(level, killer));
+            ExperienceOrb.award((ServerLevel) this.level(), this.position(), reward);
+        }
+    }
+
+    /**
+     * @return false
+     * @deprecated use {@link Benderson#shouldDropExperience(DamageSource)} instead
+     */
     @Override
+    @Deprecated
     public boolean shouldDropExperience() {
+        return false;
+    }
+
+    public boolean shouldDropExperience(DamageSource source) {
+        if(source.is(DamageTypeTags.BYPASSES_INVULNERABILITY)) return false;
         if(lastDeltaHealth > damageGate.getLastDamage()) return false;
         return super.shouldDropExperience();
     }
@@ -696,16 +720,8 @@ public class Benderson extends Monster implements GeoEntity {
         if (hurtSound != null) {
             this.playSound(hurtSound, this.getSoundVolume(), (this.random.nextFloat() - this.random.nextFloat()) * 0.2F + 1.0F);
         }
-        this.lastDamageSource = source;
-        this.lastDamageStamp = this.level().getGameTime();
-    }
-
-    public @Nullable DamageSource getLastDamageSource() {
-        if (this.level().getGameTime() - this.lastDamageStamp > 40L) {
-            this.lastDamageSource = null;
-        }
-
-        return this.lastDamageSource;
+        ((LivingEntityAccessor) this).setLastDamageSource(source);
+        ((LivingEntityAccessor) this).setLastDamageStamp(this.level().getGameTime());
     }
 
     @Override

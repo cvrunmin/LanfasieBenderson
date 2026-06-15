@@ -6,6 +6,7 @@
     "EffectCommandsMixin",
     "EnderpearlItemMixin",
     "FoodDataMixin",
+    "LivingEntityAccessor",
     "TeleportRandomlyCnsumeEffectMixin"
   ],
   "injectors": {
