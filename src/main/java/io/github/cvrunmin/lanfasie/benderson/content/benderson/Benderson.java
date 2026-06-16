@@ -266,11 +266,11 @@ public class Benderson extends Monster implements GeoEntity {
                                 test.setAndContinue(RawAnimation.begin().thenPlay("attack.circular_swing.loop"));
                         case CircleAoeSelfPhaseState.ANIMATE_STATE_CIRCLE_AOE_END ->
                                 test.setAndContinue(RawAnimation.begin().thenPlay("attack.circular_swing.end"));
-                        case CircleStackAttackPhaseState.ANIMATE_STATE_CIRCLE_STACK_ATTACK_START ->
+                        case CircleStackAttackPhaseState.ANIMATE_STATE_CIRCLE_STACK_ATTACK_START, PreEclipticMeteorState.ANIMATE_STATE_START ->
                                 test.setAndContinue(RawAnimation.begin().thenPlay("cast.magic.start"));
-                        case CircleStackAttackPhaseState.ANIMATE_STATE_CIRCLE_STACK_ATTACK_LOOP ->
+                        case CircleStackAttackPhaseState.ANIMATE_STATE_CIRCLE_STACK_ATTACK_LOOP, PreEclipticMeteorState.ANIMATE_STATE_LOOP ->
                                 test.setAndContinue(RawAnimation.begin().thenPlay("cast.magic.loop"));
-                        case CircleStackAttackPhaseState.ANIMATE_STATE_CIRCLE_STACK_ATTACK_END ->
+                        case CircleStackAttackPhaseState.ANIMATE_STATE_CIRCLE_STACK_ATTACK_END, PreEclipticMeteorState.ANIMATE_STATE_END ->
                                 test.setAndContinue(RawAnimation.begin().thenPlay("cast.magic.end"));
                         case PartialArenaAoePhaseState.ANIMATE_STATE_HALF_ARENA_AOE_SELF_START ->
                                 test.setAndContinue(RawAnimation.begin().thenPlay("attack.facing_swing.start"));
@@ -280,6 +280,18 @@ public class Benderson extends Monster implements GeoEntity {
                                 test.setAndContinue(RawAnimation.begin().thenPlay("attack.facing_swing.end"));
                         case SummonAnticalabrumPhaseState.ANIMATE_STATE_START ->
                             test.setAndContinue(RawAnimation.begin().thenPlay("cast.sword"));
+                        case KnockbackFromCenterPhaseState.ANIMATE_STATE_START ->
+                                test.setAndContinue(RawAnimation.begin().thenPlay("knockback_at_center.start"));
+                        case KnockbackFromCenterPhaseState.ANIMATE_STATE_LOOP ->
+                                test.setAndContinue(RawAnimation.begin().thenPlay("knockback_at_center.loop"));
+                        case KnockbackFromCenterPhaseState.ANIMATE_STATE_END ->
+                                test.setAndContinue(RawAnimation.begin().thenPlay("knockback_at_center.end"));
+                        case EclipticMeteorState.ANIMATE_STATE_START ->
+                                test.setAndContinue(RawAnimation.begin().thenPlay("ecliptic_meteor.start"));
+                        case EclipticMeteorState.ANIMATE_STATE_LOOP ->
+                                test.setAndContinue(RawAnimation.begin().thenPlay("ecliptic_meteor.loop"));
+                        case EclipticMeteorState.ANIMATE_STATE_END ->
+                                test.setAndContinue(RawAnimation.begin().thenPlay("ecliptic_meteor.end"));
                         case "idle" -> {
                             test.controller().reset();
                             yield PlayState.STOP;

@@ -60,7 +60,7 @@ public class CircleAoeSelfPhaseState implements IPhaseState{
         if(trackingMarker == null || trackingMarker.isRemoved()) return false;
         currentTick--;
         int pastTicks = maxTicks - currentTick;
-        if(pastTicks == 5){
+        if(pastTicks == 20){
             this.owner.setAnimateState(ANIMATE_STATE_CIRCLE_AOE_LOOP);
         } else if (pastTicks == 110) {
             this.owner.setAnimateState(ANIMATE_STATE_CIRCLE_AOE_END);

@@ -3,8 +3,10 @@ package io.github.cvrunmin.lanfasie.benderson.content.benderson.phases;
 import io.github.cvrunmin.lanfasie.benderson.content.benderson.Benderson;
 import io.github.cvrunmin.lanfasie.benderson.content.marker.DelayedAttackMarker;
 import io.github.cvrunmin.lanfasie.benderson.content.marker.TargetMarker;
+import io.github.cvrunmin.lanfasie.benderson.content.particles.BlockParticleDustEmitterOption;
 import io.github.cvrunmin.lanfasie.benderson.index.AllBlocks;
 import io.github.cvrunmin.lanfasie.benderson.index.AllDamageTypes;
+import io.github.cvrunmin.lanfasie.benderson.index.AllParticleTypes;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
@@ -14,6 +16,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityReference;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.ServerExplosion;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.phys.Vec3;
@@ -51,21 +54,24 @@ public class EclipticMeteorState implements IPhaseState{
     public boolean tick() {
         currentTick--;
         int pastTicks = maxTicks - currentTick;
+        Vec3 arenaCenter = this.owner.getCombatArenaCenter();
         if(pastTicks < 240){
             if(pastTicks % 2 == 0){
                 var alpha = (float) Mth.clamp(pastTicks / 200.0f, 0.1, 1);
-                this.owner.level().playSound(null, BlockPos.containing(this.owner.getCombatArenaCenter()), SoundEvents.FIRE_EXTINGUISH, SoundSource.HOSTILE, 0.1f + alpha, alpha);
+                this.owner.level().playSound(null, BlockPos.containing(arenaCenter), SoundEvents.FIRE_EXTINGUISH, SoundSource.HOSTILE, 0.1f + alpha, alpha);
+            }
+            if(pastTicks < 170 && pastTicks % 5 == 0){
+                ((ServerLevel) this.owner.level()).sendParticles(new BlockParticleDustEmitterOption(AllParticleTypes.DUST_SUCKING.get(), Blocks.STONE.defaultBlockState(), (float) (this.owner.getArenaRadius() * Math.sqrt(2)), 1, 5),
+                        arenaCenter.x, arenaCenter.y + 0.5f, arenaCenter.z, 0, 0, 0.0, 0, 0.0);
             }
         }
-        if(pastTicks == 5){
+        if(pastTicks == 15){
             this.owner.setAnimateState(ANIMATE_STATE_LOOP);
         } else if (pastTicks == 160) {
-            Vec3 arenaCenter = this.owner.getCombatArenaCenter();
             var remoteMeteor = DelayedAttackMarker.createRemoteMeteor(this.owner.level(), arenaCenter.subtract(0, 1, 0), this.owner, 84, true);
             this.owner.level().addFreshEntity(remoteMeteor);
         } else if (pastTicks == 200) {
             this.owner.setAnimateState(ANIMATE_STATE_END);
-            Vec3 arenaCenter = this.owner.getCombatArenaCenter();
             targetingEntitySnapshot.clear();
             this.owner.level().getEntitiesOfClass(LivingEntity.class, this.owner.getCombatArena(), livingEntity -> {
                 if(!this.owner.canAttack(livingEntity)) return false;
@@ -77,10 +83,12 @@ public class EclipticMeteorState implements IPhaseState{
         } else {
             if(pastTicks > 210 && pastTicks <= 240){
                 if(pastTicks % 5 == 0){
-                    this.owner.level().playSound(null, BlockPos.containing(this.owner.getCombatArenaCenter()), SoundEvents.LIGHTNING_BOLT_THUNDER, SoundSource.HOSTILE, 4, 0.5f);
+                    this.owner.level().playSound(null, BlockPos.containing(arenaCenter), SoundEvents.LIGHTNING_BOLT_THUNDER, SoundSource.HOSTILE, 4, 0.5f);
+                    ((ServerLevel) this.owner.level()).sendParticles(new BlockParticleDustEmitterOption(AllParticleTypes.DUST_BLOWING.get(), Blocks.STONE.defaultBlockState(), (float) (this.owner.getArenaRadius() * Math.sqrt(2)), 1, 5),
+                            arenaCenter.x, arenaCenter.y, arenaCenter.z, 0, 0, 0.0, 0, 0.0);
                 }
                 if(pastTicks == 239){
-                    this.owner.level().playSound(null, BlockPos.containing(this.owner.getCombatArenaCenter()), SoundEvents.GENERIC_EXPLODE.value(), SoundSource.HOSTILE, 4, 0.5f);
+                    this.owner.level().playSound(null, BlockPos.containing(arenaCenter), SoundEvents.GENERIC_EXPLODE.value(), SoundSource.HOSTILE, 4, 0.5f);
                 }
             }
             if (pastTicks == 240) {
@@ -91,7 +99,7 @@ public class EclipticMeteorState implements IPhaseState{
                     }
                 }
             } else if (pastTicks == 245) {
-                BlockPos.betweenClosedStream(this.owner.getCombatArena().setMinY(this.owner.getCombatArenaCenter().y))
+                BlockPos.betweenClosedStream(this.owner.getCombatArena().setMinY(arenaCenter.y))
                         .filter(pos -> this.owner.level().getBlockState(pos).is(AllBlocks.DEEP_LATENT_BLOCK))
                         .forEach(pos -> this.owner.level().destroyBlock(pos, true, this.owner));
             }

@@ -19,6 +19,7 @@ import io.github.cvrunmin.lanfasie.benderson.content.anticalabrum.Anticalabrum;
 import io.github.cvrunmin.lanfasie.benderson.content.anticalabrum.AnticalabrumModel;
 import io.github.cvrunmin.lanfasie.benderson.content.benderson.phases.ArenaEnteringPhaseState;
 import io.github.cvrunmin.lanfasie.benderson.content.benderson.phases.ElevateToExtremeState;
+import io.github.cvrunmin.lanfasie.benderson.content.benderson.phases.KnockbackFromCenterPhaseState;
 import io.github.cvrunmin.lanfasie.benderson.content.benderson.phases.SummonAnticalabrumPhaseState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.FaceInfo;
@@ -101,14 +102,6 @@ public class BendersonRenderer<R extends LivingEntityRenderState & GeoRenderStat
     }
 
     @Override
-    public void preRenderPass(RenderPassInfo<R> renderPassInfo, SubmitNodeCollector renderTasks) {
-        super.preRenderPass(renderPassInfo, renderTasks);
-        renderPassInfo.addBonePositionListener("root", (worldPos, modelPos, localPos) -> {
-            renderPassInfo.renderState().addGeckolibData(BendersonDataTickets.MODEL_ROOT_POS, localPos);
-        });
-    }
-
-    @Override
     public void adjustModelBonesForRender(RenderPassInfo<R> renderPassInfo, BoneSnapshots snapshots) {
         if(renderPassInfo.getGeckolibData(BendersonDataTickets.BODY_STATE) == Benderson.BodyState.ENTRANCE){
             snapshots.ifPresent("rightLeg", bone -> bone.skipRender(true));
@@ -133,6 +126,12 @@ public class BendersonRenderer<R extends LivingEntityRenderState & GeoRenderStat
             }
         } else if (renderPassInfo.getGeckolibData(BendersonDataTickets.BODY_STATE) == Benderson.BodyState.UNVEILED) {
             snapshots.ifPresent("hat", bone -> bone.skipRender(true));
+        }
+        if(Objects.equals(renderPassInfo.getGeckolibData(BendersonDataTickets.ANIMATE_STATE), KnockbackFromCenterPhaseState.ANIMATE_STATE_LOOP)){
+            snapshots.ifPresent("root", bone -> {
+                bone.skipRender(true);
+                bone.skipChildrenRender(true);
+            });
         }
     }
 

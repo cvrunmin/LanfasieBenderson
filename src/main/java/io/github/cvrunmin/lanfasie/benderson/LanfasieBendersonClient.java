@@ -10,11 +10,13 @@ import io.github.cvrunmin.lanfasie.benderson.content.marker.TargetMarkerRenderer
 import io.github.cvrunmin.lanfasie.benderson.content.mundane_praisers.MundanePraiserBardRenderer;
 import io.github.cvrunmin.lanfasie.benderson.content.mundane_praisers.MundanePraiserRedMageRenderer;
 import io.github.cvrunmin.lanfasie.benderson.content.mundane_praisers.MundanePraiserWhiteMageRenderer;
+import io.github.cvrunmin.lanfasie.benderson.content.particles.DustSuckingBlowingParticleEmitter;
 import io.github.cvrunmin.lanfasie.benderson.content.unforgiven.*;
 import io.github.cvrunmin.lanfasie.benderson.data.*;
 import io.github.cvrunmin.lanfasie.benderson.index.AllDamageTypes;
 import io.github.cvrunmin.lanfasie.benderson.index.AllEntityTypes;
 import io.github.cvrunmin.lanfasie.benderson.index.AllItems;
+import io.github.cvrunmin.lanfasie.benderson.index.AllParticleTypes;
 import io.github.cvrunmin.lanfasie.benderson.utils.ArmPoseEnumProxy;
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
@@ -33,10 +35,7 @@ import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
-import net.neoforged.neoforge.client.event.EntityRenderersEvent;
-import net.neoforged.neoforge.client.event.ModelEvent;
-import net.neoforged.neoforge.client.event.RegisterConditionalItemModelPropertyEvent;
-import net.neoforged.neoforge.client.event.RegisterSpecialModelRendererEvent;
+import net.neoforged.neoforge.client.event.*;
 import net.neoforged.neoforge.client.extensions.common.IClientItemExtensions;
 import net.neoforged.neoforge.client.extensions.common.RegisterClientExtensionsEvent;
 import net.neoforged.neoforge.client.gui.ConfigurationScreen;
@@ -104,6 +103,12 @@ public class LanfasieBendersonClient {
     @SubscribeEvent
     public static void registerConditionalModelProperty(RegisterConditionalItemModelPropertyEvent event){
         event.register(Identifier.fromNamespaceAndPath(LanfasieBenderson.MODID, "is_provoking"), IsProvokingModelProperty.MAP_CODEC);
+    }
+
+    @SubscribeEvent
+    public static void registerParticleProvider(RegisterParticleProvidersEvent event){
+        event.registerSpecial(AllParticleTypes.DUST_SUCKING.get(), new DustSuckingBlowingParticleEmitter.SuckingProvider());
+        event.registerSpecial(AllParticleTypes.DUST_BLOWING.get(), new DustSuckingBlowingParticleEmitter.BlowingProvider());
     }
 
     @SubscribeEvent

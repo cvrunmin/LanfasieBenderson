@@ -52,6 +52,7 @@ public class LanfasieBenderson {
         AllBlocks.register(modEventBus);
         AllItems.register(modEventBus);
         AllAttributes.register(modEventBus);
+        AllParticleTypes.register(modEventBus);
         AllEntityTypes.register(modEventBus);
         AllMobEffects.register(modEventBus);
         AllCreativeModeTabs.register(modEventBus);

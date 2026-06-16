@@ -2,7 +2,9 @@ package io.github.cvrunmin.lanfasie.benderson.content.benderson.phases;
 
 import io.github.cvrunmin.lanfasie.benderson.content.benderson.Benderson;
 import io.github.cvrunmin.lanfasie.benderson.content.marker.TargetMarker;
+import io.github.cvrunmin.lanfasie.benderson.content.particles.BlockParticleDustEmitterOption;
 import io.github.cvrunmin.lanfasie.benderson.index.AllDamageTypes;
+import io.github.cvrunmin.lanfasie.benderson.index.AllParticleTypes;
 import net.minecraft.core.UUIDUtil;
 import net.minecraft.core.particles.BlockParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
@@ -53,7 +55,7 @@ public class KnockbackFromCenterPhaseState implements IPhaseState{
         if(trackingMarker == null || trackingMarker.isRemoved()) return false;
         currentTick--;
         int pastTicks = maxTicks - currentTick;
-        if(pastTicks == 5){
+        if(pastTicks == 20){
             this.owner.setAnimateState(ANIMATE_STATE_LOOP);
         } else if (pastTicks == 110) {
             this.owner.setAnimateState(ANIMATE_STATE_END);
@@ -62,6 +64,8 @@ public class KnockbackFromCenterPhaseState implements IPhaseState{
         } else if(pastTicks > 110 && pastTicks <= 120){
             if(pastTicks == 111){
                 this.owner.level().playSound(null, this.owner.getX(), this.owner.getY(), this.owner.getZ(), SoundEvents.MACE_SMASH_GROUND_HEAVY, SoundSource.HOSTILE, 1, 0.5f);
+                ((ServerLevel) this.owner.level()).sendParticles(new BlockParticleDustEmitterOption(AllParticleTypes.DUST_BLOWING.get(), Blocks.STONE.defaultBlockState(), (float) knockbackDistance, 1, 5),
+                        this.owner.getX(), this.owner.getY(), this.owner.getZ(), 0, 0, 0.0, 0, 0.0);
             }
             if(pastTicks % 2 == 1){
                 this.owner.level().playSound(null, this.owner.getX(), this.owner.getY(), this.owner.getZ(), SoundEvents.STONE_FALL, SoundSource.HOSTILE, 1, 0.5f);
