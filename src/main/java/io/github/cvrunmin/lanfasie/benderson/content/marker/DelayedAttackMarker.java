@@ -67,6 +67,7 @@ public class DelayedAttackMarker extends Entity implements TraceableEntity, IEnt
     private static final EntityDataAccessor<Float> RANGE_ACCESSOR = SynchedEntityData.defineId(DelayedAttackMarker.class, EntityDataSerializers.FLOAT);
     private static final EntityDataAccessor<Float> RANGE2_ACCESSOR = SynchedEntityData.defineId(DelayedAttackMarker.class, EntityDataSerializers.FLOAT);
     private static final EntityDataAccessor<Integer> LIFETICK_ACCESSOR = SynchedEntityData.defineId(DelayedAttackMarker.class, EntityDataSerializers.INT);
+    private static final EntityDataAccessor<Integer> LIFETICK2_ACCESSOR = SynchedEntityData.defineId(DelayedAttackMarker.class, EntityDataSerializers.INT);
 
     private EntityReference<LivingEntity> owner;
     private float damage = 1;
@@ -106,12 +107,23 @@ public class DelayedAttackMarker extends Entity implements TraceableEntity, IEnt
         return instance;
     }
 
-    public static DelayedAttackMarker createRemoteMeteor(Level level, Vec3 location, @Nullable LivingEntity owner, int lifeTick, boolean isEcliptic){
+    public static DelayedAttackMarker createRemoteMeteor(Level level, Vec3 location, @Nullable LivingEntity owner, int lifeTick){
         var instance = new DelayedAttackMarker(AllEntityTypes.DELAYED_ATTACK_MARKER.get(), level);
-        instance.setAttackType(isEcliptic ? AttackType.BENDERSON_REMOTE_ECLIPTIC_METEOR : AttackType.BENDERSON_REMOTE_STACKABLE_METEOR);
+        instance.setAttackType(AttackType.BENDERSON_REMOTE_STACKABLE_METEOR);
         instance.owner = EntityReference.of(owner);
         instance.setPos(location);
         instance.setMaxLifeTick(lifeTick + 5);
+        return instance;
+    }
+
+    public static DelayedAttackMarker createRemoteEclipticMeteor(Level level, Vec3 location, @Nullable LivingEntity owner, int lifeTick, int keypointLifeTick, float keypointY){
+        var instance = new DelayedAttackMarker(AllEntityTypes.DELAYED_ATTACK_MARKER.get(), level);
+        instance.setAttackType(AttackType.BENDERSON_REMOTE_ECLIPTIC_METEOR);
+        instance.owner = EntityReference.of(owner);
+        instance.setPos(location);
+        instance.setRange2(keypointY);
+        instance.setMaxLifeTick(lifeTick + 5);
+        instance.setKeypointLifeTick(keypointLifeTick + 5);
         return instance;
     }
 
@@ -121,6 +133,7 @@ public class DelayedAttackMarker extends Entity implements TraceableEntity, IEnt
         entityData.define(RANGE_ACCESSOR, 1f);
         entityData.define(RANGE2_ACCESSOR, 1f);
         entityData.define(LIFETICK_ACCESSOR, 0);
+        entityData.define(LIFETICK2_ACCESSOR, 0);
     }
 
     @Override
@@ -258,6 +271,14 @@ public class DelayedAttackMarker extends Entity implements TraceableEntity, IEnt
         entityData.set(LIFETICK_ACCESSOR, lifeTick);
     }
 
+    public int getKeypointLifeTick(){
+        return entityData.get(LIFETICK2_ACCESSOR);
+    }
+
+    private void setKeypointLifeTick(int v){
+        entityData.set(LIFETICK2_ACCESSOR, v);
+    }
+
     @Override
     public boolean hurtServer(ServerLevel level, DamageSource source, float damage) {
         return false;
@@ -269,6 +290,7 @@ public class DelayedAttackMarker extends Entity implements TraceableEntity, IEnt
         this.setRange(input.getFloatOr("Range", 1));
         this.setRange2(input.getFloatOr("Range2", 1));
         this.setMaxLifeTick(input.getIntOr("MaxLifeTick", 20));
+        this.setKeypointLifeTick(input.getIntOr("KeypointLifeTick", 0));
         this.lifeTick = input.getIntOr("LifeTick", 0);
         this.damage = input.getFloatOr("Damage", 0);
         this.owner = EntityReference.read(input, "Owner");
@@ -281,6 +303,7 @@ public class DelayedAttackMarker extends Entity implements TraceableEntity, IEnt
         output.putFloat("Range2", getRange2());
         output.putInt("LifeTick", lifeTick);
         output.putInt("MaxLifeTick", getMaxLifeTick());
+        output.putInt("KeypointLifeTick", getKeypointLifeTick());
         output.putFloat("Damage", damage);
         EntityReference.store(this.owner, output, "Owner");
     }

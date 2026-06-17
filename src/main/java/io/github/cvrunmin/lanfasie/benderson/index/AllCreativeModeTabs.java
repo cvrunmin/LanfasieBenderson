@@ -22,15 +22,16 @@ public class AllCreativeModeTabs {
             output.accept(AllItems.SWORD_OF_DAWNWAITER);
             output.accept(AllItems.SHALLOWAY_SWORD);
             output.accept(AllItems.SHALLOWAY_SHIELD);
+            output.accept(AllItems.MUNDANE_PRAISER_BOW);
+            output.accept(AllItems.MUNDANE_PRAISER_CANE);
+            output.accept(AllItems.MUNDANE_PRAISER_RAPIER);
+            output.accept(AllItems.MUNDANE_PRAISER_MANA_FOCI);
+            output.accept(AllItems.DAWNWAITER_TOTEM);
             output.accept(AllItems.UNFORGIVEN_PERFIDY_SPAWN_EGG);
             output.accept(AllItems.UNFORGIVEN_RIDICULE_SPAWN_EGG);
             output.accept(AllItems.UNFORGIVEN_INDISCRETION_SPAWN_EGG);
             output.accept(AllItems.UNFORGIVEN_COWARDICE_SPAWN_EGG);
             output.accept(AllItems.UNFORGIVEN_SPOILING_SPAWN_EGG);
-            output.accept(AllItems.MUNDANE_PRAISER_BOW);
-            output.accept(AllItems.MUNDANE_PRAISER_CANE);
-            output.accept(AllItems.MUNDANE_PRAISER_RAPIER);
-            output.accept(AllItems.MUNDANE_PRAISER_MANA_FOCI);
         }).build());
 
     public static void register(IEventBus modBus){

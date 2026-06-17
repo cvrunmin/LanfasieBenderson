@@ -24,7 +24,11 @@ public class NormalAttackPhaseState implements IPhaseState{
             var distVec = currentTarget.position().subtract(this.owner.position()).horizontal();
             if(distVec.length() > 3.0f){
                 var newPos = this.owner.position().add(distVec).subtract(distVec.normalize());
-                this.owner.getMoveControl().setWantedPosition(newPos.x, newPos.y, newPos.z, 1.0);
+                if(distVec.length() <= 7.0f) {
+                    this.owner.getMoveControl().setWantedPosition(newPos.x, newPos.y, newPos.z, 1.0);
+                }else{
+                    this.owner.teleportTo(newPos.x, newPos.y, newPos.z);
+                }
             }
             this.owner.lookAt(EntityAnchorArgument.Anchor.FEET, currentTarget.position());
             this.owner.swing(InteractionHand.MAIN_HAND);

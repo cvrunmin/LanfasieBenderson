@@ -17,6 +17,8 @@ public class MyLanguageProvider extends LanguageProvider {
     protected void addTranslations() {
         this.addItem(AllItems.SWORD_OF_DAWNWAITER, "Sword of Dawnwaiter");
         this.addItem(AllItems.SWORD_OF_DAWNWAITER_TAINTED, "Tainted Sword of Dawnwaiter");
+        this.addItem(AllItems.CLAYMORE_OF_HEI_POWER, "Claymore of Hei Power");
+        this.addItem(AllItems.DAWNWAITER_TOTEM, "Dawnwaiter Totem");
         this.addItem(AllItems.OMINOUS_ORB, "Ominous Orb of Latent");
         this.addItem(AllItems.PROVOKING_STICK, "Provoking Stick");
         this.addItem(AllItems.UNFORGIVEN_COWARDICE_SPAWN_EGG, "Unforgiven Cowardice Spawn Egg");
@@ -52,6 +54,7 @@ public class MyLanguageProvider extends LanguageProvider {
         this.add("subtitles.lanfasie_benderson.lethal_attack", "Omen of lethal attack");
         this.add("subtitles.lanfasie_benderson.stack_attack", "Omen of stack attack");
         this.add("subtitles.lanfasie_benderson.enemy_sweep", "Sweeping attack");
+        this.addItem(AllItems.AGGRO_UP_ICON, "Provoking");
         this.addEffect(AllMobEffects.AGGRO_UP, "Provoking");
         this.addEffect(AllMobEffects.VULNERABILITY_UP, "Vulnerability Up");
         this.addEffect(AllMobEffects.CURSE_BLACK_CAT, "Anticalabrum: Felis Invisibilis");

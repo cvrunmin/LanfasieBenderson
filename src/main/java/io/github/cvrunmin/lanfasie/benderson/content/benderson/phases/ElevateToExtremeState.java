@@ -30,7 +30,9 @@ public class ElevateToExtremeState implements IPhaseState{
     @Override
     public boolean tick() {
         if(tick >= 140) return false;
+        this.owner.suppressBossBarUpdate = true;
         tick++;
+        this.owner.getBossEvent().setProgress(tick / 140.0f);
         if(tick == 81){
             owner.setAnimateState(ANIMATE_STATE_P2);
             owner.setBodyState(Benderson.BodyState.TRANSITION_UNFORGIVEN_POST);
@@ -45,6 +47,7 @@ public class ElevateToExtremeState implements IPhaseState{
 
     @Override
     public void end() {
+        owner.setHealth(owner.getMaxHealth());
         owner.setBodyState(Benderson.BodyState.UNFORGIVEN);
     }
 

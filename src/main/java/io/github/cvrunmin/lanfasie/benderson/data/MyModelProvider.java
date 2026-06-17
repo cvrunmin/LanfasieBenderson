@@ -33,9 +33,8 @@ public class MyModelProvider extends ModelProvider {
     protected void registerModels(BlockModelGenerators blockModels, ItemModelGenerators itemModels) {
         blockModels.createTrivialCube(AllBlocks.DEEP_LATENT_BLOCK.get());
         blockModels.createTrivialCube(AllBlocks.DEEP_LATENT_CALLER.get());
-//        blockModels.blockStateOutput.accept(BlockModelGenerators.createSimpleBlock(AllBlocks.DEEP_LATENT_CALLER.get(),
-//                BlockModelGenerators.plainVariant(new TexturedModel(TextureMapping.cube(new Material(Identifier.withDefaultNamespace("block/sculk_shrieker_inner_top"))), ModelTemplates.CUBE_ALL).create(AllBlocks.DEEP_LATENT_CALLER.get(), blockModels.modelOutput))));
         itemModels.generateFlatItem(AllItems.AGGRO_UP_ICON.get(), ModelTemplates.FLAT_ITEM);
+        itemModels.generateFlatItem(AllItems.DAWNWAITER_TOTEM.get(), ModelTemplates.FLAT_ITEM);
         {
             ExtendedModelTemplate template = ExtendedModelTemplateBuilder.of(ModelTemplates.FLAT_HANDHELD_ITEM)
                     .transform(ItemDisplayContext.FIRST_PERSON_LEFT_HAND, transformVecBuilder -> transformVecBuilder.rotation(0, 90, -25).scale(1.02f, 1.02f, 0.68f).translation(1.695f, 4.8f, 1.13f))
@@ -45,6 +44,7 @@ public class MyModelProvider extends ModelProvider {
                     .build();
             itemModels.generateFlatItem(AllItems.SWORD_OF_DAWNWAITER.get(), template);
             itemModels.generateFlatItem(AllItems.SWORD_OF_DAWNWAITER_TAINTED.get(), template);
+            itemModels.generateFlatItem(AllItems.CLAYMORE_OF_HEI_POWER.get(), template);
         }
         itemModels.generateFlatItem(AllItems.OMINOUS_ORB.get(), ModelTemplates.FLAT_ITEM);
         itemModels.generateFlatItem(AllItems.UNFORGIVEN_COWARDICE_SPAWN_EGG.get(), ModelTemplates.FLAT_ITEM);

@@ -28,14 +28,14 @@ public class KnockbackFromCenterPhaseState implements IPhaseState{
     private final Benderson owner;
     private TargetMarker trackingMarker;
     private int currentTick = 0;
-    private final double knockbackDistance;
-    private int maxTicks = (int) (20 * (5.5f + 2.5f));
+    private final double knockbackMultiplier;
+    private int maxTicks = (int) (20 * (6.5f + 2.5f));
     private int cooldownTick = 0;
     private final float attackDamage;
 
-    public KnockbackFromCenterPhaseState(Benderson owner, double knockbackDistance, float attackDamage) {
+    public KnockbackFromCenterPhaseState(Benderson owner, double knockbackDistanceMultiplier, float attackDamage) {
         this.owner = owner;
-        this.knockbackDistance = knockbackDistance;
+        this.knockbackMultiplier = knockbackDistanceMultiplier;
         this.attackDamage = attackDamage;
     }
 
@@ -44,27 +44,27 @@ public class KnockbackFromCenterPhaseState implements IPhaseState{
     public void start() {
         if(this.owner.level().isClientSide()) return;
         this.owner.setShouldHideBoundingBox(true);
-        trackingMarker = new TargetMarker(this.owner.level(), this.owner.getCombatArenaCenter(), TargetMarker.MarkerArgs.simple(TargetMarker.MarkerType.KNOCKBACK_RADIAL, (float) (knockbackDistance * 2), 110));
-        this.owner.level().addFreshEntity(trackingMarker);
         this.owner.setAnimateState(ANIMATE_STATE_START);
         this.currentTick = this.maxTicks;
     }
 
     @Override
     public boolean tick() {
-        if(trackingMarker == null || trackingMarker.isRemoved()) return false;
+        if(maxTicks - currentTick > 20 && (trackingMarker == null || trackingMarker.isRemoved())) return false;
         currentTick--;
         int pastTicks = maxTicks - currentTick;
         if(pastTicks == 20){
             this.owner.setAnimateState(ANIMATE_STATE_LOOP);
-        } else if (pastTicks == 110) {
+            trackingMarker = new TargetMarker(this.owner.level(), this.owner.getCombatArenaCenter(), TargetMarker.MarkerArgs.simple(TargetMarker.MarkerType.KNOCKBACK_RADIAL, (float) (knockbackMultiplier * 2), 110));
+            this.owner.level().addFreshEntity(trackingMarker);
+        } else if (pastTicks == 126) {
             this.owner.setAnimateState(ANIMATE_STATE_END);
             Vec3 center = this.owner.getCombatArenaCenter();
             this.owner.teleportTo(center.x, center.y, center.z);
-        } else if(pastTicks > 110 && pastTicks <= 120){
-            if(pastTicks == 111){
+        } else if(pastTicks > 130 && pastTicks <= 140){
+            if(pastTicks == 131){
                 this.owner.level().playSound(null, this.owner.getX(), this.owner.getY(), this.owner.getZ(), SoundEvents.MACE_SMASH_GROUND_HEAVY, SoundSource.HOSTILE, 1, 0.5f);
-                ((ServerLevel) this.owner.level()).sendParticles(new BlockParticleDustEmitterOption(AllParticleTypes.DUST_BLOWING.get(), Blocks.STONE.defaultBlockState(), (float) knockbackDistance, 1, 5),
+                ((ServerLevel) this.owner.level()).sendParticles(new BlockParticleDustEmitterOption(AllParticleTypes.DUST_BLOWING.get(), Blocks.STONE.defaultBlockState(), (float) knockbackMultiplier, 1, 5),
                         this.owner.getX(), this.owner.getY(), this.owner.getZ(), 0, 0, 0.0, 0, 0.0);
             }
             if(pastTicks % 2 == 1){
@@ -72,7 +72,7 @@ public class KnockbackFromCenterPhaseState implements IPhaseState{
                 ((ServerLevel) this.owner.level()).sendParticles(new BlockParticleOption(ParticleTypes.DUST_PILLAR, Blocks.STONE.defaultBlockState()),
                         this.owner.getX(), this.owner.getY(), this.owner.getZ(), 16, 1, 0.0, 1, 0.0);
             }
-            if (pastTicks == 114) {
+            if (pastTicks == 134) {
                 if(!this.owner.level().isClientSide()){
                     var acceptingTargets = this.owner.level().getEntities(EntityTypeTest.forClass(LivingEntity.class),
                             this.owner.getCombatArena(),
@@ -84,7 +84,7 @@ public class KnockbackFromCenterPhaseState implements IPhaseState{
                         acceptingTarget.hurtServer(((ServerLevel) this.owner.level()),
                                 this.owner.damageSources().source(AllDamageTypes.BOSS_ABILITY_ATTACK, this.owner),
                                 damage);
-                        acceptingTarget.knockback(knockbackDistance * 0.5, dir.x, dir.z);
+                        acceptingTarget.knockback(this.owner.getArenaRadius() * knockbackMultiplier * 0.5, dir.x, dir.z);
                     }
                 }
             }

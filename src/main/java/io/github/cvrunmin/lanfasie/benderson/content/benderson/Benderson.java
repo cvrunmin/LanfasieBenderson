@@ -11,6 +11,7 @@ import com.geckolib.constant.DefaultAnimations;
 import com.geckolib.util.GeckoLibUtil;
 import com.mojang.serialization.Codec;
 import io.github.cvrunmin.lanfasie.benderson.LanfasieBenderson;
+import io.github.cvrunmin.lanfasie.benderson.ServerConfig;
 import io.github.cvrunmin.lanfasie.benderson.content.benderson.phases.*;
 import io.github.cvrunmin.lanfasie.benderson.content.marker.TargetMarker;
 import io.github.cvrunmin.lanfasie.benderson.index.*;
@@ -26,7 +27,6 @@ import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.resources.Identifier;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerBossEvent;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -54,7 +54,6 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.gamerules.GameRules;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
-import net.minecraft.world.level.storage.loot.LootTable;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.common.CommonHooks;
@@ -84,13 +83,13 @@ public class Benderson extends Monster implements GeoEntity {
     private ArenaEnteringPhaseState arenaEnteringPhaseState = new ArenaEnteringPhaseState(this);
     private NormalAttackPhaseState normalAttackPhaseState = new NormalAttackPhaseState(this);
     private LethalAttackPhaseState lethalAttackPhaseState = new LethalAttackPhaseState(this);
-    private CircleAoeSelfPhaseState circleAoeSelfPhaseState = new CircleAoeSelfPhaseState(this, 10, 22);
-    private CircleStackAttackPhaseState circleStackAttackPhaseState = new CircleStackAttackPhaseState(this, 20);
-    private PartialArenaAoePhaseState threeforthAreanAoePhaseState = new PartialArenaAoePhaseState(this, 22);
+    private CircleAoeSelfPhaseState circleAoeSelfPhaseState = new CircleAoeSelfPhaseState(this, 10, ServerConfig.BENDERSON_CIRCLE_AOE_SELF_ATTACK_DAMAGE_MULTIPLIER.get().floatValue());
+    private CircleStackAttackPhaseState circleStackAttackPhaseState = new CircleStackAttackPhaseState(this, ServerConfig.BENDERSON_CIRCLE_STACK_ATTACK_DAMAGE_MULTIPLIER.get().floatValue());
+    private PartialArenaAoePhaseState threeforthAreanAoePhaseState = new PartialArenaAoePhaseState(this, ServerConfig.BENDERSON_SWEEP_PARTIAL_ARENA_DAMAGE_MULTIPLIER.get().floatValue());
     private SummonAnticalabrumPhaseState summonAnticalabrumPhaseState = new SummonAnticalabrumPhaseState(this);
     private ElevateToExtremeState elevateToExtremeState = new ElevateToExtremeState(this);
-    private KnockbackFromCenterPhaseState knockbackFromCenterPhaseState = new KnockbackFromCenterPhaseState(this, 18, 2);
-    private PreEclipticMeteorState summonBlockPilePhaseState = new PreEclipticMeteorState(this, 10);
+    private KnockbackFromCenterPhaseState knockbackFromCenterPhaseState = new KnockbackFromCenterPhaseState(this, 0.75, ServerConfig.BENDERSON_CENTER_KNOCKBACKING_DAMAGE_MULTIPLIER.get().floatValue());
+    private PreEclipticMeteorState summonBlockPilePhaseState = new PreEclipticMeteorState(this, ServerConfig.BENDERSON_PRE_ECLIPTIC_PILE_DAMAGE_MULTIPLIER.get().floatValue());
     private EclipticMeteorState eclipticMeteorState = new EclipticMeteorState(this);
     private int globalCooldown;
     private PhaseStateTransitioner transitioner;
@@ -100,6 +99,12 @@ public class Benderson extends Monster implements GeoEntity {
             new ServerBossEvent(this.uuid, this.getDisplayName(), BossEvent.BossBarColor.PURPLE, BossEvent.BossBarOverlay.PROGRESS),
             e -> e.setDarkenScreen(true)
     );
+
+    public ServerBossEvent getBossEvent(){
+        return bossEvent;
+    }
+
+    public boolean suppressBossBarUpdate;
 
     private TargetMarker arenaHintMarker;
     private BlockPos arenaCenter;
@@ -383,12 +388,15 @@ public class Benderson extends Monster implements GeoEntity {
     protected void customServerAiStep(ServerLevel level) {
         super.customServerAiStep(level);
         if(globalCooldown > 0) --globalCooldown;
+        suppressBossBarUpdate = false;
         if((this.tickCount + this.getId()) % 2 != 0 && this.tickCount > 1 && shouldChangePhase){
             // force refresh targetGoal
             this.targetSelector.tick();
         }
         progressPhaseState();
-        this.bossEvent.setProgress(this.getHealth() / this.getMaxHealth());
+        if(!suppressBossBarUpdate) {
+            this.bossEvent.setProgress(this.getHealth() / this.getMaxHealth());
+        }
         if(tickCount % 20 == 0){
             this.entityData.set(ENMITY_SYNCER, Optional.ofNullable(getEnmityMapForSyncing()));
         }

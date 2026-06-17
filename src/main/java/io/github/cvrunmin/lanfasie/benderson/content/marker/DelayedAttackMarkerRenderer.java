@@ -48,6 +48,7 @@ public class DelayedAttackMarkerRenderer extends EntityRenderer<DelayedAttackMar
         super.extractRenderState(entity, state, partialTicks);
         state.lifeTick = entity.getLifeTick() + partialTicks;
         state.maxLifeTick = entity.getMaxLifeTick();
+        state.keypointLifeTick = entity.getKeypointLifeTick();
         state.attackType = entity.getAttackType();
         state.range = entity.getRange();
         state.range2 = entity.getRange2();
@@ -138,10 +139,12 @@ public class DelayedAttackMarkerRenderer extends EntityRenderer<DelayedAttackMar
         if(state.maxLifeTick - state.lifeTick < 5) return;
         float tGround = state.maxLifeTick - 8 - state.lifeTick;
         float tAll = state.maxLifeTick - 5;
+        float tKp = state.maxLifeTick - state.keypointLifeTick - 5;
+        float yOffset = state.range2;
         poseStack.pushPose();
         poseStack.scale(scale, scale, scale);
-        poseStack.translate(-0.5f, 10f * tGround / tAll, -0.5f);
-        poseStack.rotateAround(new Quaternionf().rotationZYX((float) (Math.PI * 30 / 180), (float) (Math.PI * 0.25), 0), 0, 10 * tGround / 20f * 0, 0);
+        poseStack.translate(-0.5f, 10f * Mth.clamp(tGround / tKp, 0, 1) - yOffset * Mth.clamp((tGround - tKp) / state.keypointLifeTick, 0, 1), -0.5f);
+        poseStack.rotateAround(new Quaternionf().rotationZYX((float) (Math.PI * 30 / 180), (float) (Math.PI * 0.25), 0), 0, 0, 0);
         state.blockModelRenderState.submit(poseStack, submitNodeCollector, state.lightCoords, OverlayTexture.NO_OVERLAY, state.outlineColor);
         poseStack.pushPose();
         poseStack.scale(0.33333f, 0.66667f, 0.33333f);

@@ -58,6 +58,7 @@ public class LanfasieBenderson {
         AllCreativeModeTabs.register(modEventBus);
         AllEntityDataSerializers.register(modEventBus);
         AllSoundEvents.register(modEventBus);
+        AllLootObjects.register(modEventBus);
 
         // Register ourselves for server and other game events we are interested in.
         // Note that this is necessary if and only if we want *this* class (LanfasieBenderson) to respond directly to events.
@@ -71,7 +72,7 @@ public class LanfasieBenderson {
 //        modEventBus.addListener(this::gatherData);
 
         // Register our mod's ModConfigSpec so that FML can create and load the config file for us
-        modContainer.registerConfig(ModConfig.Type.COMMON, Config.SPEC);
+        modContainer.registerConfig(ModConfig.Type.SERVER, ServerConfig.SPEC);
     }
 
     private void commonSetup(FMLCommonSetupEvent event) {
@@ -81,14 +82,7 @@ public class LanfasieBenderson {
     // Add the example block item to the building blocks tab
     private void addCreative(BuildCreativeModeTabContentsEvent event) {
         if(CreativeModeTabs.COMBAT.equals(event.getTabKey())){
-            event.accept(AllItems.SWORD_OF_DAWNWAITER);
             event.accept(AllItems.PROVOKING_STICK);
-        }
-        if(CreativeModeTabs.INGREDIENTS.equals(event.getTabKey())){
-            event.accept(AllItems.OMINOUS_ORB);
-        }
-        if(CreativeModeTabs.FUNCTIONAL_BLOCKS.equals(event.getTabKey())){
-            event.accept(AllItems.DEEP_LATENT_CALLER);
         }
         if(CreativeModeTabs.SPAWN_EGGS.equals(event.getTabKey())){
             event.accept(AllItems.UNFORGIVEN_COWARDICE_SPAWN_EGG);

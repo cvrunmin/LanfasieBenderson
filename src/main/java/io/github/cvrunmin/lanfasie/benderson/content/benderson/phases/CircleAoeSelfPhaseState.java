@@ -7,8 +7,10 @@ import io.github.cvrunmin.lanfasie.benderson.index.AllSoundEvents;
 import io.github.cvrunmin.lanfasie.benderson.utils.VulnerabilityHelper;
 import net.minecraft.commands.arguments.EntityAnchorArgument;
 import net.minecraft.core.UUIDUtil;
+import net.minecraft.core.particles.BlockParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
@@ -68,8 +70,13 @@ public class CircleAoeSelfPhaseState implements IPhaseState{
             if(pastTicks % 2 == 1){
                 double dx = -Mth.sin(this.owner.getYRot() * (float) (Math.PI / 180.0));
                 double dz = Mth.cos(this.owner.getYRot() * (float) (Math.PI / 180.0));
-                this.owner.level().playSound(null, this.owner.getX(), this.owner.getY(), this.owner.getZ(), AllSoundEvents.BOSS_SWEEP_SFX.get(), SoundSource.HOSTILE, 1, 1);
-                ((ServerLevel) this.owner.level()).sendParticles(ParticleTypes.SWEEP_ATTACK, this.owner.getX() + dx, this.owner.getY(0.5), this.owner.getZ() + dz, 0, dx, 0.0, dz, 0.0);
+                if(this.owner.getBodyState() == Benderson.BodyState.UNFORGIVEN){
+                    this.owner.level().playSound(null, this.owner.getX(), this.owner.getY(), this.owner.getZ(), SoundEvents.MACE_SMASH_GROUND, SoundSource.HOSTILE, 1, 1);
+                    ((ServerLevel) this.owner.level()).sendParticles(new BlockParticleOption(ParticleTypes.DUST_PILLAR, this.owner.level().getBlockState(this.owner.blockPosition())), this.owner.getX() + dx, this.owner.getY(0.5), this.owner.getZ() + dz, 0, dx, 0.0, dz, 0.0);
+                }else{
+                    this.owner.level().playSound(null, this.owner.getX(), this.owner.getY(), this.owner.getZ(), AllSoundEvents.BOSS_SWEEP_SFX.get(), SoundSource.HOSTILE, 1, 1);
+                    ((ServerLevel) this.owner.level()).sendParticles(ParticleTypes.SWEEP_ATTACK, this.owner.getX() + dx, this.owner.getY(0.5), this.owner.getZ() + dz, 0, dx, 0.0, dz, 0.0);
+                }
             }
             if (pastTicks == 114) {
                 if(!this.owner.level().isClientSide()){

@@ -51,7 +51,6 @@ public class PreEclipticMeteorState implements IPhaseState{
             int offset = this.owner.getArenaRadius() - 8;
             summonPilePoses[i] = this.owner.getCombatArenaCenter().add(offset * (i / 2 == 0 ? -1 : 1), 0, offset * (i == 1 || i == 2 ? 1 : -1));
             trackingMarkers[i] = new TargetMarker(this.owner.level(), summonPilePoses[i], TargetMarker.MarkerArgs.simple(TargetMarker.MarkerType.GROUND_PROXIMITY, (float) (this.owner.getArenaRadius() * 0.5 * Math.sqrt(2)), 90));
-            this.owner.level().addFreshEntity(trackingMarkers[i]);
         }
         this.owner.setAnimateState(ANIMATE_STATE_START);
         this.currentTick = this.maxTicks;
@@ -67,6 +66,9 @@ public class PreEclipticMeteorState implements IPhaseState{
             this.owner.setAnimateState(ANIMATE_STATE_END);
         } else if(pastTicks == 25){
             this.owner.setAnimateState("idle");
+            for (int i = 0; i < 4; i++) {
+                this.owner.level().addFreshEntity(trackingMarkers[i]);
+            }
         } else if(currentTick == 0) {
             return false;
         } else {
@@ -80,7 +82,11 @@ public class PreEclipticMeteorState implements IPhaseState{
                     var distVec = currentTarget.position().subtract(this.owner.position()).horizontal();
                     if(distVec.length() > 3.0f){
                         var newPos = this.owner.position().add(distVec).subtract(distVec.normalize());
-                        this.owner.getMoveControl().setWantedPosition(newPos.x, newPos.y, newPos.z, 1.0);
+                        if(distVec.length() <= 7.0f) {
+                            this.owner.getMoveControl().setWantedPosition(newPos.x, newPos.y, newPos.z, 1.0);
+                        }else{
+                            this.owner.teleportTo(newPos.x, newPos.y, newPos.z);
+                        }
                     }
                     this.owner.lookAt(EntityAnchorArgument.Anchor.FEET, currentTarget.position());
                 }
@@ -91,7 +97,7 @@ public class PreEclipticMeteorState implements IPhaseState{
             if(pastTicks == 85){
                 for (Vec3 pilePose : summonPilePoses) {
                     if(pilePose != null){
-                        var remoteMeteor = DelayedAttackMarker.createRemoteMeteor(this.owner.level(), pilePose, this.owner, 10, false);
+                        var remoteMeteor = DelayedAttackMarker.createRemoteMeteor(this.owner.level(), pilePose, this.owner, 10);
                         this.owner.level().addFreshEntity(remoteMeteor);
                     }
                 }

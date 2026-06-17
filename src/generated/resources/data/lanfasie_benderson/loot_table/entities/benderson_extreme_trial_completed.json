@@ -1,4 +1,26 @@
 {
   "type": "minecraft:entity",
+  "pools": [
+    {
+      "bonus_rolls": 0.0,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "functions": [
+            {
+              "add": false,
+              "count": {
+                "type": "lanfasie_benderson:scaled_by_extra_health",
+                "base": 2.0
+              },
+              "function": "minecraft:set_count"
+            }
+          ],
+          "name": "lanfasie_benderson:dawnwaiter_totem"
+        }
+      ],
+      "rolls": 1.0
+    }
+  ],
   "random_sequence": "lanfasie_benderson:entities/benderson_extreme_trial_completed"
 }

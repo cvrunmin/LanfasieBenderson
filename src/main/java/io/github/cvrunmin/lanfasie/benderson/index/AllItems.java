@@ -23,8 +23,11 @@ public class AllItems {
     public static final DeferredItem<BlockItem> DEEP_LATENT_CALLER = ITEMS.registerSimpleBlockItem(AllBlocks.DEEP_LATENT_CALLER);
     public static final DeferredItem<Item> SWORD_OF_DAWNWAITER = ITEMS.registerItem("sword_of_dawnwaiter", properties -> new Item(properties.sword(ToolMaterial.DIAMOND, 4.5f, -2.8f)));
     public static final DeferredItem<Item> SWORD_OF_DAWNWAITER_TAINTED = ITEMS.registerItem("sword_of_dawnwaiter_tainted", properties -> new Item(properties.sword(ToolMaterial.DIAMOND, 4.5f, -2.8f)));
+    public static final DeferredItem<Item> CLAYMORE_OF_HEI_POWER = ITEMS.registerItem("claymore_of_hei_power", properties -> new Item(properties.sword(ToolMaterial.NETHERITE, 8.5f, -3.2f)));
     public static final DeferredItem<OminousOrbItem> OMINOUS_ORB = ITEMS.registerItem("ominous_orb", properties -> new OminousOrbItem(properties.useCooldown(5).component(AllDataComponents.ARENA_RADIUS.get(), 24)));
     public static final DeferredItem<ProvokingStickItem> PROVOKING_STICK = ITEMS.registerItem("provoking_stick", properties -> new ProvokingStickItem(properties.useCooldown(2)));
+
+    public static final DeferredItem<Item> DAWNWAITER_TOTEM = ITEMS.registerSimpleItem("dawnwaiter_totem");
 
     public static final DeferredItem<SpawnEggItem> UNFORGIVEN_COWARDICE_SPAWN_EGG = ITEMS.registerItem("unforgiven_cowardice_spawn_egg", properties -> new SpawnEggItem(properties.spawnEgg(AllEntityTypes.UNFORGIVEN_COWARDICE.get())));
     public static final DeferredItem<SpawnEggItem> UNFORGIVEN_INDISCRETION_SPAWN_EGG = ITEMS.registerItem("unforgiven_indiscretion_spawn_egg", properties -> new SpawnEggItem(properties.spawnEgg(AllEntityTypes.UNFORGIVEN_INDISCRETION.get())));

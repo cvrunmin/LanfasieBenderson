@@ -1,6 +1,7 @@
 package io.github.cvrunmin.lanfasie.benderson.content.anticalabrum;
 
 import com.mojang.serialization.Codec;
+import io.github.cvrunmin.lanfasie.benderson.ServerConfig;
 import io.github.cvrunmin.lanfasie.benderson.content.marker.DelayedAttackMarker;
 import io.github.cvrunmin.lanfasie.benderson.index.AllEntityDataSerializers;
 import io.github.cvrunmin.lanfasie.benderson.index.AllEntityTypes;
@@ -21,6 +22,7 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.*;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.util.RandomPos;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
@@ -152,7 +154,15 @@ public class Anticalabrum extends Entity implements TraceableEntity, IEntityWith
                     var safeCol = this.level().getRandom().fork().nextInt(3);
                     for (int i = 0; i < 3; i++) {
                         if(i == safeCol) continue;
-                        var attacker = DelayedAttackMarker.createBlackCatSmash(level(), position(), getOwner(), range, i, 20, 110);
+                        var attacker = DelayedAttackMarker.createBlackCatSmash(
+                                level(),
+                                position(),
+                                getOwner(),
+                                range,
+                                i,
+                                (float) (ServerConfig.BENDERSON_CAT_SMASHING_ATTACK_DAMAGE_MULTIPLIER.get() *
+                                        Optional.ofNullable(getOwner()).map(entity -> entity.getAttributeValue(Attributes.ATTACK_DAMAGE)).orElse(1.0)),
+                                110);
                         level().addFreshEntity(attacker);
                     }
                 }
@@ -165,7 +175,14 @@ public class Anticalabrum extends Entity implements TraceableEntity, IEntityWith
                     var maxZ = minZ + range + range - 2;
                     var x = randomSource.nextDouble() * (maxX - minX) + minX;
                     var z = randomSource.nextDouble() * (maxZ - minZ) + minZ;
-                    var attacker = DelayedAttackMarker.createFireballMeteor(level(), new Vec3(x, position().y, z), getOwner(), 1.5f, 15, 70);
+                    var attacker = DelayedAttackMarker.createFireballMeteor(
+                            level(),
+                            new Vec3(x, position().y, z),
+                            getOwner(),
+                            1.5f,
+                            (float) (ServerConfig.BENDERSON_FIREBALL_METEOR_ATTACK_DAMAGE_MULTIPLIER.get() *
+                                    Optional.ofNullable(getOwner()).map(entity -> entity.getAttributeValue(Attributes.ATTACK_DAMAGE)).orElse(1.0)),
+                            70);
                     level().addFreshEntity(attacker);
                 }
             }
@@ -175,6 +192,7 @@ public class Anticalabrum extends Entity implements TraceableEntity, IEntityWith
     }
 
     @Override
+    @Nullable
     public LivingEntity getOwner() {
         return EntityReference.getLivingEntity(this.owner, level());
     }

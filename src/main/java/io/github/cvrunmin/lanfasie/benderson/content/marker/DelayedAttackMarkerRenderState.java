@@ -8,6 +8,7 @@ import net.minecraft.client.renderer.item.ItemStackRenderState;
 public class DelayedAttackMarkerRenderState extends EntityRenderState {
     public float lifeTick;
     public int maxLifeTick;
+    public int keypointLifeTick;
     public DelayedAttackMarker.AttackType attackType;
     public float range;
     public float range2;

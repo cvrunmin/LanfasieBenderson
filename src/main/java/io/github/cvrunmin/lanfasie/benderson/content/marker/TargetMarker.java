@@ -74,10 +74,10 @@ public class TargetMarker extends Entity implements IEntityWithComplexSpawn, Own
     public record MarkerArgs(MarkerType markerType, float range, float range2, Vec3 direction, int expectedLife){
         public static final Codec<MarkerArgs> CODEC = RecordCodecBuilder.create(instance ->
                 instance.group(MarkerType.CODEC.fieldOf("MarkerType").forGetter(MarkerArgs::markerType),
-                    Codec.FLOAT.fieldOf("Range").orElse(0f).validate(r -> r >= 0 ? DataResult.success(r) : DataResult.error(() -> "range must be no less than 0")).forGetter(MarkerArgs::range),
-                        Codec.FLOAT.fieldOf("Range2").orElse(0f).validate(r -> r >= 0 ? DataResult.success(r) : DataResult.error(() -> "range must be no less than 0")).forGetter(MarkerArgs::range2),
-                        Vec3.CODEC.fieldOf("Dir").orElse(new Vec3(0, 0, 1)).forGetter(MarkerArgs::direction),
-                        Codec.INT.fieldOf("ExpectedLife").orElse(1).validate(life -> life > 0 ? DataResult.success(life) : DataResult.error(() -> "expectedLife must be larger than 0")).forGetter(MarkerArgs::expectedLife)
+                    Codec.FLOAT.optionalFieldOf("Range", 0f).validate(r -> r >= 0 ? DataResult.success(r) : DataResult.error(() -> "range must be no less than 0")).forGetter(MarkerArgs::range),
+                        Codec.FLOAT.optionalFieldOf("Range2", 0f).validate(r -> r >= 0 ? DataResult.success(r) : DataResult.error(() -> "range must be no less than 0")).forGetter(MarkerArgs::range2),
+                        Vec3.CODEC.optionalFieldOf("Dir", new Vec3(0, 0, 1)).forGetter(MarkerArgs::direction),
+                        Codec.INT.optionalFieldOf("ExpectedLife", 1).validate(life -> life > 0 ? DataResult.success(life) : DataResult.error(() -> "expectedLife must be larger than 0")).forGetter(MarkerArgs::expectedLife)
                     ).apply(instance, MarkerArgs::new));
 
         public static final StreamCodec<ByteBuf, MarkerArgs> STREAM_CODEC = new StreamCodec<>() {

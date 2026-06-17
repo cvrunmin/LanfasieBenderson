@@ -7,12 +7,12 @@ import io.github.cvrunmin.lanfasie.benderson.content.particles.BlockParticleDust
 import io.github.cvrunmin.lanfasie.benderson.index.AllBlocks;
 import io.github.cvrunmin.lanfasie.benderson.index.AllDamageTypes;
 import io.github.cvrunmin.lanfasie.benderson.index.AllParticleTypes;
+import net.minecraft.commands.arguments.EntityAnchorArgument;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityReference;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.ServerExplosion;
@@ -43,6 +43,7 @@ public class EclipticMeteorState implements IPhaseState{
         if(this.owner.level().isClientSide()) return;
         Vec3 center = this.owner.getCombatArenaCenter();
         this.owner.teleportTo(center.x, center.y, center.z);
+        this.owner.lookAt(EntityAnchorArgument.Anchor.FEET, new Vec3(0, 0, 1).add(this.owner.position()));
         this.owner.setAnimateState(ANIMATE_STATE_START);
         this.trackingMarker = new TargetMarker(this.owner.level(), center, TargetMarker.MarkerArgs.simple(TargetMarker.MarkerType.CIRCLE_AOE, (float) (this.owner.getArenaRadius() * 2 * Math.sqrt(2)), 200));
         this.owner.level().addFreshEntity(trackingMarker);
@@ -68,7 +69,7 @@ public class EclipticMeteorState implements IPhaseState{
         if(pastTicks == 15){
             this.owner.setAnimateState(ANIMATE_STATE_LOOP);
         } else if (pastTicks == 160) {
-            var remoteMeteor = DelayedAttackMarker.createRemoteMeteor(this.owner.level(), arenaCenter.subtract(0, 1, 0), this.owner, 84, true);
+            var remoteMeteor = DelayedAttackMarker.createRemoteEclipticMeteor(this.owner.level(), arenaCenter.subtract(0, 1, 0), this.owner, 100, 20, 0.2f);
             this.owner.level().addFreshEntity(remoteMeteor);
         } else if (pastTicks == 200) {
             this.owner.setAnimateState(ANIMATE_STATE_END);
@@ -95,7 +96,7 @@ public class EclipticMeteorState implements IPhaseState{
                 for (EntityReference<LivingEntity> reference : targetingEntitySnapshot) {
                     var entity = reference.getEntity(this.owner.level(), LivingEntity.class);
                     if (entity != null && this.owner.canAttack(entity) && this.owner.getCombatArena().contains(entity.position())) {
-                        entity.hurtServer(((ServerLevel) this.owner.level()), this.owner.damageSources().source(AllDamageTypes.ECLIPTIC_METEOR, this.owner), Float.MAX_VALUE);
+                        entity.hurtServer(((ServerLevel) this.owner.level()), this.owner.damageSources().source(AllDamageTypes.ECLIPTIC_METEOR, this.owner), 9999999);
                     }
                 }
             } else if (pastTicks == 245) {

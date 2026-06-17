@@ -43,19 +43,22 @@ import java.util.Optional;
 
 public class BendersonWeaponGeoLayer<O, R extends GeoRenderState> extends BlockAndItemGeoLayer<Benderson, O, R> {
     private final Lazy<ItemStack> itemStack;
+    private final Lazy<ItemStack> extremeItemStack;
 
     private final QuadInstance quadInstance = new QuadInstance();
 
     public BendersonWeaponGeoLayer(EntityRendererProvider.Context context, GeoRenderer<Benderson, O, R> renderer) {
         super(context, renderer);
         this.itemStack = Lazy.of(AllItems.SWORD_OF_DAWNWAITER_TAINTED::toStack);
+        this.extremeItemStack = Lazy.of(AllItems.CLAYMORE_OF_HEI_POWER::toStack);
     }
 
     @Override
     protected List<RenderData> getRelevantBones(Benderson animatable, @Nullable O relatedObject, R renderState, float partialTick) {
+        ItemStack stack = animatable.getBodyState() == Benderson.BodyState.TRANSITION_UNFORGIVEN_POST || animatable.getBodyState() == Benderson.BodyState.UNFORGIVEN ? extremeItemStack.get() : itemStack.get();
         return List.of(RenderData.item("rightHand",
                 ItemDisplayContext.THIRD_PERSON_RIGHT_HAND,
-                RenderUtil.createRenderStateForItem(itemStack.get(), this.itemModelResolver, ItemDisplayContext.THIRD_PERSON_RIGHT_HAND, animatable)));
+                RenderUtil.createRenderStateForItem(stack, this.itemModelResolver, ItemDisplayContext.THIRD_PERSON_RIGHT_HAND, animatable)));
     }
 
     @Override
