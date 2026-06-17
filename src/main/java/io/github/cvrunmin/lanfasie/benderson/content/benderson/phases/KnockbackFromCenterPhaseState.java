@@ -55,7 +55,7 @@ public class KnockbackFromCenterPhaseState implements IPhaseState{
         int pastTicks = maxTicks - currentTick;
         if(pastTicks == 20){
             this.owner.setAnimateState(ANIMATE_STATE_LOOP);
-            trackingMarker = new TargetMarker(this.owner.level(), this.owner.getCombatArenaCenter(), TargetMarker.MarkerArgs.simple(TargetMarker.MarkerType.KNOCKBACK_RADIAL, (float) (knockbackMultiplier * 2), 110));
+            trackingMarker = new TargetMarker(this.owner.level(), this.owner.getCombatArenaCenter(), TargetMarker.MarkerArgs.simple(TargetMarker.MarkerType.KNOCKBACK_RADIAL, (float) (this.owner.getArenaRadius() * knockbackMultiplier * 2), 110));
             this.owner.level().addFreshEntity(trackingMarker);
         } else if (pastTicks == 126) {
             this.owner.setAnimateState(ANIMATE_STATE_END);
@@ -64,7 +64,7 @@ public class KnockbackFromCenterPhaseState implements IPhaseState{
         } else if(pastTicks > 130 && pastTicks <= 140){
             if(pastTicks == 131){
                 this.owner.level().playSound(null, this.owner.getX(), this.owner.getY(), this.owner.getZ(), SoundEvents.MACE_SMASH_GROUND_HEAVY, SoundSource.HOSTILE, 1, 0.5f);
-                ((ServerLevel) this.owner.level()).sendParticles(new BlockParticleDustEmitterOption(AllParticleTypes.DUST_BLOWING.get(), Blocks.STONE.defaultBlockState(), (float) knockbackMultiplier, 1, 5),
+                ((ServerLevel) this.owner.level()).sendParticles(new BlockParticleDustEmitterOption(AllParticleTypes.BLOCK_DUST_BLOWING.get(), Blocks.STONE.defaultBlockState(), (float) (this.owner.getArenaRadius() * knockbackMultiplier), 1, 5),
                         this.owner.getX(), this.owner.getY(), this.owner.getZ(), 0, 0, 0.0, 0, 0.0);
             }
             if(pastTicks % 2 == 1){
@@ -103,7 +103,7 @@ public class KnockbackFromCenterPhaseState implements IPhaseState{
         }
         this.trackingMarker = null;
         this.currentTick = 0;
-        cooldownTick = 400;
+        cooldownTick = 2400;
         this.owner.setGlobalCooldown(100);
     }
 
@@ -114,7 +114,7 @@ public class KnockbackFromCenterPhaseState implements IPhaseState{
 
     @Override
     public boolean canUse() {
-        return this.owner.getBodyState() == Benderson.BodyState.UNFORGIVEN || this.owner.getBodyState() == Benderson.BodyState.UNVEILED;
+        return (this.owner.getBodyState() == Benderson.BodyState.UNFORGIVEN || this.owner.getBodyState() == Benderson.BodyState.UNVEILED) && !this.owner.isInGlobalCooldown();
     }
 
     @Override

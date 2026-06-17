@@ -20,6 +20,7 @@
     "ItemLayerRenderStateAccessor",
     "ItemStackRenderStateAccessor",
     "LevelRendererAccessor",
+    "ParticleAccessor",
     "SoundEngineAccessor",
     "SoundManagerAccessor"
   ],

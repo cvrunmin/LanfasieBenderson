@@ -13,6 +13,7 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
 import io.github.cvrunmin.lanfasie.benderson.content.benderson.phases.ArenaEnteringPhaseState;
 import io.github.cvrunmin.lanfasie.benderson.content.benderson.phases.ElevateToExtremeState;
+import io.github.cvrunmin.lanfasie.benderson.content.benderson.phases.KnockbackFromCenterPhaseState;
 import io.github.cvrunmin.lanfasie.benderson.index.AllItems;
 import io.github.cvrunmin.lanfasie.benderson.mixin.ItemLayerRenderStateAccessor;
 import io.github.cvrunmin.lanfasie.benderson.mixin.ItemStackRenderStateAccessor;
@@ -72,6 +73,10 @@ public class BendersonWeaponGeoLayer<O, R extends GeoRenderState> extends BlockA
 
     @Override
     protected void submitItemStackRender(PoseStack poseStack, GeoBone bone, ItemStackRenderState stackState, ItemDisplayContext displayContext, R renderState, SubmitNodeCollector submitNodeCollector, int packedLight) {
+        if (Objects.equals(renderState.getGeckolibData(BendersonDataTickets.ANIMATE_STATE), KnockbackFromCenterPhaseState.ANIMATE_STATE_LOOP)) {
+            return;
+        }
+
         poseStack.pushPose();
 
         if (displayContext == ItemDisplayContext.THIRD_PERSON_RIGHT_HAND) {
@@ -91,13 +96,13 @@ public class BendersonWeaponGeoLayer<O, R extends GeoRenderState> extends BlockA
                     } else {
                         alpha = 1;
                     }
-                    customSubmitItemStackState(stackState, poseStack, submitNodeCollector, packedLight, OverlayTexture.NO_OVERLAY, alpha);
+                    customSubmitItemStackState(stackState, poseStack, submitNodeCollector, this.quadInstance, packedLight, OverlayTexture.NO_OVERLAY, alpha);
                 }
             } else if(Objects.equals(renderState.getGeckolibData(BendersonDataTickets.ANIMATE_STATE), ElevateToExtremeState.ANIMATE_STATE_P1)){
                 var tSec = performController.getCurrentTimelineTime();
                 if (tSec >= 0.38) {
                     float alpha = (float) Mth.clamp(1 - (tSec - 0.38) / 0.25, 0, 1);
-                    customSubmitItemStackState(stackState, poseStack, submitNodeCollector, packedLight, OverlayTexture.NO_OVERLAY, alpha);
+                    customSubmitItemStackState(stackState, poseStack, submitNodeCollector, this.quadInstance, packedLight, OverlayTexture.NO_OVERLAY, alpha);
                 } else {
                     stackState.submit(poseStack, submitNodeCollector, packedLight, OverlayTexture.NO_OVERLAY, renderState instanceof EntityRenderState entityState ? entityState.outlineColor : 0);
                 }
@@ -110,7 +115,7 @@ public class BendersonWeaponGeoLayer<O, R extends GeoRenderState> extends BlockA
         poseStack.popPose();
     }
 
-    private void customSubmitItemStackState(ItemStackRenderState stackState, PoseStack poseStack, SubmitNodeCollector submitNodeCollector, int packedLight, int overlay, float alpha){
+    public static void customSubmitItemStackState(ItemStackRenderState stackState, PoseStack poseStack, SubmitNodeCollector submitNodeCollector, QuadInstance quadInstance, int packedLight, int overlay, float alpha){
         if(alpha < 0.1) return;
         for (int i = 0; i < ((ItemStackRenderStateAccessor) stackState).getActiveLayerCount(); i++) {
             var layerState = ((ItemStackRenderStateAccessor) stackState).getLayers()[i];
@@ -132,7 +137,7 @@ public class BendersonWeaponGeoLayer<O, R extends GeoRenderState> extends BlockA
                 for (BakedQuad quad : ((ItemLayerRenderStateAccessor) layerState).getQuads()) {
                     BakedQuad.MaterialInfo material = quad.materialInfo();
                     RenderType renderType = RenderTypes.itemTranslucent(material.sprite().atlasLocation());
-                    this.quadInstance.setColor(getLayerColorSafe(tints, material));
+                    quadInstance.setColor(getLayerColorSafe(tints, material));
 
                     submitNodeCollector.submitCustomGeometry(poseStack, renderType, (inPose, buffer) -> {
                         Vector3fc normalVec = quad.direction().getUnitVec3f();

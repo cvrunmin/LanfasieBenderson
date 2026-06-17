@@ -1,12 +1,11 @@
 package io.github.cvrunmin.lanfasie.benderson.index;
 
-import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import io.github.cvrunmin.lanfasie.benderson.LanfasieBenderson;
 import io.github.cvrunmin.lanfasie.benderson.content.particles.BlockParticleDustEmitterOption;
+import io.github.cvrunmin.lanfasie.benderson.content.particles.ColoredDustEmitterOption;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleType;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
@@ -19,8 +18,10 @@ import java.util.function.Function;
 public class AllParticleTypes {
     private static final DeferredRegister<ParticleType<?>> PARTICLE_TYPE = DeferredRegister.create(Registries.PARTICLE_TYPE, LanfasieBenderson.MODID);
 
-    public static final DeferredHolder<ParticleType<?>, ParticleType<BlockParticleDustEmitterOption>> DUST_SUCKING = PARTICLE_TYPE.register("dust_sucking", () -> createType(true, BlockParticleDustEmitterOption::codec, BlockParticleDustEmitterOption::streamCodec));
-    public static final DeferredHolder<ParticleType<?>, ParticleType<BlockParticleDustEmitterOption>> DUST_BLOWING = PARTICLE_TYPE.register("dust_blowing", () -> createType(true, BlockParticleDustEmitterOption::codec, BlockParticleDustEmitterOption::streamCodec));
+    public static final DeferredHolder<ParticleType<?>, ParticleType<BlockParticleDustEmitterOption>> BLOCK_DUST_SUCKING = PARTICLE_TYPE.register("block_dust_sucking", () -> createType(true, BlockParticleDustEmitterOption::codec, BlockParticleDustEmitterOption::streamCodec));
+    public static final DeferredHolder<ParticleType<?>, ParticleType<BlockParticleDustEmitterOption>> BLOCK_DUST_BLOWING = PARTICLE_TYPE.register("block_dust_blowing", () -> createType(true, BlockParticleDustEmitterOption::codec, BlockParticleDustEmitterOption::streamCodec));
+    public static final DeferredHolder<ParticleType<?>, ParticleType<ColoredDustEmitterOption>> DUST_SUCKING = PARTICLE_TYPE.register("dust_sucking", () -> createType(true, ColoredDustEmitterOption::codec, ColoredDustEmitterOption::streamCodec));
+    public static final DeferredHolder<ParticleType<?>, ParticleType<ColoredDustEmitterOption>> DUST_BLOWING = PARTICLE_TYPE.register("dust_blowing", () -> createType(true, ColoredDustEmitterOption::codec, ColoredDustEmitterOption::streamCodec));
 
     public static void register(IEventBus modBus){
         PARTICLE_TYPE.register(modBus);

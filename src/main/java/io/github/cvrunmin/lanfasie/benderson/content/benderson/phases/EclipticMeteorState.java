@@ -4,6 +4,7 @@ import io.github.cvrunmin.lanfasie.benderson.content.benderson.Benderson;
 import io.github.cvrunmin.lanfasie.benderson.content.marker.DelayedAttackMarker;
 import io.github.cvrunmin.lanfasie.benderson.content.marker.TargetMarker;
 import io.github.cvrunmin.lanfasie.benderson.content.particles.BlockParticleDustEmitterOption;
+import io.github.cvrunmin.lanfasie.benderson.content.particles.ColoredDustEmitterOption;
 import io.github.cvrunmin.lanfasie.benderson.index.AllBlocks;
 import io.github.cvrunmin.lanfasie.benderson.index.AllDamageTypes;
 import io.github.cvrunmin.lanfasie.benderson.index.AllParticleTypes;
@@ -62,14 +63,14 @@ public class EclipticMeteorState implements IPhaseState{
                 this.owner.level().playSound(null, BlockPos.containing(arenaCenter), SoundEvents.FIRE_EXTINGUISH, SoundSource.HOSTILE, 0.1f + alpha, alpha);
             }
             if(pastTicks < 170 && pastTicks % 5 == 0){
-                ((ServerLevel) this.owner.level()).sendParticles(new BlockParticleDustEmitterOption(AllParticleTypes.DUST_SUCKING.get(), Blocks.STONE.defaultBlockState(), (float) (this.owner.getArenaRadius() * Math.sqrt(2)), 1, 5),
-                        arenaCenter.x, arenaCenter.y + 0.5f, arenaCenter.z, 0, 0, 0.0, 0, 0.0);
+                ((ServerLevel) this.owner.level()).sendParticles(new ColoredDustEmitterOption(AllParticleTypes.DUST_SUCKING.get(), 0xffffffff, 2, (float) (this.owner.getArenaRadius() * Math.sqrt(2)), 2, -0.49f, 5),
+                        arenaCenter.x, arenaCenter.y, arenaCenter.z, 0, 0, 0.0, 0, 0.0);
             }
         }
         if(pastTicks == 15){
             this.owner.setAnimateState(ANIMATE_STATE_LOOP);
         } else if (pastTicks == 160) {
-            var remoteMeteor = DelayedAttackMarker.createRemoteEclipticMeteor(this.owner.level(), arenaCenter.subtract(0, 1, 0), this.owner, 100, 20, 0.2f);
+            var remoteMeteor = DelayedAttackMarker.createRemoteEclipticMeteor(this.owner.level(), arenaCenter, this.owner, 90, 10, 0.2f);
             this.owner.level().addFreshEntity(remoteMeteor);
         } else if (pastTicks == 200) {
             this.owner.setAnimateState(ANIMATE_STATE_END);
@@ -85,11 +86,11 @@ public class EclipticMeteorState implements IPhaseState{
             if(pastTicks > 210 && pastTicks <= 240){
                 if(pastTicks % 5 == 0){
                     this.owner.level().playSound(null, BlockPos.containing(arenaCenter), SoundEvents.LIGHTNING_BOLT_THUNDER, SoundSource.HOSTILE, 4, 0.5f);
-                    ((ServerLevel) this.owner.level()).sendParticles(new BlockParticleDustEmitterOption(AllParticleTypes.DUST_BLOWING.get(), Blocks.STONE.defaultBlockState(), (float) (this.owner.getArenaRadius() * Math.sqrt(2)), 1, 5),
+                    ((ServerLevel) this.owner.level()).sendParticles(new BlockParticleDustEmitterOption(AllParticleTypes.BLOCK_DUST_BLOWING.get(), Blocks.STONE.defaultBlockState(), (float) (this.owner.getArenaRadius() * Math.sqrt(2)), 2, 5),
                             arenaCenter.x, arenaCenter.y, arenaCenter.z, 0, 0, 0.0, 0, 0.0);
-                }
-                if(pastTicks == 239){
-                    this.owner.level().playSound(null, BlockPos.containing(arenaCenter), SoundEvents.GENERIC_EXPLODE.value(), SoundSource.HOSTILE, 4, 0.5f);
+                    if(pastTicks >= 230){
+                        this.owner.level().playSound(null, BlockPos.containing(arenaCenter), SoundEvents.GENERIC_EXPLODE.value(), SoundSource.HOSTILE, 4, 0.5f);
+                    }
                 }
             }
             if (pastTicks == 240) {
@@ -116,6 +117,7 @@ public class EclipticMeteorState implements IPhaseState{
         trackingMarker = null;
         this.owner.setAnimateState("idle");
         this.owner.setShouldHideBoundingBox(false);
+        this.owner.setGlobalCooldown(100);
     }
 
     @Override

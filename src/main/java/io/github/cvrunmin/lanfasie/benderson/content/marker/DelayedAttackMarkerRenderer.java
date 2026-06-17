@@ -137,14 +137,15 @@ public class DelayedAttackMarkerRenderer extends EntityRenderer<DelayedAttackMar
 
     private void submitRemoteMeteor(DelayedAttackMarkerRenderState state, PoseStack poseStack, SubmitNodeCollector submitNodeCollector, CameraRenderState camera, float scale){
         if(state.maxLifeTick - state.lifeTick < 5) return;
-        float tGround = state.maxLifeTick - 8 - state.lifeTick;
         float tAll = state.maxLifeTick - 5;
-        float tKp = state.maxLifeTick - state.keypointLifeTick - 5;
+        float tKp = tAll - state.keypointLifeTick;
+        float tGround = state.lifeTick;
         float yOffset = state.range2;
         poseStack.pushPose();
         poseStack.scale(scale, scale, scale);
-        poseStack.translate(-0.5f, 10f * Mth.clamp(tGround / tKp, 0, 1) - yOffset * Mth.clamp((tGround - tKp) / state.keypointLifeTick, 0, 1), -0.5f);
+        poseStack.translate(0, 10f * Mth.clamp(1 - tGround / tKp, 0, 1) - yOffset / scale * Mth.clamp((tGround - tKp) / state.keypointLifeTick, 0, 1), 0);
         poseStack.rotateAround(new Quaternionf().rotationZYX((float) (Math.PI * 30 / 180), (float) (Math.PI * 0.25), 0), 0, 0, 0);
+        poseStack.translate(-0.5, -0.5, -0.5);
         state.blockModelRenderState.submit(poseStack, submitNodeCollector, state.lightCoords, OverlayTexture.NO_OVERLAY, state.outlineColor);
         poseStack.pushPose();
         poseStack.scale(0.33333f, 0.66667f, 0.33333f);

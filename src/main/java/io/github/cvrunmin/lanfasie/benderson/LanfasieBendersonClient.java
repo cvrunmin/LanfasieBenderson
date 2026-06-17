@@ -10,6 +10,7 @@ import io.github.cvrunmin.lanfasie.benderson.content.marker.TargetMarkerRenderer
 import io.github.cvrunmin.lanfasie.benderson.content.mundane_praisers.MundanePraiserBardRenderer;
 import io.github.cvrunmin.lanfasie.benderson.content.mundane_praisers.MundanePraiserRedMageRenderer;
 import io.github.cvrunmin.lanfasie.benderson.content.mundane_praisers.MundanePraiserWhiteMageRenderer;
+import io.github.cvrunmin.lanfasie.benderson.content.particles.BlockDustSuckingBlowingParticleEmitter;
 import io.github.cvrunmin.lanfasie.benderson.content.particles.DustSuckingBlowingParticleEmitter;
 import io.github.cvrunmin.lanfasie.benderson.content.unforgiven.*;
 import io.github.cvrunmin.lanfasie.benderson.data.*;
@@ -19,12 +20,10 @@ import io.github.cvrunmin.lanfasie.benderson.index.AllItems;
 import io.github.cvrunmin.lanfasie.benderson.index.AllParticleTypes;
 import io.github.cvrunmin.lanfasie.benderson.utils.ArmPoseEnumProxy;
 import net.minecraft.client.model.HumanoidModel;
-import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.core.RegistrySetBuilder;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.data.loot.LootTableProvider;
 import net.minecraft.resources.Identifier;
-import net.minecraft.util.context.ContextKeySet;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
@@ -107,8 +106,10 @@ public class LanfasieBendersonClient {
 
     @SubscribeEvent
     public static void registerParticleProvider(RegisterParticleProvidersEvent event){
-        event.registerSpecial(AllParticleTypes.DUST_SUCKING.get(), new DustSuckingBlowingParticleEmitter.SuckingProvider());
+        event.registerSpecial(AllParticleTypes.BLOCK_DUST_SUCKING.get(), new BlockDustSuckingBlowingParticleEmitter.SuckingProvider());
+        event.registerSpecial(AllParticleTypes.BLOCK_DUST_BLOWING.get(), new BlockDustSuckingBlowingParticleEmitter.BlowingProvider());
         event.registerSpecial(AllParticleTypes.DUST_BLOWING.get(), new DustSuckingBlowingParticleEmitter.BlowingProvider());
+        event.registerSpecial(AllParticleTypes.DUST_SUCKING.get(), new DustSuckingBlowingParticleEmitter.SuckingProvider());
     }
 
     @SubscribeEvent

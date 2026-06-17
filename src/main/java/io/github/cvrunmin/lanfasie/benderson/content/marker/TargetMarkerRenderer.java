@@ -526,9 +526,9 @@ public class TargetMarkerRenderer extends EntityRenderer<TargetMarker, TargetMar
                 for (int j = 0; j < 16; j++) {
                     poseStack1.pushPose();
                     poseStack1.rotateAround(new Quaternionf().rotationY((float) (Math.PI * j / 8.0)), 0, 0, 0);
-                    float x1 = (float) (iOffsetted * Math.cos(Math.PI * 7 / 128));
+                    float x1 = (float) (iOffsetted * Math.cos(Math.PI * 8 / 128));
                     float x2 = x1 * (iOffsetted + 1) / iOffsetted;
-                    float z1 = (float) (iOffsetted * Math.sin(Math.PI * 7 / 128));
+                    float z1 = (float) (iOffsetted * Math.sin(Math.PI * 8 / 128));
                     float z2 = z1 * (iOffsetted + 1) / iOffsetted;
                     var pose = poseStack1.last();
                     buffer.addVertex(pose, x1, 1e-3f, -z1).setUv(1, 0).setColor(1f, 1f, 1f, alpha * alpha1).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setNormal(pose, 0, 1, 0);

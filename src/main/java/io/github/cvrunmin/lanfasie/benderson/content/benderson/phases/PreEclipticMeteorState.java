@@ -71,7 +71,7 @@ public class PreEclipticMeteorState implements IPhaseState{
             }
         } else if(currentTick == 0) {
             return false;
-        } else {
+        } else if(pastTicks > 25) {
             var withinPhaseNormalAttackTick = (pastTicks - 26) % 30;
             if(this.owner.getTarget() != null){
                 var currentTarget = this.owner.getTarget();
@@ -148,6 +148,8 @@ public class PreEclipticMeteorState implements IPhaseState{
                     }
 
                     this.owner.level().playSound(null, pilePose.x, pilePose.y, pilePose.z, SoundEvents.MACE_SMASH_GROUND, SoundSource.HOSTILE, 1, 0.5f);
+                    ((ServerLevel) this.owner.level()).sendParticles(ParticleTypes.EXPLOSION_EMITTER,
+                            pilePose.x, pilePose.y, pilePose.z, 0, 0, 0.0, 0, 0.0);
                     ((ServerLevel) this.owner.level()).sendParticles(new BlockParticleOption(ParticleTypes.DUST_PILLAR, Blocks.STONE.defaultBlockState()),
                             pilePose.x, pilePose.y, pilePose.z, 8, 1, 0.0, 1, 0.0);
                 }
