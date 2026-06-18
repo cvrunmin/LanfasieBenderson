@@ -32,7 +32,7 @@ public class SummonAnticalabrumPhaseState implements IPhaseState{
         currentTick++;
         if(currentTick == 20){
             if(!this.owner.level().isClientSide()){
-                lastSword = new Anticalabrum(this.owner.level(), this.owner.getCombatArenaCenter(), nextType, 600, this.owner.getArenaRadius(), this.owner);
+                lastSword = new Anticalabrum(this.owner.level(), this.owner.getCombatArenaCenterVec3(), nextType, 600, this.owner.getArenaRadius(), this.owner);
                 this.owner.level().addFreshEntity(lastSword);
                 nextType = Anticalabrum.AnticalabrumType.values()[nextType.getNextTypeIndex()];
             }

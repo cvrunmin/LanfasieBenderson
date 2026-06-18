@@ -46,7 +46,7 @@ import java.util.Optional;
 
 public class BendersonRenderer<R extends LivingEntityRenderState & GeoRenderState> extends GeoEntityRenderer<Benderson, R> {
 
-    private static final RenderPipeline.Snippet END_PORTAL_TRIANGLE_SNIPPET = RenderPipeline.builder(RenderPipelines.MATRICES_PROJECTION_SNIPPET, RenderPipelines.FOG_SNIPPET, RenderPipelines.GLOBALS_SNIPPET)
+    public static final RenderPipeline.Snippet END_PORTAL_TRIANGLE_SNIPPET = RenderPipeline.builder(RenderPipelines.MATRICES_PROJECTION_SNIPPET, RenderPipelines.FOG_SNIPPET, RenderPipelines.GLOBALS_SNIPPET)
             .withVertexShader("core/rendertype_end_portal")
             .withFragmentShader("core/rendertype_end_portal")
             .withSampler("Sampler0")
@@ -55,17 +55,17 @@ public class BendersonRenderer<R extends LivingEntityRenderState & GeoRenderStat
             .withDepthStencilState(DepthStencilState.DEFAULT)
             .buildSnippet();
 
-    private static final RenderPipeline PORTAL_PIPELINE = RenderPipeline.builder(RenderPipelines.END_PORTAL_SNIPPET)
+    public static final RenderPipeline PORTAL_PIPELINE = RenderPipeline.builder(RenderPipelines.END_PORTAL_SNIPPET)
             .withLocation(Identifier.fromNamespaceAndPath(LanfasieBenderson.MODID, "pipeline/deep_latent_portal"))
             .withShaderDefine("PORTAL_LAYERS", 15)
             .withCull(false).build();
 
-    private static final RenderPipeline PORTAL_TRIANGLE_PIPELINE = RenderPipeline.builder(END_PORTAL_TRIANGLE_SNIPPET)
+    public static final RenderPipeline PORTAL_TRIANGLE_PIPELINE = RenderPipeline.builder(END_PORTAL_TRIANGLE_SNIPPET)
             .withLocation(Identifier.fromNamespaceAndPath(LanfasieBenderson.MODID, "pipeline/deep_latent_portal_triangle"))
             .withShaderDefine("PORTAL_LAYERS", 15)
             .withCull(false).build();
 
-    private static final RenderType PORTAL = RenderType.create(
+    public static final RenderType PORTAL = RenderType.create(
             "deep_latent_portal",
             RenderSetup.builder(PORTAL_PIPELINE)
             .withTexture("Sampler0",AbstractEndPortalRenderer.END_SKY_LOCATION)
@@ -73,7 +73,7 @@ public class BendersonRenderer<R extends LivingEntityRenderState & GeoRenderStat
             .createRenderSetup()
     );
 
-    private static final RenderType PORTAL_TRIANGLE = RenderType.create(
+    public static final RenderType PORTAL_TRIANGLE = RenderType.create(
             "deep_latent_portal_triangle",
             RenderSetup.builder(PORTAL_TRIANGLE_PIPELINE)
             .withTexture("Sampler0",AbstractEndPortalRenderer.END_SKY_LOCATION)
@@ -95,7 +95,7 @@ public class BendersonRenderer<R extends LivingEntityRenderState & GeoRenderStat
         renderState.addGeckolibData(BendersonDataTickets.BODY_STATE, animatable.getBodyState());
         renderState.addGeckolibData(BendersonDataTickets.ARENA_RADIUS, animatable.getArenaRadius());
         if(animatable.getBodyState() == Benderson.BodyState.ENTRANCE){
-            var arenaCenter = animatable.clientGetCombatArenaCenter();
+            var arenaCenter = animatable.getCombatArenaCenterVec3();
             renderState.x = arenaCenter.x;
             renderState.y = arenaCenter.y + 10;
             renderState.z = arenaCenter.z - animatable.getArenaRadius() - 1;

@@ -40,7 +40,7 @@ public class PartialArenaAoePhaseState implements IPhaseState{
     @Override
     public void start() {
         if(this.owner.level().isClientSide()) return;
-        targetPos = this.owner.getCombatArenaCenter().subtract(0, 0, owner.getArenaRadius() * 0.5f);
+        targetPos = this.owner.getCombatArenaCenterVec3().subtract(0, 0, owner.getArenaRadius() * 0.5f);
         this.owner.getMoveControl().setWantedPosition(targetPos.x, targetPos.y, targetPos.z, 1.0f);
         var marker = new TargetMarker(this.owner.level(), targetPos,
                 TargetMarker.MarkerArgs.complexRange(TargetMarker.MarkerType.LINEAR_AOE, this.owner.getArenaRadius() * 2, this.owner.getArenaRadius() * 1.5f, 130));
@@ -50,7 +50,7 @@ public class PartialArenaAoePhaseState implements IPhaseState{
 
     @Override
     public boolean tick() {
-        if(targetPos == null) targetPos = this.owner.getCombatArenaCenter().subtract(0, 0, owner.getArenaRadius() * 0.5f);
+        if(targetPos == null) targetPos = this.owner.getCombatArenaCenterVec3().subtract(0, 0, owner.getArenaRadius() * 0.5f);
         if(maxTicksWithWaiting - currentTick <= 60){
             var distToTgtPos = targetPos.distanceTo(this.owner.position());
             if(distToTgtPos < 0.708 || maxTicksWithWaiting - currentTick == 60) {
@@ -82,7 +82,7 @@ public class PartialArenaAoePhaseState implements IPhaseState{
             if(pastTicks == 134){
                 if(!this.owner.level().isClientSide()){
                     var acceptingTargets = this.owner.level().getEntities(EntityTypeTest.forClass(LivingEntity.class),
-                            AABB.ofSize(this.owner.getCombatArenaCenter(), this.owner.getArenaRadius() * 2, 20, this.owner.getArenaRadius() * 2).contract(0, 0, -this.owner.getArenaRadius() * 0.5f)
+                            AABB.ofSize(this.owner.getCombatArenaCenterVec3(), this.owner.getArenaRadius() * 2, 20, this.owner.getArenaRadius() * 2).contract(0, 0, -this.owner.getArenaRadius() * 0.5f)
                                     .intersect(this.owner.getCombatArena()),
                             LivingEntity::canBeSeenByAnyone);
                     for (LivingEntity acceptingTarget : acceptingTargets) {

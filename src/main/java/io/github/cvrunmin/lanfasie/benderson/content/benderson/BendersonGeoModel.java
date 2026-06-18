@@ -21,6 +21,10 @@ public class BendersonGeoModel extends GeoModel<Benderson> {
     @Override
     public Identifier getModelResource(GeoRenderState renderState) {
         Benderson.BodyState bodyState = renderState.getOrDefaultGeckolibData(BendersonDataTickets.BODY_STATE, Benderson.BodyState.DEEP_LATENT);
+        return getModelPath(bodyState);
+    }
+
+    public static Identifier getModelPath(Benderson.BodyState bodyState) {
         if(bodyState == Benderson.BodyState.TRANSITION_UNFORGIVEN){
             return DEEP_LATENT_CRYSTAL_MODEL;
         }else if(bodyState == Benderson.BodyState.TRANSITION_UNFORGIVEN_POST || bodyState == Benderson.BodyState.UNFORGIVEN){
@@ -32,6 +36,10 @@ public class BendersonGeoModel extends GeoModel<Benderson> {
     @Override
     public Identifier getTextureResource(GeoRenderState renderState) {
         Benderson.BodyState bodyState = renderState.getOrDefaultGeckolibData(BendersonDataTickets.BODY_STATE, Benderson.BodyState.DEEP_LATENT);
+        return getTexturePath(bodyState);
+    }
+
+    public static Identifier getTexturePath(Benderson.BodyState bodyState) {
         if(bodyState == Benderson.BodyState.TRANSITION_UNFORGIVEN){
             return DEEP_LATENT_CRYSTAL_TEXTURE;
         }else if(bodyState == Benderson.BodyState.TRANSITION_UNFORGIVEN_POST || bodyState == Benderson.BodyState.UNFORGIVEN){
@@ -43,6 +51,10 @@ public class BendersonGeoModel extends GeoModel<Benderson> {
     @Override
     public Identifier getAnimationResource(Benderson animatable) {
         Benderson.BodyState bodyState = animatable.getBodyState();
+        return getAnimationPath(bodyState);
+    }
+
+    public static Identifier getAnimationPath(Benderson.BodyState bodyState) {
         if(bodyState == Benderson.BodyState.ENTRANCE) return DEEP_LATENT_ENTRANCE_ANIMATION;
         if(bodyState == Benderson.BodyState.TRANSITION_UNFORGIVEN) return DEEP_LATENT_TU1_ANIMATION;
         if(bodyState == Benderson.BodyState.TRANSITION_UNFORGIVEN_POST) return DEEP_LATENT_TU2_ANIMATION;

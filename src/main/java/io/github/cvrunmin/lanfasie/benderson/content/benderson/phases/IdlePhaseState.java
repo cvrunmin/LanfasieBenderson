@@ -18,7 +18,7 @@ public class IdlePhaseState implements IPhaseState{
     @Override
     public void start() {
         this.currentTick = 0;
-        var center = this.owner.getCombatArenaCenter();
+        var center = this.owner.getCombatArenaCenterVec3();
         this.owner.teleportTo(center.x, center.y, center.z);
         this.owner.lookAt(EntityAnchorArgument.Anchor.FEET, new Vec3(0, 0, 1).add(this.owner.position()));
     }

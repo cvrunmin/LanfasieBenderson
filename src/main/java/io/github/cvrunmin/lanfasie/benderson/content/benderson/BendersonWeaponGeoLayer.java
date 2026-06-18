@@ -1,5 +1,6 @@
 package io.github.cvrunmin.lanfasie.benderson.content.benderson;
 
+import com.geckolib.animatable.GeoAnimatable;
 import com.geckolib.animatable.manager.AnimatableManager;
 import com.geckolib.cache.model.GeoBone;
 import com.geckolib.constant.DataTickets;
@@ -9,7 +10,6 @@ import com.geckolib.renderer.layer.builtin.BlockAndItemGeoLayer;
 import com.geckolib.util.RenderUtil;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.QuadInstance;
-import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
 import io.github.cvrunmin.lanfasie.benderson.content.benderson.phases.ArenaEnteringPhaseState;
 import io.github.cvrunmin.lanfasie.benderson.content.benderson.phases.ElevateToExtremeState;
@@ -18,7 +18,6 @@ import io.github.cvrunmin.lanfasie.benderson.index.AllItems;
 import io.github.cvrunmin.lanfasie.benderson.mixin.ItemLayerRenderStateAccessor;
 import io.github.cvrunmin.lanfasie.benderson.mixin.ItemStackRenderStateAccessor;
 import net.minecraft.client.model.geom.builders.UVPair;
-import net.minecraft.client.renderer.Sheets;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.state.EntityRenderState;
@@ -29,7 +28,7 @@ import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.resources.model.geometry.BakedQuad;
 import net.minecraft.util.ARGB;
 import net.minecraft.util.Mth;
-import net.minecraft.world.entity.HumanoidArm;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.common.util.Lazy;
@@ -42,20 +41,20 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
-public class BendersonWeaponGeoLayer<O, R extends GeoRenderState> extends BlockAndItemGeoLayer<Benderson, O, R> {
+public class BendersonWeaponGeoLayer<T extends LivingEntity & GeoAnimatable & BendersonStatesGetter, O, R extends GeoRenderState> extends BlockAndItemGeoLayer<T, O, R> {
     private final Lazy<ItemStack> itemStack;
     private final Lazy<ItemStack> extremeItemStack;
 
     private final QuadInstance quadInstance = new QuadInstance();
 
-    public BendersonWeaponGeoLayer(EntityRendererProvider.Context context, GeoRenderer<Benderson, O, R> renderer) {
+    public BendersonWeaponGeoLayer(EntityRendererProvider.Context context, GeoRenderer<T, O, R> renderer) {
         super(context, renderer);
         this.itemStack = Lazy.of(AllItems.SWORD_OF_DAWNWAITER_TAINTED::toStack);
         this.extremeItemStack = Lazy.of(AllItems.CLAYMORE_OF_HEI_POWER::toStack);
     }
 
     @Override
-    protected List<RenderData> getRelevantBones(Benderson animatable, @Nullable O relatedObject, R renderState, float partialTick) {
+    protected List<RenderData> getRelevantBones(T animatable, @Nullable O relatedObject, R renderState, float partialTick) {
         ItemStack stack = animatable.getBodyState() == Benderson.BodyState.TRANSITION_UNFORGIVEN_POST || animatable.getBodyState() == Benderson.BodyState.UNFORGIVEN ? extremeItemStack.get() : itemStack.get();
         return List.of(RenderData.item("rightHand",
                 ItemDisplayContext.THIRD_PERSON_RIGHT_HAND,
@@ -63,7 +62,7 @@ public class BendersonWeaponGeoLayer<O, R extends GeoRenderState> extends BlockA
     }
 
     @Override
-    public void addRenderData(Benderson animatable, @Nullable O relatedObject, R renderState, float partialTick) {
+    public void addRenderData(T animatable, @Nullable O relatedObject, R renderState, float partialTick) {
         final List<RenderData> contents = getRelevantBones(animatable, relatedObject, renderState, partialTick);
 
         if (!contents.isEmpty()) {

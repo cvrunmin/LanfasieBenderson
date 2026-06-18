@@ -55,11 +55,11 @@ public class KnockbackFromCenterPhaseState implements IPhaseState{
         int pastTicks = maxTicks - currentTick;
         if(pastTicks == 20){
             this.owner.setAnimateState(ANIMATE_STATE_LOOP);
-            trackingMarker = new TargetMarker(this.owner.level(), this.owner.getCombatArenaCenter(), TargetMarker.MarkerArgs.simple(TargetMarker.MarkerType.KNOCKBACK_RADIAL, (float) (this.owner.getArenaRadius() * knockbackMultiplier * 2), 110));
+            trackingMarker = new TargetMarker(this.owner.level(), this.owner.getCombatArenaCenterVec3(), TargetMarker.MarkerArgs.simple(TargetMarker.MarkerType.KNOCKBACK_RADIAL, (float) (this.owner.getArenaRadius() * knockbackMultiplier * 2), 110));
             this.owner.level().addFreshEntity(trackingMarker);
         } else if (pastTicks == 126) {
             this.owner.setAnimateState(ANIMATE_STATE_END);
-            Vec3 center = this.owner.getCombatArenaCenter();
+            Vec3 center = this.owner.getCombatArenaCenterVec3();
             this.owner.teleportTo(center.x, center.y, center.z);
         } else if(pastTicks > 130 && pastTicks <= 140){
             if(pastTicks == 131){

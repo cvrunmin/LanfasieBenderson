@@ -64,13 +64,13 @@ import javax.annotation.Nullable;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class Benderson extends Monster implements GeoEntity {
+public class Benderson extends Monster implements GeoEntity, BendersonStatesGetter {
     private static final EntityDataAccessor<String> ANIMATE_STATE = SynchedEntityData.defineId(Benderson.class, EntityDataSerializers.STRING);
     private static final EntityDataAccessor<Optional<HashMap<UUID, Float>>> ENMITY_SYNCER = SynchedEntityData.defineId(Benderson.class, AllEntityDataSerializers.OPTIONAL_UUID_FLOAT_MAP.get());
     private static final EntityDataAccessor<Optional<EntityReference<LivingEntity>>> TARGET_SYNCER = SynchedEntityData.defineId(Benderson.class, EntityDataSerializers.OPTIONAL_LIVING_ENTITY_REFERENCE);
     private static final EntityDataAccessor<BodyState> BODY_STATE = SynchedEntityData.defineId(Benderson.class, AllEntityDataSerializers.BENDERSON_BODY_STATE.get());
     private static final EntityDataAccessor<Integer> ARENA_RADIUS = SynchedEntityData.defineId(Benderson.class, EntityDataSerializers.INT);
-    private static final EntityDataAccessor<BlockPos> ARENA_CENTER = SynchedEntityData.defineId(Benderson.class, EntityDataSerializers.BLOCK_POS);
+    private static final EntityDataAccessor<Optional<BlockPos>> ARENA_CENTER = SynchedEntityData.defineId(Benderson.class, EntityDataSerializers.OPTIONAL_BLOCK_POS);
     private static final EntityDataAccessor<Boolean> SHOULD_HIDE_BOUNDING_BOX = SynchedEntityData.defineId(Benderson.class, EntityDataSerializers.BOOLEAN);
 
     private static final EntityDimensions NO_DIMENSIONS = EntityDimensions.fixed(0.0F, 0.0F);
@@ -107,7 +107,6 @@ public class Benderson extends Monster implements GeoEntity {
     public boolean suppressBossBarUpdate;
 
     private TargetMarker arenaHintMarker;
-    private BlockPos arenaCenter;
     private int arenaRadius = 24;
     private final DamageGate damageGate = new DamageGate(20);
     private float lastDeltaHealth;
@@ -172,7 +171,7 @@ public class Benderson extends Monster implements GeoEntity {
         this.entityData.set(ARENA_RADIUS, arenaRadius);
         this.setPos(x, y, z);
         this.setArenaCenter(BlockPos.containing(x, y, z));
-        this.arenaHintMarker = TargetMarker.byBlockPosLowerCorner(level, this.arenaCenter, TargetMarker.MarkerArgs.simple(TargetMarker.MarkerType.ARENA_HINT, arenaRadius, 1));
+        this.arenaHintMarker = TargetMarker.byBlockPosLowerCorner(level, this.getArenaCenter(), TargetMarker.MarkerArgs.simple(TargetMarker.MarkerType.ARENA_HINT, arenaRadius, 1));
         this.arenaHintMarker.setPersistent(true);
         this.arenaHintMarker.setSourceEntity(this);
         level.addFreshEntity(this.arenaHintMarker);
@@ -195,11 +194,11 @@ public class Benderson extends Monster implements GeoEntity {
     public void onAddedToLevel() {
         super.onAddedToLevel();
         if(!level().isClientSide() && !isNoAi()) {
-            if(this.arenaCenter == null) {
+            if(!this.isArenaCenterSet()) {
                 this.setArenaCenter(blockPosition());
             }
             if(this.arenaHintMarker == null){
-                this.arenaHintMarker = TargetMarker.byBlockPosLowerCorner(level(), this.arenaCenter, TargetMarker.MarkerArgs.simple(TargetMarker.MarkerType.ARENA_HINT, arenaRadius, 1));
+                this.arenaHintMarker = TargetMarker.byBlockPosLowerCorner(level(), this.getArenaCenter(), TargetMarker.MarkerArgs.simple(TargetMarker.MarkerType.ARENA_HINT, arenaRadius, 1));
                 this.arenaHintMarker.setPersistent(true);
                 this.arenaHintMarker.setSourceEntity(this);
                 level().addFreshEntity(this.arenaHintMarker);
@@ -214,7 +213,7 @@ public class Benderson extends Monster implements GeoEntity {
         entityData.define(ENMITY_SYNCER, Optional.empty());
         entityData.define(TARGET_SYNCER, Optional.empty());
         entityData.define(BODY_STATE, BodyState.DEEP_LATENT);
-        entityData.define(ARENA_CENTER, BlockPos.ZERO);
+        entityData.define(ARENA_CENTER, Optional.empty());
         entityData.define(ARENA_RADIUS, 24);
         entityData.define(SHOULD_HIDE_BOUNDING_BOX, false);
     }
@@ -502,12 +501,12 @@ public class Benderson extends Monster implements GeoEntity {
             this.setArenaCenter(pos);
             if (!level().isClientSide() && !isNoAi()) {
                 if (this.arenaHintMarker == null) {
-                    this.arenaHintMarker = TargetMarker.byBlockPosLowerCorner(level(), this.arenaCenter, TargetMarker.MarkerArgs.simple(TargetMarker.MarkerType.ARENA_HINT, arenaRadius, 1));
+                    this.arenaHintMarker = TargetMarker.byBlockPosLowerCorner(level(), this.getArenaCenter(), TargetMarker.MarkerArgs.simple(TargetMarker.MarkerType.ARENA_HINT, arenaRadius, 1));
                     this.arenaHintMarker.setPersistent(true);
                     this.arenaHintMarker.setSourceEntity(this);
                     level().addFreshEntity(this.arenaHintMarker);
                 }else{
-                    this.arenaHintMarker.setTargetPos(this.arenaCenter);
+                    this.arenaHintMarker.setTargetPos(this.getArenaCenter());
                 }
             }
         });
@@ -531,8 +530,8 @@ public class Benderson extends Monster implements GeoEntity {
             child.putFloat("Value", entry.getValue());
         }
         transitioner.addAdditionalSaveData(output);
-        if(this.arenaCenter != null) {
-            output.store("ArenaCenter", BlockPos.CODEC, this.arenaCenter);
+        if(this.isArenaCenterSet()) {
+            output.store("ArenaCenter", BlockPos.CODEC, this.getArenaCenter());
         }
         if(isShouldHideBoundingBox()){
             output.putBoolean("ShouldHideBoundingBox", true);
@@ -804,18 +803,21 @@ public class Benderson extends Monster implements GeoEntity {
         }
     }
 
-    public Vec3 getCombatArenaCenter(){
-        if(this.arenaCenter == null) return Vec3.ZERO;
-        return Vec3.atLowerCornerOf(this.arenaCenter);
+    @Override
+    public Vec3 getCombatArenaCenterVec3(){
+        return Vec3.atLowerCornerOf(this.getArenaCenter());
+    }
+
+    public BlockPos getArenaCenter(){
+        return this.entityData.get(ARENA_CENTER).orElse(BlockPos.ZERO);
     }
 
     public void setArenaCenter(BlockPos arenaCenter) {
-        this.arenaCenter = arenaCenter;
-        this.entityData.set(ARENA_CENTER, arenaCenter);
+        this.entityData.set(ARENA_CENTER, Optional.of(arenaCenter));
     }
 
-    public Vec3 clientGetCombatArenaCenter(){
-        return Vec3.atLowerCornerOf(entityData.get(ARENA_CENTER));
+    public boolean isArenaCenterSet(){
+        return this.entityData.get(ARENA_CENTER).isPresent();
     }
 
     @Override
@@ -857,8 +859,7 @@ public class Benderson extends Monster implements GeoEntity {
     }
 
     public @NonNull AABB getCombatArena() {
-        if(this.arenaCenter == null) return new AABB(-32, -3, -32, 32, 9, 32);
-        return AABB.ofSize(Vec3.atLowerCornerOf(this.arenaCenter), this.arenaRadius * 2, 12, this.arenaRadius * 2).move(0, 2, 0);
+        return AABB.ofSize(this.getCombatArenaCenterVec3(), this.arenaRadius * 2, 12, this.arenaRadius * 2).move(0, 3, 0);
     }
 
     public int getArenaRadius(){

@@ -49,7 +49,7 @@ public class PreEclipticMeteorState implements IPhaseState{
         if(this.owner.level().isClientSide()) return;
         for (int i = 0; i < 4; i++) {
             int offset = this.owner.getArenaRadius() - 8;
-            summonPilePoses[i] = this.owner.getCombatArenaCenter().add(offset * (i / 2 == 0 ? -1 : 1), 0, offset * (i == 1 || i == 2 ? 1 : -1));
+            summonPilePoses[i] = this.owner.getCombatArenaCenterVec3().add(offset * (i / 2 == 0 ? -1 : 1), 0, offset * (i == 1 || i == 2 ? 1 : -1));
             trackingMarkers[i] = new TargetMarker(this.owner.level(), summonPilePoses[i], TargetMarker.MarkerArgs.simple(TargetMarker.MarkerType.GROUND_PROXIMITY, (float) (this.owner.getArenaRadius() * 0.5 * Math.sqrt(2)), 90));
         }
         this.owner.setAnimateState(ANIMATE_STATE_START);

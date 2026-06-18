@@ -27,7 +27,7 @@ public class BossThemeMusicManager {
             var entities = level.getEntitiesOfClass(Benderson.class, AABB.ofSize(player.position(), 64, 20, 64));
             for (Benderson benderson : entities) {
                 if(benderson.isNoAi()) continue;
-                var bossArena = AABB.ofSize(benderson.clientGetCombatArenaCenter(), benderson.getArenaRadius() * 2, 14, benderson.getArenaRadius() * 2);
+                var bossArena = AABB.ofSize(benderson.getCombatArenaCenterVec3(), benderson.getArenaRadius() * 2, 14, benderson.getArenaRadius() * 2);
                 if(bossArena.contains(player.position())){
                     if(!bendersonTheme1Player.isActive() || bendersonTheme1Player.isMarkedDeactivate()) {
                         bendersonTheme1Player.startPlaying();

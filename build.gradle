@@ -146,6 +146,8 @@ dependencies {
 
     implementation "com.geckolib:geckolib-neoforge-${minecraft_version}:${geckolibVersion}"
     interfaceInjectionData "com.geckolib:geckolib-neoforge-${minecraft_version}:${geckolibVersion}"
+
+    implementation 'io.lettuce:lettuce-core:6.2.3.RELEASE'
 }
 
 // This block of code expands all declared replace properties in the specified resource targets.

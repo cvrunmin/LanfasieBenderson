@@ -32,7 +32,7 @@ public class LevelSpecialPerformanceHandler {
         var shouldRenderSpecialSky = false;
         for (Benderson benderson : entities) {
             if(benderson.isNoAi()) continue;
-            var bossArena = AABB.ofSize(benderson.clientGetCombatArenaCenter(), benderson.getArenaRadius() * 2, 20, benderson.getArenaRadius() * 2);
+            var bossArena = AABB.ofSize(benderson.getCombatArenaCenterVec3(), benderson.getArenaRadius() * 2, 20, benderson.getArenaRadius() * 2);
             if(bossArena.contains(player.position()) &&
                     (benderson.getBodyState() == Benderson.BodyState.TRANSITION_UNFORGIVEN_POST || benderson.getBodyState() == Benderson.BodyState.UNFORGIVEN)){
                 shouldRenderSpecialSky = true;

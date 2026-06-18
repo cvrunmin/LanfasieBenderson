@@ -42,7 +42,7 @@ public class EclipticMeteorState implements IPhaseState{
     @Override
     public void start() {
         if(this.owner.level().isClientSide()) return;
-        Vec3 center = this.owner.getCombatArenaCenter();
+        Vec3 center = this.owner.getCombatArenaCenterVec3();
         this.owner.teleportTo(center.x, center.y, center.z);
         this.owner.lookAt(EntityAnchorArgument.Anchor.FEET, new Vec3(0, 0, 1).add(this.owner.position()));
         this.owner.setAnimateState(ANIMATE_STATE_START);
@@ -56,7 +56,7 @@ public class EclipticMeteorState implements IPhaseState{
     public boolean tick() {
         currentTick--;
         int pastTicks = maxTicks - currentTick;
-        Vec3 arenaCenter = this.owner.getCombatArenaCenter();
+        Vec3 arenaCenter = this.owner.getCombatArenaCenterVec3();
         if(pastTicks < 240){
             if(pastTicks % 2 == 0){
                 var alpha = (float) Mth.clamp(pastTicks / 200.0f, 0.1, 1);
