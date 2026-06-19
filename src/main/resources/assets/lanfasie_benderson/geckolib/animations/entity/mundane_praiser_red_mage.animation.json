@@ -3,6 +3,7 @@
 	"animations": {
 		"misc.idle": {
 			"loop": true,
+			"animation_length": 1,
 			"bones": {
 				"head": {
 					"rotation": {
@@ -26,17 +27,46 @@
 				},
 				"rightArm": {
 					"rotation": {
-						"vector": [-72.5, 60, 0]
+						"0.0": {
+							"vector": [-72.5, 60, 0]
+						},
+						"0.5": {
+							"vector": [-77.5, 60, 0]
+						},
+						"1.0": {
+							"vector": [-72.5, 60, 0]
+						}
+					}
+				},
+				"rightForearm": {
+					"rotation": {
+						"vector": [-15, 0, 0]
 					}
 				},
 				"leftArm": {
 					"rotation": {
-						"vector": [-65, -75, 0]
+						"0.0": {
+							"vector": [-65, -75, 0]
+						},
+						"0.5": {
+							"vector": [-60, -75, 0]
+						},
+						"1.0": {
+							"vector": [-65, -75, 0]
+						}
 					}
 				},
 				"leftForearm": {
 					"rotation": {
-						"vector": [-32.5, 0, 0]
+						"0.0": {
+							"vector": [-32.5, 0, 0]
+						},
+						"0.5": {
+							"vector": [-37.5, 0, 0]
+						},
+						"1.0": {
+							"vector": [-32.5, 0, 0]
+						}
 					}
 				},
 				"rightHand": {
@@ -49,7 +79,15 @@
 						"vector": [0, -62.5, 0]
 					},
 					"position": {
-						"vector": [0, -2, 0]
+						"0.0": {
+							"vector": [0, -2, 0]
+						},
+						"0.5": {
+							"vector": [0, -2, -0.5]
+						},
+						"1.0": {
+							"vector": [0, -2, 0]
+						}
 					}
 				},
 				"leftArmRotator": {
@@ -59,12 +97,28 @@
 				},
 				"rightLegRotator": {
 					"rotation": {
-						"vector": [-40, 60, 0]
+						"0.0": {
+							"vector": [-40, 60, 0]
+						},
+						"0.5": {
+							"vector": [-37.5, 60, 0]
+						},
+						"1.0": {
+							"vector": [-40, 60, 0]
+						}
 					}
 				},
 				"leftLegRotator": {
 					"rotation": {
-						"vector": [-35, -20, 0]
+						"0.0": {
+							"vector": [-35, -20, 0]
+						},
+						"0.5": {
+							"vector": [-34.222, -21.4202, -2.1997]
+						},
+						"1.0": {
+							"vector": [-34.998, -19.9999, -0.0003]
+						}
 					}
 				}
 			}

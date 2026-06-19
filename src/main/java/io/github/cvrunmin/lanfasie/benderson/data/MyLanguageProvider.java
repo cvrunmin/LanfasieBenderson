@@ -76,5 +76,13 @@ public class MyLanguageProvider extends LanguageProvider {
         this.add("text.lanfasie_benderson.enmity_bar.aggro", "A");
         this.add("attributes.lanfasie_benderson.enmity_multiplier", "Enmity multiplier");
         this.add("attributes.lanfasie_benderson.extreme", "Extreme Mode");
+        this.add("config.lanfasie_benderson.benderson_normal_attack_damage_multiplier", "Benderson Normal Attack Damage Multiplier");
+        this.add("config.lanfasie_benderson.benderson_circular_stackable_aoe_damage_multiplier", "Benderson Circular Stackable AoE Damage Multiplier");
+        this.add("config.lanfasie_benderson.benderson_self_circular_aoe_damage_multiplier", "Benderson Self Circular AoE Damage Multiplier");
+        this.add("config.lanfasie_benderson.benderson_center_knockbacking_damage_multiplier", "Benderson Center Knockbacking Damage Multiplier");
+        this.add("config.lanfasie_benderson.benderson_partial_sweep_arena_damage_multiplier", "Benderson Partial Sweep Arena Damage Multiplier");
+        this.add("config.lanfasie_benderson.benderson_pre_ecliptic_pile_damage_multiplier", "Benderson Pre-Ecliptic Pile Damage Multiplier");
+        this.add("config.lanfasie_benderson.benderson_cat_smashing_attack_damage_multiplier", "Benderson Cat Smashing Attack Damage Multiplier");
+        this.add("config.lanfasie_benderson.benderson_fireball_meteor_attack_damage_multiplier", "Benderson Fireball Meteor Attack Damage Multiplier");
     }
 }

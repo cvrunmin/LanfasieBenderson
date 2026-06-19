@@ -108,10 +108,12 @@ public class BossMusicTrackPlayer {
         }
         for (BossMusicSoundInstance track : tracks) {
             if(track != null){
-                ChannelAccess.ChannelHandle handle = ((SoundEngineAccessor) ((SoundManagerAccessor) Minecraft.getInstance().getSoundManager()).getSoundEngine()).getInstanceToChannel().get(track);
+                SoundEngineAccessor soundEngineAccessor = (SoundEngineAccessor) ((SoundManagerAccessor) Minecraft.getInstance().getSoundManager()).getSoundEngine();
+                ChannelAccess.ChannelHandle handle = soundEngineAccessor.getInstanceToChannel().get(track);
                 if(handle != null){
                     handle.execute(channel -> {
-                        channel.setVolume(track.getVolume());
+                        var volume = soundEngineAccessor.invokeCalculateVolume(track);
+                        channel.setVolume(volume);
                     });
                 }
             }

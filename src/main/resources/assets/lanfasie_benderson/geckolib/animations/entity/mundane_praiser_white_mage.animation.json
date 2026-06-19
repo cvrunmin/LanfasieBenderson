@@ -3,20 +3,57 @@
 	"animations": {
 		"misc.idle": {
 			"loop": true,
+			"animation_length": 2,
 			"bones": {
+				"leftLowerLeg": {
+					"rotation": {
+						"vector": [2.5, 0, 0]
+					}
+				},
+				"rightLowerLeg": {
+					"rotation": {
+						"vector": [7.5, 0, 0]
+					}
+				},
 				"rightArm": {
 					"rotation": {
-						"vector": [-69.7165, -9.3913, -3.4511]
+						"0.0": {
+							"vector": [-69.7165, -9.3913, -3.4511]
+						},
+						"1.0": {
+							"vector": [-74.7165, -9.3913, -3.4511]
+						},
+						"2.0": {
+							"vector": [-69.7165, -9.3913, -3.4511]
+						}
 					}
 				},
 				"leftArm": {
 					"rotation": {
-						"vector": [-62.8242, -14.941, 4.9694]
+						"0.0": {
+							"vector": [-62.8242, -14.941, 4.9694]
+						},
+						"1.0": {
+							"vector": [-67.5481, -17.2533, 3.9818]
+						},
+						"2.0": {
+							"vector": [-62.82, -14.94, 4.97]
+						}
 					}
 				},
 				"leftForearm": {
 					"rotation": {
 						"vector": [0, 0, 72.5]
+					}
+				},
+				"rightLegRotator": {
+					"rotation": {
+						"vector": [-7.5, 5, 0]
+					}
+				},
+				"leftLegRotator": {
+					"rotation": {
+						"vector": [0, 0, -5]
 					}
 				}
 			}

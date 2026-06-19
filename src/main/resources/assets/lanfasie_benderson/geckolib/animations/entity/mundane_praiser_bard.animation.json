@@ -3,6 +3,7 @@
 	"animations": {
 		"misc.idle": {
 			"loop": true,
+			"animation_length": 2,
 			"bones": {
 				"head": {
 					"rotation": {
@@ -21,12 +22,28 @@
 				},
 				"rightArm": {
 					"rotation": {
-						"vector": [-27.5, 0, 0]
+						"0.0": {
+							"vector": [-27.5, 0, 0]
+						},
+						"1.0": {
+							"vector": [-32.5, 0, 0]
+						},
+						"2.0": {
+							"vector": [-27.5, 0, 0]
+						}
 					}
 				},
 				"leftArm": {
 					"rotation": {
-						"vector": [-45, 0, 0]
+						"0.0": {
+							"vector": [-45, 0, 0]
+						},
+						"1.0": {
+							"vector": [-50, 0, 0]
+						},
+						"2.0": {
+							"vector": [-45, 0, 0]
+						}
 					}
 				},
 				"leftForearm": {
