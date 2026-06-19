@@ -1,5 +1,6 @@
 package io.github.cvrunmin.lanfasie.benderson.content.benderson;
 
+import com.geckolib.animatable.GeoAnimatable;
 import com.geckolib.animatable.GeoEntity;
 import com.geckolib.animatable.instance.AnimatableInstanceCache;
 import com.geckolib.animatable.manager.AnimatableManager;
@@ -12,6 +13,7 @@ import com.geckolib.util.GeckoLibUtil;
 import com.mojang.serialization.Codec;
 import io.github.cvrunmin.lanfasie.benderson.LanfasieBenderson;
 import io.github.cvrunmin.lanfasie.benderson.ServerConfig;
+import io.github.cvrunmin.lanfasie.benderson.compat.projectme.ProjectMeCompat;
 import io.github.cvrunmin.lanfasie.benderson.content.benderson.phases.*;
 import io.github.cvrunmin.lanfasie.benderson.content.marker.TargetMarker;
 import io.github.cvrunmin.lanfasie.benderson.index.*;
@@ -20,6 +22,7 @@ import io.netty.buffer.ByteBuf;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.UUIDUtil;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
@@ -58,13 +61,13 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.common.CommonHooks;
 import net.neoforged.neoforge.common.damagesource.DamageContainer;
-import org.jspecify.annotations.NonNull;
+import net.neoforged.neoforge.entity.IEntityWithComplexSpawn;
 
 import javax.annotation.Nullable;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class Benderson extends Monster implements GeoEntity, BendersonStatesGetter {
+public class Benderson extends Monster implements GeoEntity, BendersonStatesGetter, IEntityWithComplexSpawn {
     private static final EntityDataAccessor<String> ANIMATE_STATE = SynchedEntityData.defineId(Benderson.class, EntityDataSerializers.STRING);
     private static final EntityDataAccessor<Optional<HashMap<UUID, Float>>> ENMITY_SYNCER = SynchedEntityData.defineId(Benderson.class, AllEntityDataSerializers.OPTIONAL_UUID_FLOAT_MAP.get());
     private static final EntityDataAccessor<Optional<EntityReference<LivingEntity>>> TARGET_SYNCER = SynchedEntityData.defineId(Benderson.class, EntityDataSerializers.OPTIONAL_LIVING_ENTITY_REFERENCE);
@@ -74,6 +77,8 @@ public class Benderson extends Monster implements GeoEntity, BendersonStatesGett
     private static final EntityDataAccessor<Boolean> SHOULD_HIDE_BOUNDING_BOX = SynchedEntityData.defineId(Benderson.class, EntityDataSerializers.BOOLEAN);
 
     private static final EntityDimensions NO_DIMENSIONS = EntityDimensions.fixed(0.0F, 0.0F);
+    private static final String SPECIAL_ATTACK_CONTROLLER_NAME = "Special Attack";
+    private static final String SPECIAL_PERFORM_CONTROLLER_NAME = "Special Performing";
 
     private final AnimatableInstanceCache geoCache = GeckoLibUtil.createInstanceCache(this);
 
@@ -110,6 +115,8 @@ public class Benderson extends Monster implements GeoEntity, BendersonStatesGett
     private int arenaRadius = 24;
     private final DamageGate damageGate = new DamageGate(20);
     private float lastDeltaHealth;
+
+    public @Nullable Double clientSyncApproxAnimTime = null;
 
     public Benderson(EntityType<? extends Benderson> type, Level level) {
         super(type, level);
@@ -159,6 +166,7 @@ public class Benderson extends Monster implements GeoEntity, BendersonStatesGett
                 .addTransition("ecliptic_meteor", "attack")
                 .addTransition("ecliptic_meteor", "idle", 0)
         ;
+        transitioner.setOnChangePhaseListener(this::onPhaseStateChanged);
     }
 
     public Benderson(Level level, double x, double y, double z) {
@@ -251,7 +259,7 @@ public class Benderson extends Monster implements GeoEntity, BendersonStatesGett
                     return test.setAndContinue(DefaultAnimations.IDLE);
 //                    return PlayState.STOP;
                 }),
-                new AnimationController<Benderson>("Special Attack", test -> {
+                new AnimationController<Benderson>(SPECIAL_ATTACK_CONTROLLER_NAME, test -> {
                     if(test.animatable().getBodyState().isTransition()) {
                         test.controller().reset();
                         return PlayState.STOP;
@@ -303,7 +311,7 @@ public class Benderson extends Monster implements GeoEntity, BendersonStatesGett
                         default -> PlayState.STOP;
                     };
                 }),
-                new AnimationController<Benderson>("Special Performing", test -> {
+                new AnimationController<Benderson>(SPECIAL_PERFORM_CONTROLLER_NAME, test -> {
                     var animateState = test.getDataOrDefault(BendersonDataTickets.ANIMATE_STATE, "");
                     if(test.animatable().getBodyState() == BodyState.ENTRANCE
                             && Objects.equals(animateState, ArenaEnteringPhaseState.ANIMATE_STATE_START)){
@@ -348,6 +356,16 @@ public class Benderson extends Monster implements GeoEntity, BendersonStatesGett
     public void tick() {
         if(!level().isClientSide()){
             damageGate.tick();
+        }else{
+            if(clientSyncApproxAnimTime != null) {
+                var manager = geoCache.getManagerForId(getId());
+                var controllerName = getBodyState().isTransition() ? SPECIAL_PERFORM_CONTROLLER_NAME : SPECIAL_ATTACK_CONTROLLER_NAME;
+                var controller = manager.getAnimationControllers().get(controllerName);
+                if(controller != null && controller.getPlayState() != PlayState.STOP){
+                    controller.setTimelineTime(clientSyncApproxAnimTime);
+                    clientSyncApproxAnimTime = null;
+                }
+            }
         }
         super.tick();
     }
@@ -399,6 +417,10 @@ public class Benderson extends Monster implements GeoEntity, BendersonStatesGett
         if(tickCount % 20 == 0){
             this.entityData.set(ENMITY_SYNCER, Optional.ofNullable(getEnmityMapForSyncing()));
         }
+    }
+
+    private void onPhaseStateChanged(String phaseId, IPhaseState phaseState){
+        ProjectMeCompat.getSynchronizerBackend().entityPhaseStateChanged(this, phaseId, phaseState);
     }
 
     public void setGlobalCooldown(int value){
@@ -846,6 +868,23 @@ public class Benderson extends Monster implements GeoEntity, BendersonStatesGett
         }).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (o, n) -> o, HashMap::new));
     }
 
+    @Override
+    public void writeSpawnData(RegistryFriendlyByteBuf buffer) {
+        var optSec = transitioner.getPhaseState().syncSecondForClient();
+        buffer.writeBoolean(optSec.isPresent());
+        if(optSec.isPresent()){
+            buffer.writeDouble(optSec.getAsDouble());
+        }
+    }
+
+    @Override
+    public void readSpawnData(RegistryFriendlyByteBuf additionalData) {
+        var isPresent = additionalData.readBoolean();
+        if(isPresent){
+            clientSyncApproxAnimTime = additionalData.readDouble();
+        }
+    }
+
     public record EnmityBarInfo(int rank, float barPercentage){}
 
     public EnmityBarInfo getEnmityBarInfo(UUID player){
@@ -858,7 +897,7 @@ public class Benderson extends Monster implements GeoEntity, BendersonStatesGett
         return new EnmityBarInfo(i + 1, Mth.clamp(enmity / Math.max(0.0001f, maxEnmity), 0, 1));
     }
 
-    public @NonNull AABB getCombatArena() {
+    public AABB getCombatArena() {
         return AABB.ofSize(this.getCombatArenaCenterVec3(), this.arenaRadius * 2, 12, this.arenaRadius * 2).move(0, 3, 0);
     }
 

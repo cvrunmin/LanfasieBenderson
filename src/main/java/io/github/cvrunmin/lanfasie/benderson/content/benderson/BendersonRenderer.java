@@ -1,5 +1,6 @@
 package io.github.cvrunmin.lanfasie.benderson.content.benderson;
 
+import com.geckolib.animatable.GeoAnimatable;
 import com.geckolib.animatable.manager.AnimatableManager;
 import com.geckolib.constant.DataTickets;
 import com.geckolib.renderer.GeoEntityRenderer;
@@ -35,8 +36,10 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.util.ARGB;
 import net.minecraft.util.LightCoordsUtil;
 import net.minecraft.util.Mth;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.phys.AABB;
+import org.jetbrains.annotations.ApiStatus;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 import org.jspecify.annotations.Nullable;
@@ -44,7 +47,7 @@ import org.jspecify.annotations.Nullable;
 import java.util.Objects;
 import java.util.Optional;
 
-public class BendersonRenderer<R extends LivingEntityRenderState & GeoRenderState> extends GeoEntityRenderer<Benderson, R> {
+public class BendersonRenderer<T extends LivingEntity & GeoAnimatable & BendersonStatesGetter, R extends LivingEntityRenderState & GeoRenderState> extends GeoEntityRenderer<T, R> {
 
     public static final RenderPipeline.Snippet END_PORTAL_TRIANGLE_SNIPPET = RenderPipeline.builder(RenderPipelines.MATRICES_PROJECTION_SNIPPET, RenderPipelines.FOG_SNIPPET, RenderPipelines.GLOBALS_SNIPPET)
             .withVertexShader("core/rendertype_end_portal")
@@ -90,7 +93,7 @@ public class BendersonRenderer<R extends LivingEntityRenderState & GeoRenderStat
     }
 
     @Override
-    public void addRenderData(Benderson animatable, @Nullable Void relatedObject, R renderState, float partialTick) {
+    public void addRenderData(T animatable, @Nullable Void relatedObject, R renderState, float partialTick) {
         renderState.addGeckolibData(BendersonDataTickets.ANIMATE_STATE, animatable.getAnimateState());
         renderState.addGeckolibData(BendersonDataTickets.BODY_STATE, animatable.getBodyState());
         renderState.addGeckolibData(BendersonDataTickets.ARENA_RADIUS, animatable.getArenaRadius());
@@ -138,14 +141,14 @@ public class BendersonRenderer<R extends LivingEntityRenderState & GeoRenderStat
     }
 
     @Override
-    protected boolean affectedByCulling(Benderson entity) {
+    protected boolean affectedByCulling(T entity) {
         if(entity.getBodyState().isTransition()) return false;
         if(entity.isShouldHideBoundingBox()) return false;
         return true;
     }
 
     @Override
-    protected AABB getBoundingBoxForCulling(Benderson entity) {
+    protected AABB getBoundingBoxForCulling(T entity) {
         if(entity.getBodyState() == Benderson.BodyState.UNFORGIVEN){
             String animateState = entity.getAnimateState();
             if(animateState.equals(PartialArenaAoePhaseState.ANIMATE_STATE_HALF_ARENA_AOE_SELF_START) ||
@@ -163,6 +166,7 @@ public class BendersonRenderer<R extends LivingEntityRenderState & GeoRenderStat
         var controller = Optional.ofNullable(renderPassInfo.getGeckolibData(DataTickets.ANIMATABLE_MANAGER)).map(AnimatableManager::getAnimationControllers).map(map -> map.get("Special Attack")).orElse(null);
         var performController = Optional.ofNullable(renderPassInfo.getGeckolibData(DataTickets.ANIMATABLE_MANAGER)).map(AnimatableManager::getAnimationControllers).map(map -> map.get("Special Performing")).orElse(null);
         String animateState = renderPassInfo.renderState().getGeckolibData(BendersonDataTickets.ANIMATE_STATE);
+        Benderson.BodyState bodyState = renderPassInfo.getGeckolibData(BendersonDataTickets.BODY_STATE);
         if (controller != null && animateState != null) {
             if (animateState.equals(SummonAnticalabrumPhaseState.ANIMATE_STATE_START)) {
                 var tSec = controller.getCurrentTimelineTime();
@@ -193,9 +197,10 @@ public class BendersonRenderer<R extends LivingEntityRenderState & GeoRenderStat
                         poseStack.popPose();
                     }
                 }
-            } else if (animateState.equals(PartialArenaAoePhaseState.ANIMATE_STATE_HALF_ARENA_AOE_SELF_START) ||
+            } else if (bodyState == Benderson.BodyState.UNFORGIVEN &&
+                    (animateState.equals(PartialArenaAoePhaseState.ANIMATE_STATE_HALF_ARENA_AOE_SELF_START) ||
                     animateState.equals(PartialArenaAoePhaseState.ANIMATE_STATE_HALF_ARENA_AOE_SELF_LOOP) ||
-                    animateState.equals(PartialArenaAoePhaseState.ANIMATE_STATE_HALF_ARENA_AOE_SELF_END)){
+                    animateState.equals(PartialArenaAoePhaseState.ANIMATE_STATE_HALF_ARENA_AOE_SELF_END))){
                 var tSec = controller.getCurrentTimelineTime();
                 float alpha1 = 1.0f;
                 if(animateState.equals(PartialArenaAoePhaseState.ANIMATE_STATE_HALF_ARENA_AOE_SELF_START)){
@@ -248,7 +253,7 @@ public class BendersonRenderer<R extends LivingEntityRenderState & GeoRenderStat
                 }
             }
         }
-        if(renderPassInfo.getGeckolibData(BendersonDataTickets.BODY_STATE) == Benderson.BodyState.ENTRANCE
+        if(bodyState == Benderson.BodyState.ENTRANCE
                 && performController != null
                 && Objects.equals(animateState, ArenaEnteringPhaseState.ANIMATE_STATE_START)){
             var tSec = performController.getCurrentTimelineTime();
@@ -281,7 +286,7 @@ public class BendersonRenderer<R extends LivingEntityRenderState & GeoRenderStat
                 poseStack.popPose();
             }
         }
-        if(renderPassInfo.getGeckolibData(BendersonDataTickets.BODY_STATE) == Benderson.BodyState.TRANSITION_UNFORGIVEN
+        if(bodyState == Benderson.BodyState.TRANSITION_UNFORGIVEN
                 && performController != null
                 && Objects.equals(animateState, ElevateToExtremeState.ANIMATE_STATE_P1)){
             var tSec = performController.getCurrentTimelineTime();

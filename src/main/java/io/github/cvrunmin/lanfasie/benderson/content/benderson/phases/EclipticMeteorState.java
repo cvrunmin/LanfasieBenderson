@@ -24,6 +24,7 @@ import net.minecraft.world.phys.Vec3;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.OptionalDouble;
 
 public class EclipticMeteorState implements IPhaseState{
     public static final String ANIMATE_STATE_START = "ecliptic_meteor.start";
@@ -154,5 +155,16 @@ public class EclipticMeteorState implements IPhaseState{
         input.read("Marker", EntityReference.<TargetMarker>codec())
                 .map(ref -> ref.getEntity(this.owner.level(), TargetMarker.class))
                 .ifPresent(targetMarker -> this.trackingMarker = targetMarker);
+    }
+
+    @Override
+    public OptionalDouble syncSecondForClient() {
+        int pastTicks = maxTicks - currentTick;
+        if(pastTicks >= 200){
+            pastTicks -= 200;
+        } else if (pastTicks >= 15) {
+            pastTicks -= 15;
+        }
+        return OptionalDouble.of(pastTicks / 20.0);
     }
 }

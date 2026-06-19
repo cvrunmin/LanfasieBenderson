@@ -3,6 +3,8 @@ package io.github.cvrunmin.lanfasie.benderson.content.benderson.phases;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 
+import java.util.OptionalDouble;
+
 public interface IPhaseState {
     void start();
     boolean tick();
@@ -13,4 +15,7 @@ public interface IPhaseState {
     }
     default void addAdditionalSaveData(ValueOutput output){}
     default void readAdditionalSaveData(ValueInput input){}
+    default OptionalDouble syncSecondForClient(){
+        return OptionalDouble.empty();
+    }
 }

@@ -65,6 +65,7 @@ public class LanfasieBendersonClient {
     @SubscribeEvent
     public static void registerEntityRenderers(EntityRenderersEvent.RegisterRenderers event){
         event.registerEntityRenderer(AllEntityTypes.BENDERSON.get(), BendersonRenderer::new);
+        event.registerEntityRenderer(AllEntityTypes.PROJECTED_BENDERSON.get(), BendersonRenderer::new);
         event.registerEntityRenderer(AllEntityTypes.TARGET_MARKER.get(), TargetMarkerRenderer::new);
         event.registerEntityRenderer(AllEntityTypes.ANTICALABRUM.get(), AnticalabrumRenderer::new);
         event.registerEntityRenderer(AllEntityTypes.DAWN.get(), DawnEntityRenderer::new);

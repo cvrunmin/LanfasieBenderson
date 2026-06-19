@@ -15,6 +15,8 @@ import net.minecraft.world.level.entity.EntityTypeTest;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 
+import java.util.OptionalDouble;
+
 public class ArenaEnteringPhaseState implements IPhaseState{
     public static final String ANIMATE_STATE_START = "arena_entering";
     private final Benderson owner;
@@ -86,5 +88,10 @@ public class ArenaEnteringPhaseState implements IPhaseState{
     @Override
     public void addAdditionalSaveData(ValueOutput output) {
         output.putInt("Tick", tick);
+    }
+
+    @Override
+    public OptionalDouble syncSecondForClient() {
+        return OptionalDouble.of(tick / 20.0);
     }
 }

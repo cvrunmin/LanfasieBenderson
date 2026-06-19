@@ -10,6 +10,8 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 
+import java.util.OptionalDouble;
+
 public class ElevateToExtremeState implements IPhaseState{
     public static final String ANIMATE_STATE_P1 = "elevate_to_extreme_p1";
     public static final String ANIMATE_STATE_P2 = "elevate_to_extreme_p2";
@@ -64,5 +66,14 @@ public class ElevateToExtremeState implements IPhaseState{
     @Override
     public boolean canUse() {
         return owner.getBodyState() == Benderson.BodyState.DEEP_LATENT;
+    }
+
+    @Override
+    public OptionalDouble syncSecondForClient() {
+        var offsetTick = tick;
+        if(offsetTick >= 81){
+            offsetTick -= 81;
+        }
+        return OptionalDouble.of(offsetTick / 20.0);
     }
 }

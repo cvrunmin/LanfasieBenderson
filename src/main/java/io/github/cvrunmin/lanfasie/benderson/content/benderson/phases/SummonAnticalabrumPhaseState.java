@@ -14,6 +14,7 @@ public class SummonAnticalabrumPhaseState implements IPhaseState{
     private Anticalabrum.AnticalabrumType nextType = Anticalabrum.AnticalabrumType.FELIS_INVISIBILIS;
     private int currentTick = 0;
     private Anticalabrum lastSword;
+    private Long lastSeed;
     private int cooldownTick = 0;
 
     public SummonAnticalabrumPhaseState(Benderson owner) {
@@ -25,6 +26,7 @@ public class SummonAnticalabrumPhaseState implements IPhaseState{
         if(this.owner.level().isClientSide()) return;
         this.owner.setAnimateState(ANIMATE_STATE_START);
         currentTick = 0;
+        lastSeed = this.owner.level().getRandom().nextLong();
     }
 
     @Override
@@ -32,7 +34,7 @@ public class SummonAnticalabrumPhaseState implements IPhaseState{
         currentTick++;
         if(currentTick == 20){
             if(!this.owner.level().isClientSide()){
-                lastSword = new Anticalabrum(this.owner.level(), this.owner.getCombatArenaCenterVec3(), nextType, 600, this.owner.getArenaRadius(), this.owner);
+                lastSword = new Anticalabrum(this.owner.level(), this.owner.getCombatArenaCenterVec3(), nextType, 600, this.owner.getArenaRadius(), this.owner, lastSeed);
                 this.owner.level().addFreshEntity(lastSword);
                 nextType = Anticalabrum.AnticalabrumType.values()[nextType.getNextTypeIndex()];
             }
@@ -47,6 +49,7 @@ public class SummonAnticalabrumPhaseState implements IPhaseState{
         this.owner.setAnimateState("idle");
         this.currentTick = 0;
         this.cooldownTick = 800;
+        lastSeed = null;
     }
 
     @Override
@@ -67,6 +70,9 @@ public class SummonAnticalabrumPhaseState implements IPhaseState{
         if(lastSword != null) {
             EntityReference.of(lastSword).store(output, "LastSword");
         }
+        if(this.currentTick <= 20 && lastSeed != null){
+            output.putLong("Seed", lastSeed);
+        }
     }
 
     @Override
@@ -77,5 +83,14 @@ public class SummonAnticalabrumPhaseState implements IPhaseState{
         Optional.ofNullable(EntityReference.<Anticalabrum>read(input, "LastSword"))
                 .map(ref -> ref.getEntity(this.owner.level(), Anticalabrum.class))
                 .ifPresent(v -> lastSword = v);
+        input.getLong("Seed").ifPresent(v -> lastSeed = v);
+    }
+
+    public long getLastSeed() {
+        return lastSeed;
+    }
+
+    public Anticalabrum.AnticalabrumType getNextType() {
+        return nextType;
     }
 }

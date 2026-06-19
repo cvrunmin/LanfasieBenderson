@@ -103,7 +103,7 @@ public class KnockbackFromCenterPhaseState implements IPhaseState{
         }
         this.trackingMarker = null;
         this.currentTick = 0;
-        cooldownTick = 2400;
+        cooldownTick = 3600;
         this.owner.setGlobalCooldown(100);
     }
 

@@ -1,11 +1,13 @@
 package io.github.cvrunmin.lanfasie.benderson.content.benderson;
 
+import com.geckolib.animatable.GeoAnimatable;
 import com.geckolib.model.GeoModel;
 import com.geckolib.renderer.base.GeoRenderState;
 import io.github.cvrunmin.lanfasie.benderson.LanfasieBenderson;
 import net.minecraft.resources.Identifier;
+import net.minecraft.world.entity.LivingEntity;
 
-public class BendersonGeoModel extends GeoModel<Benderson> {
+public class BendersonGeoModel<T extends LivingEntity & GeoAnimatable & BendersonStatesGetter> extends GeoModel<T> {
     private static final Identifier DEEP_LATENT_MODEL = Identifier.fromNamespaceAndPath(LanfasieBenderson.MODID, "entity/benderson");
     private static final Identifier DEEP_LATENT_CRYSTAL_MODEL = Identifier.fromNamespaceAndPath(LanfasieBenderson.MODID, "entity/benderson_with_crystal");
     private static final Identifier UNFORGIVEN_MODEL = Identifier.fromNamespaceAndPath(LanfasieBenderson.MODID, "entity/unforgiven_teamsoul");
@@ -49,7 +51,7 @@ public class BendersonGeoModel extends GeoModel<Benderson> {
     }
 
     @Override
-    public Identifier getAnimationResource(Benderson animatable) {
+    public Identifier getAnimationResource(T animatable) {
         Benderson.BodyState bodyState = animatable.getBodyState();
         return getAnimationPath(bodyState);
     }

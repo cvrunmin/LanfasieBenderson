@@ -1,5 +1,6 @@
 package io.github.cvrunmin.lanfasie.benderson;
 
+import io.github.cvrunmin.lanfasie.benderson.compat.projectme.ProjectMeCompat;
 import io.github.cvrunmin.lanfasie.benderson.data.MyDamageTypeTagsProvider;
 import io.github.cvrunmin.lanfasie.benderson.index.*;
 import net.minecraft.core.RegistrySetBuilder;
@@ -73,6 +74,8 @@ public class LanfasieBenderson {
 
         // Register our mod's ModConfigSpec so that FML can create and load the config file for us
         modContainer.registerConfig(ModConfig.Type.SERVER, ServerConfig.SPEC);
+
+        ProjectMeCompat.activate();
     }
 
     private void commonSetup(FMLCommonSetupEvent event) {

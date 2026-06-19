@@ -87,10 +87,10 @@ public class Anticalabrum extends Entity implements TraceableEntity, IEntityWith
 
     private int lifeTick;
     private int maxLifeTick;
-    private Vector3fc swordOrientation;
+    private Vector3fc swordOrientation = new Vector3f(0, 1, 0);
     private boolean persistent = false;
     private int range = 24;
-    private EntityReference<LivingEntity> owner;
+    private @Nullable EntityReference<LivingEntity> owner;
     private RandomSource randomSource;
 
     public Anticalabrum(EntityType<?> type, Level level) {
@@ -98,13 +98,24 @@ public class Anticalabrum extends Entity implements TraceableEntity, IEntityWith
         this.noPhysics = true;
         this.lifeTick = -15; // animation offset
         randomSource = level.getRandom().fork();
+    }
+
+    public Anticalabrum(Level level, Vec3 pos, AnticalabrumType anticalabrumType, int maxLifeTick, int range, @Nullable LivingEntity owner) {
+        this(level, pos, anticalabrumType, maxLifeTick, range, owner, null);
+    }
+
+    public Anticalabrum(Level level, Vec3 pos, AnticalabrumType anticalabrumType, int maxLifeTick, int range, @Nullable LivingEntity owner, @Nullable Long seed){
+        super(AllEntityTypes.ANTICALABRUM.get(), level);
+        this.noPhysics = true;
+        this.lifeTick = -15; // animation offset
+        if(seed == null) {
+            randomSource = level.getRandom().fork();
+        }else{
+            randomSource = RandomSource.create(seed);
+        }
         var rho = Math.toRadians(90 - randomSource.nextDouble() * 30);
         var theta = Math.toRadians(randomSource.nextDouble() * 360);
         this.swordOrientation = new Vector3f((float) (Math.cos(rho) * Math.cos(theta)), (float) Math.sin(rho), (float) (Math.cos(rho) * Math.sin(theta)));
-    }
-
-    public Anticalabrum(Level level, Vec3 pos, AnticalabrumType anticalabrumType, int maxLifeTick, int range, @Nullable LivingEntity owner){
-        this(AllEntityTypes.ANTICALABRUM.get(), level);
         this.setPos(pos);
         this.setAnticalabrumType(anticalabrumType);
         this.maxLifeTick = Math.max(0, maxLifeTick);
@@ -132,7 +143,7 @@ public class Anticalabrum extends Entity implements TraceableEntity, IEntityWith
                             this.level().levelEvent(null, 2001, getOnPos(), Block.getId(bs));
                         }
                     }
-                    if(lifeTick % 100 == 0){
+                    if(owner != null && lifeTick % 100 == 0){
                         getAnticalabrumType().getInfluencingMobEffect().ifPresent(mobEffect -> {
                             var aabb = AABB.ofSize(Vec3.atLowerCornerOf(this.blockPosition()), this.range * 2, 10, this.range * 2);
                             for (Player player : this.level().getEntitiesOfClass(Player.class, aabb)) {
@@ -151,7 +162,7 @@ public class Anticalabrum extends Entity implements TraceableEntity, IEntityWith
         switch (getAnticalabrumType()) {
             case FELIS_INVISIBILIS -> {
                 if (lifeTick == 5 && maxLifeTick > 160) {
-                    var safeCol = this.level().getRandom().fork().nextInt(3);
+                    var safeCol = randomSource.nextInt(3);
                     for (int i = 0; i < 3; i++) {
                         if(i == safeCol) continue;
                         var attacker = DelayedAttackMarker.createBlackCatSmash(
@@ -161,7 +172,7 @@ public class Anticalabrum extends Entity implements TraceableEntity, IEntityWith
                                 range,
                                 i,
                                 (float) (ServerConfig.BENDERSON_CAT_SMASHING_ATTACK_DAMAGE_MULTIPLIER.get() *
-                                        Optional.ofNullable(getOwner()).map(entity -> entity.getAttributeValue(Attributes.ATTACK_DAMAGE)).orElse(1.0)),
+                                        Optional.ofNullable(getOwner()).map(entity -> entity.getAttributeValue(Attributes.ATTACK_DAMAGE)).orElse(0.0)),
                                 110);
                         level().addFreshEntity(attacker);
                     }
@@ -181,7 +192,7 @@ public class Anticalabrum extends Entity implements TraceableEntity, IEntityWith
                             getOwner(),
                             1.5f,
                             (float) (ServerConfig.BENDERSON_FIREBALL_METEOR_ATTACK_DAMAGE_MULTIPLIER.get() *
-                                    Optional.ofNullable(getOwner()).map(entity -> entity.getAttributeValue(Attributes.ATTACK_DAMAGE)).orElse(1.0)),
+                                    Optional.ofNullable(getOwner()).map(entity -> entity.getAttributeValue(Attributes.ATTACK_DAMAGE)).orElse(0.0)),
                             70);
                     level().addFreshEntity(attacker);
                 }

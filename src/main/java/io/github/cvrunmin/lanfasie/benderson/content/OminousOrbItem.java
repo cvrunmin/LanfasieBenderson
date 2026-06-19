@@ -33,7 +33,7 @@ public class OminousOrbItem extends Item {
         if (!level.isEmptyBlock(above)) {
             return InteractionResult.FAIL;
         }
-        List<Benderson> entities = level.getEntitiesOfClass(Benderson.class, AABB.ofSize(Vec3.atLowerCornerOf(above), 48, 10, 48));
+        List<Benderson> entities = level.getEntitiesOfClass(Benderson.class, AABB.ofSize(Vec3.atLowerCornerOf(above), 48, 18, 48));
         if(!entities.isEmpty()) return InteractionResult.FAIL;
         if (level instanceof ServerLevel) {
             var un1 = new UnforgivenIndiscretion(level, above.getX(), above.getY(), above.getZ());

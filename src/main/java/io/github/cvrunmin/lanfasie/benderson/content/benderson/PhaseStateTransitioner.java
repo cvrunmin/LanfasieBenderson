@@ -12,6 +12,7 @@ import javax.annotation.Nullable;
 import java.lang.ref.Reference;
 import java.lang.ref.WeakReference;
 import java.util.*;
+import java.util.function.BiConsumer;
 
 public class PhaseStateTransitioner {
     private final Benderson owner;
@@ -20,6 +21,7 @@ public class PhaseStateTransitioner {
     private String fallbackStateKey;
     private String currentState;
     private boolean shouldChangePhase;
+    private BiConsumer<String, IPhaseState> onChangePhaseListener;
 
     public PhaseStateTransitioner(Benderson owner){
         this.owner = owner;
@@ -81,6 +83,7 @@ public class PhaseStateTransitioner {
             var state = possiblePhaseState.get(currentState);
             if(state != null) state.start();
             shouldChangePhase = false;
+            if(onChangePhaseListener != null && state != null) onChangePhaseListener.accept(currentState, state);
         }
         for (Map.Entry<String, IPhaseState> entry : possiblePhaseState.entrySet()) {
             if(!Objects.equals(entry.getKey(), currentState)){
@@ -113,6 +116,7 @@ public class PhaseStateTransitioner {
             if(state.canUse()) {
                 state.start();
                 shouldChangePhase = false;
+                if(onChangePhaseListener != null) onChangePhaseListener.accept(currentState, state);
             }else{
                 shouldChangePhase = true;
             }
@@ -126,6 +130,10 @@ public class PhaseStateTransitioner {
     public IPhaseState getPhaseState(){
         if(!possiblePhaseState.containsKey(currentState)) return null;
         return possiblePhaseState.get(currentState);
+    }
+
+    public void setOnChangePhaseListener(BiConsumer<String, IPhaseState> onChangePhaseListener) {
+        this.onChangePhaseListener = onChangePhaseListener;
     }
 
     public PhaseStateTransitioner addPhaseStateInstance(String key, IPhaseState phaseState){
