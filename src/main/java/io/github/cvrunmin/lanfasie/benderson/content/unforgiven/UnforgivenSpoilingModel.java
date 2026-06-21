@@ -1,5 +1,7 @@
 package io.github.cvrunmin.lanfasie.benderson.content.unforgiven;
 
+import net.minecraft.client.animation.KeyframeAnimation;
+import net.minecraft.client.animation.definitions.RabbitAnimation;
 import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartPose;
@@ -17,6 +19,7 @@ public class UnforgivenSpoilingModel extends EntityModel<UnforgivenSpoilingRende
 	private final ModelPart backlegs;
 	private final ModelPart rightBackLeg;
 	private final ModelPart leftBackLeg;
+	private final KeyframeAnimation hopAnimation;
 
 	public UnforgivenSpoilingModel(ModelPart root) {
         super(root);
@@ -31,6 +34,7 @@ public class UnforgivenSpoilingModel extends EntityModel<UnforgivenSpoilingRende
 		this.backlegs = root.getChild("backlegs");
 		this.rightBackLeg = this.backlegs.getChild("right_hind_leg");
 		this.leftBackLeg = this.backlegs.getChild("left_hind_leg");
+		this.hopAnimation = RabbitAnimation.HOP.bake(root);
 	}
 
 	public static LayerDefinition createBodyLayer() {
@@ -75,5 +79,6 @@ public class UnforgivenSpoilingModel extends EntityModel<UnforgivenSpoilingRende
         super.setupAnim(state);
         this.head.yRot = state.yRot * (float) (Math.PI / 180.0);
         this.head.xRot = state.xRot * (float) (Math.PI / 180.0) + (float) (Math.PI * 50 / 180);
+		this.hopAnimation.apply(state.hopAnimationState, state.ageInTicks);
     }
 }

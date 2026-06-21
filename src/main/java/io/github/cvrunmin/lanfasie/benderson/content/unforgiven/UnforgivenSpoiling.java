@@ -40,14 +40,14 @@ public class UnforgivenSpoiling extends Monster {
     }
 
     public static AttributeSupplier createAttributes(){
-        return Monster.createMonsterAttributes().add(Attributes.ATTACK_DAMAGE, 2.0).add(Attributes.MOVEMENT_SPEED, 0.2).build();
+        return Monster.createMonsterAttributes().add(Attributes.ATTACK_DAMAGE, 2.0).add(Attributes.MOVEMENT_SPEED, 0.25).build();
     }
 
     @Override
     protected void registerGoals() {
         this.goalSelector.addGoal(1, new FloatGoal(this));
         this.goalSelector.addGoal(4, new MeleeAttackGoal(this, 1.2, true));
-        this.goalSelector.addGoal(6, new WaterAvoidingRandomStrollGoal(this, 0.6));
+        this.goalSelector.addGoal(6, new WaterAvoidingRandomStrollGoal(this, 0.8));
         this.targetSelector.addGoal(1, new HurtByTargetGoal(this).setAlertOthers());
     }
 
@@ -80,7 +80,7 @@ public class UnforgivenSpoiling extends Monster {
         if (speedModifier > 0.0) {
             double current = this.getDeltaMovement().horizontalDistanceSqr();
             if (current < 0.01) {
-                this.moveRelative(0.1F, new Vec3(0.0, this.isBaby() ? 0.5 : 1.5, 1.0));
+                this.moveRelative(0.1F, new Vec3(0.0, 3, 1.0));
             }
         }
 

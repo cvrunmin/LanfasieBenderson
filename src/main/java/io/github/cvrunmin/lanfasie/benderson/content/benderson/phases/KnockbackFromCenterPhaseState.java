@@ -103,7 +103,7 @@ public class KnockbackFromCenterPhaseState implements IPhaseState{
         }
         this.trackingMarker = null;
         this.currentTick = 0;
-        cooldownTick = 3600;
+        cooldownTick = 2400;
         this.owner.setGlobalCooldown(100);
     }
 
@@ -114,7 +114,7 @@ public class KnockbackFromCenterPhaseState implements IPhaseState{
 
     @Override
     public boolean canUse() {
-        return (this.owner.getBodyState() == Benderson.BodyState.UNFORGIVEN || this.owner.getBodyState() == Benderson.BodyState.UNVEILED) && !this.owner.isInGlobalCooldown();
+        return cooldownTick <= 0 && (this.owner.getBodyState() == Benderson.BodyState.UNFORGIVEN || this.owner.getBodyState() == Benderson.BodyState.UNVEILED) && !this.owner.isInGlobalCooldown();
     }
 
     @Override
