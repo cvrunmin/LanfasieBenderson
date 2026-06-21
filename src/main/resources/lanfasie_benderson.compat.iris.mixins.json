@@ -1,0 +1,26 @@
+{
+  "required": true,
+  "package": "io.github.cvrunmin.lanfasie.benderson.compat.iris.mixin",
+  "compatibilityLevel": "JAVA_25",
+  "mixins": [
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  },
+  "overwrites": {
+    "requireAnnotations": true
+  },
+  "mixinextras": {
+    "minVersion": "0.5.0"
+  },
+  "client": [
+    "BendersonRendererMixin",
+    "GlCommandEncoderMixin",
+    "GlDeviceMixin",
+    "GlRenderPassAccessor",
+    "HeiTideSkyboxRendererMixin",
+    "IrisRenderPipelineMixin",
+    "PipelineBuilderAccessor",
+    "MyGlobalRenderPipelinesMixin"
+  ]
+}

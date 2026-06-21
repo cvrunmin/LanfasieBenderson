@@ -273,6 +273,7 @@ public class BendersonRenderer<T extends LivingEntity & GeoAnimatable & Benderso
                     gateOpenZScale = 1;
                 }
                 var poseStack = renderPassInfo.poseStack();
+                this.hackStateEnter(1);
                 poseStack.pushPose();
                 var vfrom = new Vector3f(-24, -10 * gateOpenScale, -5 * gateOpenZScale);
                 var vto = new Vector3f(24, 10 * gateOpenScale, 0);
@@ -284,6 +285,7 @@ public class BendersonRenderer<T extends LivingEntity & GeoAnimatable & Benderso
                     }
                 });
                 poseStack.popPose();
+                this.hackStateLeave();
             }
         }
         if(bodyState == Benderson.BodyState.TRANSITION_UNFORGIVEN
@@ -299,6 +301,7 @@ public class BendersonRenderer<T extends LivingEntity & GeoAnimatable & Benderso
                 poseStack.translate(0, rootY + 1.0f, 0);
                 var scale = (float) Mth.clamp((tSec - 2) / 2.8, 0, 1);
                 poseStack.scale(scale, scale, scale);
+                this.hackStateEnter(1);
                 submitNodeCollector.submitCustomGeometry(poseStack, PORTAL_TRIANGLE, (inPose, buffer) -> {
                     buffer.addVertex(inPose, -2, 0, -2).addVertex(inPose, -2, 0, 2).addVertex(inPose, 0, 4, 0);
                     buffer.addVertex(inPose, -2, 0, 2).addVertex(inPose, 2, 0, 2).addVertex(inPose, 0, 4, 0);
@@ -309,8 +312,17 @@ public class BendersonRenderer<T extends LivingEntity & GeoAnimatable & Benderso
                     buffer.addVertex(inPose, 2, 0, 2).addVertex(inPose, 0, -4, 0).addVertex(inPose, 2, 0, -2);
                     buffer.addVertex(inPose, 2, 0, -2).addVertex(inPose, 0, -4, 0).addVertex(inPose, -2, 0, -2);
                 });
+                this.hackStateLeave();
                 poseStack.popPose();
             }
         }
+    }
+
+    private void hackStateEnter(int flag){
+        // stub for iris compat mixin
+    }
+
+    private void hackStateLeave(){
+        // stub for iris compat mixin
     }
 }

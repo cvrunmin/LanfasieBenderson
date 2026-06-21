@@ -1,5 +1,7 @@
 package io.github.cvrunmin.lanfasie.benderson;
 
+import io.github.cvrunmin.lanfasie.benderson.compat.iris.IrisCompatEntry;
+import io.github.cvrunmin.lanfasie.benderson.content.anticalabrum.Anticalabrum;
 import io.github.cvrunmin.lanfasie.benderson.content.anticalabrum.AnticalabrumModel;
 import io.github.cvrunmin.lanfasie.benderson.content.anticalabrum.AnticalabrumRenderer;
 import io.github.cvrunmin.lanfasie.benderson.content.benderson.BendersonRenderer;
@@ -14,6 +16,8 @@ import io.github.cvrunmin.lanfasie.benderson.content.particles.BlockDustSuckingB
 import io.github.cvrunmin.lanfasie.benderson.content.particles.DustSuckingBlowingParticleEmitter;
 import io.github.cvrunmin.lanfasie.benderson.content.unforgiven.*;
 import io.github.cvrunmin.lanfasie.benderson.data.*;
+import io.github.cvrunmin.lanfasie.benderson.foundation.HeiTideSkyboxRenderer;
+import io.github.cvrunmin.lanfasie.benderson.foundation.MyGlobalRenderPipelines;
 import io.github.cvrunmin.lanfasie.benderson.index.AllDamageTypes;
 import io.github.cvrunmin.lanfasie.benderson.index.AllEntityTypes;
 import io.github.cvrunmin.lanfasie.benderson.index.AllItems;
@@ -54,6 +58,7 @@ public class LanfasieBendersonClient {
         // Allows NeoForge to create a config screen for this mod's configs.
         // The config screen is accessed by going to the Mods screen > clicking on your mod > clicking on config.
         // Do not forget to add translations for your config options to the en_us.json file.
+        IrisCompatEntry.tryCompat();
         container.registerExtensionPoint(IConfigScreenFactory.class, ConfigurationScreen::new);
     }
 
@@ -103,6 +108,18 @@ public class LanfasieBendersonClient {
     @SubscribeEvent
     public static void registerConditionalModelProperty(RegisterConditionalItemModelPropertyEvent event){
         event.register(Identifier.fromNamespaceAndPath(LanfasieBenderson.MODID, "is_provoking"), IsProvokingModelProperty.MAP_CODEC);
+    }
+
+    @SubscribeEvent
+    public static void registerCustomPipelines(RegisterRenderPipelinesEvent event){
+        event.registerPipeline(MyGlobalRenderPipelines.ISOLATED_SKY);
+        event.registerPipeline(MyGlobalRenderPipelines.ISOLATED_SKY_TRANSLUCENT);
+        event.registerPipeline(MyGlobalRenderPipelines.ENTITY_SOLID_TRIANGLE);
+        event.registerPipeline(TargetMarkerRenderer.ATTACK_TARGET_MARKER);
+        event.registerPipeline(TargetMarkerRenderer.ATTACK_TARGET_MARKER_TRIANGLE_STRIP);
+        event.registerPipeline(HeiTideSkyboxRenderer.EYES);
+        event.registerPipeline(BendersonRenderer.PORTAL_PIPELINE);
+        event.registerPipeline(BendersonRenderer.PORTAL_TRIANGLE_PIPELINE);
     }
 
     @SubscribeEvent

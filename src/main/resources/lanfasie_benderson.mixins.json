@@ -21,6 +21,7 @@
     "ItemStackRenderStateAccessor",
     "LevelRendererAccessor",
     "ParticleAccessor",
+    "SkyRendererAccessor",
     "SoundEngineAccessor",
     "SoundManagerAccessor"
   ],

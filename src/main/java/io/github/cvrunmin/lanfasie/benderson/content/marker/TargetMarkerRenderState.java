@@ -14,4 +14,5 @@ public class TargetMarkerRenderState extends EntityRenderState {
     public float range2;
     public Vec3 direction;
     public boolean isFirstPerson;
+    public boolean isTargetingSelf;
 }

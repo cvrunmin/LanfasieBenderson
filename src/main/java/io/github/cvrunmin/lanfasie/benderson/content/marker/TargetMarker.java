@@ -7,6 +7,7 @@ import io.github.cvrunmin.lanfasie.benderson.index.AllEntityDataSerializers;
 import io.github.cvrunmin.lanfasie.benderson.index.AllEntityTypes;
 import io.github.cvrunmin.lanfasie.benderson.index.AllSoundEvents;
 import io.netty.buffer.ByteBuf;
+import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.UUIDUtil;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -341,6 +342,12 @@ public class TargetMarker extends Entity implements IEntityWithComplexSpawn, Own
             }
         }
         return targetEntity;
+    }
+
+    public boolean isTargetingSelf(){
+        if(!level().isClientSide()) return false;
+        var cameraEntity = Minecraft.getInstance().getCameraEntity();
+        return cameraEntity != null && cameraEntity.equals(targetEntity);
     }
 
     @Override

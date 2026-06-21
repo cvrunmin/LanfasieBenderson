@@ -2,6 +2,7 @@ package io.github.cvrunmin.lanfasie.benderson.foundation;
 
 import com.mojang.blaze3d.buffers.GpuBuffer;
 import com.mojang.blaze3d.buffers.GpuBufferSlice;
+import com.mojang.blaze3d.buffers.Std140Builder;
 import com.mojang.blaze3d.pipeline.BlendFunction;
 import com.mojang.blaze3d.pipeline.ColorTargetState;
 import com.mojang.blaze3d.pipeline.RenderPipeline;
@@ -13,9 +14,13 @@ import com.mojang.math.Axis;
 import io.github.cvrunmin.lanfasie.benderson.LanfasieBenderson;
 import io.github.cvrunmin.lanfasie.benderson.LevelSpecialPerformanceHandler;
 import io.github.cvrunmin.lanfasie.benderson.mixin.LevelRendererAccessor;
+import io.github.cvrunmin.lanfasie.benderson.mixin.SkyRendererAccessor;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.LevelRenderer;
+import net.minecraft.client.renderer.MappableRingBuffer;
 import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.client.renderer.fog.FogData;
+import net.minecraft.client.renderer.fog.FogRenderer;
 import net.minecraft.client.renderer.state.level.LevelRenderState;
 import net.minecraft.client.renderer.state.level.SkyRenderState;
 import net.minecraft.client.renderer.texture.TextureAtlas;
@@ -51,6 +56,7 @@ public class HeiTideSkyboxRenderer implements CustomSkyboxRenderer {
     private GpuBuffer smallEyesBuffer;
     private GpuBuffer mainEyeBuffer;
     private int starIndexCount;
+    private MappableRingBuffer fogBuffer;
 
     public void reloadResources(){
         if(smallEyesBuffer != null){
@@ -59,11 +65,15 @@ public class HeiTideSkyboxRenderer implements CustomSkyboxRenderer {
         if(mainEyeBuffer != null){
             mainEyeBuffer.close();
         }
+        if(fogBuffer != null){
+            fogBuffer.close();
+        }
         TextureManager textureManager = Minecraft.getInstance().getTextureManager();
         AtlasManager atlasManager = Minecraft.getInstance().getAtlasManager();
         celestialsAtlas = atlasManager.getAtlasOrThrow(AtlasIds.CELESTIALS);
         smallEyesBuffer = buildSmallEyes();
         mainEyeBuffer = buildMainEye();
+        fogBuffer = new MappableRingBuffer(() -> "Fog UBO", 130, FogRenderer.FOG_UBO_SIZE);
     }
 
     public void close(){
@@ -72,6 +82,9 @@ public class HeiTideSkyboxRenderer implements CustomSkyboxRenderer {
         }
         if(mainEyeBuffer != null){
             mainEyeBuffer.close();
+        }
+        if(fogBuffer != null){
+            fogBuffer.close();
         }
     }
 
@@ -124,20 +137,65 @@ public class HeiTideSkyboxRenderer implements CustomSkyboxRenderer {
         }
     }
 
+    private boolean shouldOverrideFog(){
+        return false;
+    }
+
+    private void renderSkyDisc(int skyColor) {
+        LevelRenderer levelRenderer = Minecraft.getInstance().levelRenderer;
+        var skyRenderer = ((LevelRendererAccessor) levelRenderer).getSkyRenderer();
+        GpuBufferSlice dynamicTransforms = RenderSystem.getDynamicUniforms()
+                .writeTransform(RenderSystem.getModelViewMatrix(), ARGB.vector4fFromARGB32(skyColor), new Vector3f(), new Matrix4f());
+        GpuTextureView colorTexture = Minecraft.getInstance().getMainRenderTarget().getColorTextureView();
+        GpuTextureView depthTexture = Minecraft.getInstance().getMainRenderTarget().getDepthTextureView();
+
+        try (RenderPass renderPass = RenderSystem.getDevice()
+                .createCommandEncoder()
+                .createRenderPass(() -> "Sky disc", colorTexture, OptionalInt.empty(), depthTexture, OptionalDouble.empty())) {
+            if(shouldOverrideFog()){
+                renderPass.setPipeline(MyGlobalRenderPipelines.ISOLATED_SKY_TRANSLUCENT);
+            }else {
+                renderPass.setPipeline(MyGlobalRenderPipelines.ISOLATED_SKY);
+            }
+            RenderSystem.bindDefaultUniforms(renderPass);
+            if(shouldOverrideFog()){
+                renderPass.setUniform("Fog", fogBuffer.currentBuffer().slice(0L, FogRenderer.FOG_UBO_SIZE));
+            }
+            renderPass.setUniform("DynamicTransforms", dynamicTransforms);
+            renderPass.setVertexBuffer(0, ((SkyRendererAccessor) skyRenderer).getTopSkyBuffer());
+            renderPass.draw(0, 10);
+        }
+    }
+
     @Override
     public boolean renderSky(LevelRenderState levelRenderState, SkyRenderState state, Matrix4fc modelViewMatrix, Runnable setupFog) {
         setupFog.run();
         LevelRenderer levelRenderer = Minecraft.getInstance().levelRenderer;
         var skyRenderer = ((LevelRendererAccessor) levelRenderer).getSkyRenderer();
         PoseStack poseStack = new PoseStack();
+        FogData fogData = levelRenderState.cameraRenderState.fogData;
+        try (GpuBuffer.MappedView view = RenderSystem.getDevice().createCommandEncoder().mapBuffer(this.fogBuffer.currentBuffer(), false, true)) {
+            Std140Builder.intoBuffer(view.data())
+                    .putVec4(new Vector4f(1, 1, 1, 0).mul(fogData.color))
+                    .putFloat(fogData.environmentalStart)
+                    .putFloat(fogData.environmentalEnd)
+                    .putFloat(fogData.renderDistanceStart)
+                    .putFloat(fogData.renderDistanceEnd)
+                    .putFloat(fogData.skyEnd)
+                    .putFloat(fogData.cloudEnd);
+        }
         Integer firstCustomSkyTick = levelRenderState.getRenderData(LevelSpecialPerformanceHandler.FIRST_CUSTOM_SKY_TICK);
         Integer lastCustomSkyTick = levelRenderState.getRenderData(LevelSpecialPerformanceHandler.LAST_CUSTOM_SKY_TICK);
-        if (firstCustomSkyTick == null && lastCustomSkyTick == null) return false;
+        if (firstCustomSkyTick == null && lastCustomSkyTick == null) {
+            fogBuffer.rotate();
+            return false;
+        }
         if (firstCustomSkyTick != null) {
             var t1 = levelRenderer.getTicks() - firstCustomSkyTick;
             float alpha = Mth.clamp(t1 / 40f, 0, 1);
             float alpha1 = Mth.clamp((t1 - 20) / 20f, 0, 1);
-            skyRenderer.renderSkyDisc(ARGB.linearLerp(alpha, state.skyColor, ARGB.color(255, 0)));
+            int skyColor = ARGB.linearLerp(alpha, state.skyColor, ARGB.color(255, 0));
+            this.renderSkyDisc(skyColor);
             if (t1 < 40) {
                 skyRenderer.renderSunriseAndSunset(poseStack, state.sunAngle, ARGB.linearLerp(alpha, state.sunriseAndSunsetColor, 0));
                 var rainBrightness = Mth.clampedLerp(t1 / 40f, state.rainBrightness, 0);
@@ -159,7 +217,8 @@ public class HeiTideSkyboxRenderer implements CustomSkyboxRenderer {
             var t1 = levelRenderer.getTicks() - lastCustomSkyTick;
             float alpha = Mth.clamp(t1 / 40f, 0, 1);
             float alpha1 = Mth.clamp(t1 / 20f, 0, 1);
-            skyRenderer.renderSkyDisc(ARGB.linearLerp(alpha, ARGB.color(255, 0), state.skyColor));
+            int skyColor = ARGB.linearLerp(alpha, ARGB.color(255, 0), state.skyColor);
+            this.renderSkyDisc(skyColor);
             skyRenderer.renderSunriseAndSunset(poseStack, state.sunAngle, ARGB.linearLerp(alpha, 0, state.sunriseAndSunsetColor));
             var rainBrightness = Mth.clampedLerp(t1 / 40f, 0, state.rainBrightness);
             var starBrightness = Mth.clampedLerp(t1 / 40f, 0, state.starBrightness);
@@ -179,6 +238,7 @@ public class HeiTideSkyboxRenderer implements CustomSkyboxRenderer {
         if (state.shouldRenderDarkDisc) {
             skyRenderer.renderDarkDisc();
         }
+        fogBuffer.rotate();
         return true;
     }
 

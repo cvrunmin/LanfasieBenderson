@@ -39,3 +39,9 @@ run/
 repo/
 !**/src/**/repo/
 run-production/
+
+# ignore all source jar
+libs/*-sources.jar
+
+
+libs/iris-neoforge-1.10.9+mc26.1.1.jar

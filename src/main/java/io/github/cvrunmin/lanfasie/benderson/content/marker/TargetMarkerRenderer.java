@@ -23,7 +23,6 @@ import net.minecraft.util.LightCoordsUtil;
 import net.minecraft.util.Mth;
 import net.minecraft.util.Util;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.phys.Vec3;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
@@ -47,18 +46,23 @@ public class TargetMarkerRenderer extends EntityRenderer<TargetMarker, TargetMar
             .withShaderDefine("ALPHA_CUTOUT", 0.1F)
             .withColorTargetState(new ColorTargetState(BlendFunction.TRANSLUCENT))
             .withCull(false).buildSnippet();
+
+    public static final RenderPipeline ATTACK_TARGET_MARKER = RenderPipeline.builder(ATTACK_MARKER_SNIPPET)
+            .withVertexFormat(DefaultVertexFormat.ENTITY, VertexFormat.Mode.QUADS)
+            .withLocation(Identifier.fromNamespaceAndPath(LanfasieBenderson.MODID, "attack_target_marker"))
+            .build();
+
+    public static final RenderPipeline ATTACK_TARGET_MARKER_TRIANGLE_STRIP = RenderPipeline.builder(ATTACK_MARKER_SNIPPET)
+            .withVertexFormat(DefaultVertexFormat.ENTITY, VertexFormat.Mode.TRIANGLE_STRIP)
+            .withLocation(Identifier.fromNamespaceAndPath(LanfasieBenderson.MODID, "attack_target_marker_tstrip"))
+            .build();
+
     private static final Function<Identifier, RenderType> RENDER_TYPE = Util.memoize((location) -> RenderType.create("attack_target_marker", RenderSetup.builder(
-                    RenderPipeline.builder(ATTACK_MARKER_SNIPPET)
-                            .withVertexFormat(DefaultVertexFormat.ENTITY, VertexFormat.Mode.QUADS)
-                            .withLocation(Identifier.fromNamespaceAndPath(LanfasieBenderson.MODID, "attack_target_marker"))
-                            .build())
+                    ATTACK_TARGET_MARKER)
             .withTexture("Sampler0", location).sortOnUpload().createRenderSetup()));
 
     private static final Function<Identifier, RenderType> TRIANGLE_STRIP_RENDER_TYPE = Util.memoize((location) -> RenderType.create("attack_target_marker_tstrip", RenderSetup.builder(
-                    RenderPipeline.builder(ATTACK_MARKER_SNIPPET)
-                            .withVertexFormat(DefaultVertexFormat.ENTITY, VertexFormat.Mode.TRIANGLE_STRIP)
-                            .withLocation(Identifier.fromNamespaceAndPath(LanfasieBenderson.MODID, "attack_target_marker_tstrip"))
-                            .build())
+                    ATTACK_TARGET_MARKER_TRIANGLE_STRIP)
             .withTexture("Sampler0", location).sortOnUpload().createRenderSetup()));
 
     private static final int LETHAL_ATTACK_ARROW_1_WIDTH = 103;
@@ -86,6 +90,7 @@ public class TargetMarkerRenderer extends EntityRenderer<TargetMarker, TargetMar
         state.range2 = entity.getMarkerArgs().range2();
         state.direction = entity.getMarkerArgs().direction();
         state.isFirstPerson = Minecraft.getInstance().options.getCameraType().isFirstPerson();
+        state.isTargetingSelf = entity.isTargetingSelf();
         if(entity.getTargetType() == TargetMarker.TargetType.ENTITY){
             var targetEntity = entity.getTargetEntity();
             if(targetEntity != null){
@@ -150,30 +155,30 @@ public class TargetMarkerRenderer extends EntityRenderer<TargetMarker, TargetMar
             innerStack.rotateAround(new Quaternionf().rotateY((float) (Math.PI * state.ageInTicks * 0.05)), 0, 0, 0);
             innerStack.translate(0, state.markerHeight, 0);
             var pose = innerStack.last();
-            buffer.addVertex(pose, -1, 0, -1).setUv(0, 0).setUv1(0, 0).setUv2(0, 0).setColor(1f, 1f, 1f, alpha).setNormal(0, 1, 0);
-            buffer.addVertex(pose, -1, 0, 1).setUv(0, 1).setUv1(0, 0).setUv2(0, 0).setColor(1f, 1f, 1f, alpha).setNormal(0, 1, 0);
-            buffer.addVertex(pose, 1, 0, 1).setUv(0.5f, 1).setUv1(0, 0).setUv2(0, 0).setColor(1f, 1f, 1f, alpha).setNormal(0, 1, 0);
-            buffer.addVertex(pose, 1, 0, -1).setUv(0.5f, 0).setUv1(0, 0).setUv2(0, 0).setColor(1f, 1f, 1f, alpha).setNormal(0, 1, 0);
+            buffer.addVertex(pose, -1, 0, -1).setUv(0, 0).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setColor(1f, 1f, 1f, alpha).setNormal(0, 1, 0);
+            buffer.addVertex(pose, -1, 0, 1).setUv(0, 1).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setColor(1f, 1f, 1f, alpha).setNormal(0, 1, 0);
+            buffer.addVertex(pose, 1, 0, 1).setUv(0.5f, 1).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setColor(1f, 1f, 1f, alpha).setNormal(0, 1, 0);
+            buffer.addVertex(pose, 1, 0, -1).setUv(0.5f, 0).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setColor(1f, 1f, 1f, alpha).setNormal(0, 1, 0);
             innerStack.popPose();
             innerStack.pushPose();
             innerStack.rotateAround(new Quaternionf().rotateY((float) Math.toRadians(-camera.yRot)), 0, 0, 0);
             innerStack.translate(0, state.overheadOffset + 0.5f, 0);
             pose = innerStack.last();
-            buffer.addVertex(pose, -0.5f, 0.4f, 0).setUv(0.5f, 0).setUv1(0, 0).setUv2(0, 0).setColor(1f, 1f, 1f, alpha).setNormal(0, 0, 1);
-            buffer.addVertex(pose, -0.5f, 0, 0).setUv(0.5f, LETHAL_ATTACK_ARROW_1_HEIGHT / 256f).setUv1(0, 0).setUv2(0, 0).setColor(1f, 1f, 1f, alpha).setNormal(0, 0, 1);
-            buffer.addVertex(pose, 0.5f, 0, 0).setUv(0.5f + LETHAL_ATTACK_ARROW_1_WIDTH / 512f, LETHAL_ATTACK_ARROW_1_HEIGHT / 256f).setUv1(0, 0).setUv2(0, 0).setColor(1f, 1f, 1f, alpha).setNormal(0, 0, 1);
-            buffer.addVertex(pose, 0.5f, 0.4f, 0).setUv(0.5f + LETHAL_ATTACK_ARROW_1_WIDTH / 512f, 0).setUv1(0, 0).setUv2(0, 0).setColor(1f, 1f, 1f, alpha).setNormal(0, 0, 1);
+            buffer.addVertex(pose, -0.5f, 0.4f, 0).setUv(0.5f, 0).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setColor(1f, 1f, 1f, alpha).setNormal(0, 0, 1);
+            buffer.addVertex(pose, -0.5f, 0, 0).setUv(0.5f, LETHAL_ATTACK_ARROW_1_HEIGHT / 256f).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setColor(1f, 1f, 1f, alpha).setNormal(0, 0, 1);
+            buffer.addVertex(pose, 0.5f, 0, 0).setUv(0.5f + LETHAL_ATTACK_ARROW_1_WIDTH / 512f, LETHAL_ATTACK_ARROW_1_HEIGHT / 256f).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setColor(1f, 1f, 1f, alpha).setNormal(0, 0, 1);
+            buffer.addVertex(pose, 0.5f, 0.4f, 0).setUv(0.5f + LETHAL_ATTACK_ARROW_1_WIDTH / 512f, 0).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setColor(1f, 1f, 1f, alpha).setNormal(0, 0, 1);
 
             innerStack.translate(0, 0.2f + 0.2f * ((float) Math.cos(Math.PI * state.ageInTicks * 0.1) + 1), 0);
             pose = innerStack.last();
-            buffer.addVertex(pose, -0.25f, 0.4f, 0).setUv(0.5f, LETHAL_ATTACK_ARROW_1_HEIGHT / 256f).setUv1(0, 0).setUv2(0, 0).setColor(1f, 1f, 1f, alpha).setNormal(0, 0, 1);
-            buffer.addVertex(pose, -0.25f, 0, 0).setUv(0.5f, (LETHAL_ATTACK_ARROW_1_HEIGHT + LETHAL_ATTACK_ARROW_2_HEIGHT) / 256f).setUv1(0, 0).setUv2(0, 0).setColor(1f, 1f, 1f, alpha).setNormal(0, 0, 1);
-            buffer.addVertex(pose, 0.25f, 0, 0).setUv(0.5f + LETHAL_ATTACK_ARROW_2_WIDTH / 512f, (LETHAL_ATTACK_ARROW_1_HEIGHT + LETHAL_ATTACK_ARROW_2_HEIGHT) / 256f).setUv1(0, 0).setUv2(0, 0).setColor(1f, 1f, 1f, alpha).setNormal(0, 0, 1);
-            buffer.addVertex(pose, 0.25f, 0.4f, 0).setUv(0.5f + LETHAL_ATTACK_ARROW_2_WIDTH / 512f, LETHAL_ATTACK_ARROW_1_HEIGHT / 256f).setUv1(0, 0).setUv2(0, 0).setColor(1f, 1f, 1f, alpha).setNormal(0, 0, 1);
-            buffer.addVertex(pose, -0.25f, 0.7f, 0).setUv(0.5f, LETHAL_ATTACK_ARROW_1_HEIGHT / 256f).setUv1(0, 0).setUv2(0, 0).setColor(1f, 1f, 1f, alpha).setNormal(0, 0, 1);
-            buffer.addVertex(pose, -0.25f, 0.3f, 0).setUv(0.5f, (LETHAL_ATTACK_ARROW_1_HEIGHT + LETHAL_ATTACK_ARROW_2_HEIGHT) / 256f).setUv1(0, 0).setUv2(0, 0).setColor(1f, 1f, 1f, alpha).setNormal(0, 0, 1);
-            buffer.addVertex(pose, 0.25f, 0.3f, 0).setUv(0.5f + LETHAL_ATTACK_ARROW_2_WIDTH / 512f, (LETHAL_ATTACK_ARROW_1_HEIGHT + LETHAL_ATTACK_ARROW_2_HEIGHT) / 256f).setUv1(0, 0).setUv2(0, 0).setColor(1f, 1f, 1f, alpha).setNormal(0, 0, 1);
-            buffer.addVertex(pose, 0.25f, 0.7f, 0).setUv(0.5f + LETHAL_ATTACK_ARROW_2_WIDTH / 512f, LETHAL_ATTACK_ARROW_1_HEIGHT / 256f).setUv1(0, 0).setUv2(0, 0).setColor(1f, 1f, 1f, alpha).setNormal(0, 0, 1);
+            buffer.addVertex(pose, -0.25f, 0.4f, 0).setUv(0.5f, LETHAL_ATTACK_ARROW_1_HEIGHT / 256f).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setColor(1f, 1f, 1f, alpha).setNormal(0, 0, 1);
+            buffer.addVertex(pose, -0.25f, 0, 0).setUv(0.5f, (LETHAL_ATTACK_ARROW_1_HEIGHT + LETHAL_ATTACK_ARROW_2_HEIGHT) / 256f).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setColor(1f, 1f, 1f, alpha).setNormal(0, 0, 1);
+            buffer.addVertex(pose, 0.25f, 0, 0).setUv(0.5f + LETHAL_ATTACK_ARROW_2_WIDTH / 512f, (LETHAL_ATTACK_ARROW_1_HEIGHT + LETHAL_ATTACK_ARROW_2_HEIGHT) / 256f).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setColor(1f, 1f, 1f, alpha).setNormal(0, 0, 1);
+            buffer.addVertex(pose, 0.25f, 0.4f, 0).setUv(0.5f + LETHAL_ATTACK_ARROW_2_WIDTH / 512f, LETHAL_ATTACK_ARROW_1_HEIGHT / 256f).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setColor(1f, 1f, 1f, alpha).setNormal(0, 0, 1);
+            buffer.addVertex(pose, -0.25f, 0.7f, 0).setUv(0.5f, LETHAL_ATTACK_ARROW_1_HEIGHT / 256f).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setColor(1f, 1f, 1f, alpha).setNormal(0, 0, 1);
+            buffer.addVertex(pose, -0.25f, 0.3f, 0).setUv(0.5f, (LETHAL_ATTACK_ARROW_1_HEIGHT + LETHAL_ATTACK_ARROW_2_HEIGHT) / 256f).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setColor(1f, 1f, 1f, alpha).setNormal(0, 0, 1);
+            buffer.addVertex(pose, 0.25f, 0.3f, 0).setUv(0.5f + LETHAL_ATTACK_ARROW_2_WIDTH / 512f, (LETHAL_ATTACK_ARROW_1_HEIGHT + LETHAL_ATTACK_ARROW_2_HEIGHT) / 256f).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setColor(1f, 1f, 1f, alpha).setNormal(0, 0, 1);
+            buffer.addVertex(pose, 0.25f, 0.7f, 0).setUv(0.5f + LETHAL_ATTACK_ARROW_2_WIDTH / 512f, LETHAL_ATTACK_ARROW_1_HEIGHT / 256f).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setColor(1f, 1f, 1f, alpha).setNormal(0, 0, 1);
             innerStack.popPose();
         });
     }
@@ -191,35 +196,35 @@ public class TargetMarkerRenderer extends EntityRenderer<TargetMarker, TargetMar
         submitNodeCollector.submitCustomGeometry(poseStack, TRIANGLE_STRIP_RENDER_TYPE.apply(COLOR_SCHEME_MARKER_TEXTURE), (inPose, buffer) -> {
             var innerStack = new PoseStack();
             var halfRange = state.range * 0.5f;
-            buffer.addVertex(inPose, Math.max(0, halfRange - 0.25f), 1e-3f, 0).setColor(1f, 1f, 1f, alpha).setUv(0.9999f, 0f).setUv1(0, 0).setUv2(0, 0).setNormal(0, 1, 0);
+            buffer.addVertex(inPose, Math.max(0, halfRange - 0.25f), 1e-3f, 0).setColor(1f, 1f, 1f, alpha).setUv(0.9999f, 0f).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setNormal(0, 1, 0);
             for (int i = 0; i < 361; i++) {
                 var rad = Math.PI * i / 180f;
                 var cr = (float)Math.cos(rad);
                 var sr = (float)Math.sin(rad);
-                buffer.addVertex(inPose, Math.max(0, halfRange - 0.25f) * cr, 1e-3f, Math.max(0, halfRange - 0.25f) * sr).setColor(1f, 1f, 1f, alpha).setUv(0.9999f, 0f).setUv1(0, 0).setUv2(0, 0).setNormal(0, 1, 0);
-                buffer.addVertex(inPose, halfRange * cr, 1e-3f, halfRange * sr).setColor(1f, 1f, 1f, alpha).setUv(0f, 0f).setUv1(0, 0).setUv2(0, 0).setNormal(0, 1, 0);
+                buffer.addVertex(inPose, Math.max(0, halfRange - 0.25f) * cr, 1e-3f, Math.max(0, halfRange - 0.25f) * sr).setColor(1f, 1f, 1f, alpha).setUv(0.9999f, 0f).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setNormal(0, 1, 0);
+                buffer.addVertex(inPose, halfRange * cr, 1e-3f, halfRange * sr).setColor(1f, 1f, 1f, alpha).setUv(0f, 0f).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setNormal(0, 1, 0);
             }
             for (int i = 0; i < 361; i++) {
                 var rad = Math.PI * i / 180f;
                 var cr = (float)Math.cos(rad);
                 var sr = (float)Math.sin(rad);
-                buffer.addVertex(inPose, 0, 1e-3f, 0).setColor(1f, 1f, 1f, alpha).setUv(0.999f, 0f).setUv1(0, 0).setUv2(0, 0).setNormal(0, 1, 0);
-                buffer.addVertex(inPose, Math.max(0, halfRange - 0.25f) * cr, 1e-3f, Math.max(0, halfRange - 0.25f) * sr).setColor(1f, 1f, 1f, alpha).setUv(0.999f, 0f).setUv1(0, 0).setUv2(0, 0).setNormal(0, 1, 0);
+                buffer.addVertex(inPose, 0, 1e-3f, 0).setColor(1f, 1f, 1f, alpha).setUv(0.999f, 0f).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setNormal(0, 1, 0);
+                buffer.addVertex(inPose, Math.max(0, halfRange - 0.25f) * cr, 1e-3f, Math.max(0, halfRange - 0.25f) * sr).setColor(1f, 1f, 1f, alpha).setUv(0.999f, 0f).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setNormal(0, 1, 0);
             }
-            buffer.addVertex(inPose, Math.max(0, halfRange - 0.25f), 1e-3f, 0).setColor(1f, 1f, 1f, alpha).setUv(0.999f, 0f).setUv1(0, 0).setUv2(0, 0).setNormal(0, 1, 0);
+            buffer.addVertex(inPose, Math.max(0, halfRange - 0.25f), 1e-3f, 0).setColor(1f, 1f, 1f, alpha).setUv(0.999f, 0f).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setNormal(0, 1, 0);
         });
         submitNodeCollector.submitCustomGeometry(poseStack, TRIANGLE_STRIP_RENDER_TYPE.apply(COLOR_SCHEME_MARKER_TEXTURE), (inPose, buffer) -> {
             var innerStack = new PoseStack();
             var halfRange = state.range * 0.5f * (t1 / 20f);
-            buffer.addVertex(inPose, Math.max(0, halfRange - 0.125f), 2e-3f, 0).setColor(1f, 1f, 1f, alpha * a1).setUv(0f, 0f).setUv1(0, 0).setUv2(0, 0).setNormal(0, 1, 0);
+            buffer.addVertex(inPose, Math.max(0, halfRange - 0.125f), 2e-3f, 0).setColor(1f, 1f, 1f, alpha * a1).setUv(0f, 0f).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setNormal(0, 1, 0);
             for (int i = 0; i < 361; i++) {
                 var rad = Math.PI * i / 180f;
                 var cr = (float)Math.cos(rad);
                 var sr = (float)Math.sin(rad);
-                buffer.addVertex(inPose, Math.max(0, halfRange - 0.125f) * cr, 2e-3f, Math.max(0, halfRange - 0.125f) * sr).setColor(1f, 1f, 1f, alpha * a1).setUv(0f, 0f).setUv1(0, 0).setUv2(0, 0).setNormal(0, 1, 0);
-                buffer.addVertex(inPose, halfRange * cr, 2e-3f, halfRange * sr).setColor(1f, 1f, 1f, alpha * a1).setUv(0f, 0f).setUv1(0, 0).setUv2(0, 0).setNormal(0, 1, 0);
+                buffer.addVertex(inPose, Math.max(0, halfRange - 0.125f) * cr, 2e-3f, Math.max(0, halfRange - 0.125f) * sr).setColor(1f, 1f, 1f, alpha * a1).setUv(0f, 0f).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setNormal(0, 1, 0);
+                buffer.addVertex(inPose, halfRange * cr, 2e-3f, halfRange * sr).setColor(1f, 1f, 1f, alpha * a1).setUv(0f, 0f).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setNormal(0, 1, 0);
             }
-            buffer.addVertex(inPose, halfRange, 2e-3f, 0).setColor(1f, 1f, 1f, alpha * a1).setUv(0f, 0f).setUv1(0, 0).setUv2(0, 0).setNormal(0, 1, 0);
+            buffer.addVertex(inPose, halfRange, 2e-3f, 0).setColor(1f, 1f, 1f, alpha * a1).setUv(0f, 0f).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setNormal(0, 1, 0);
         });
     }
 
@@ -240,60 +245,60 @@ public class TargetMarkerRenderer extends EntityRenderer<TargetMarker, TargetMar
             var halfRange = state.range * 0.5f;
             var halfRange2 = state.range2 * 0.5f;
             var range2 = state.range2;
-            buffer.addVertex(inPose, -halfRange, 1e-3f, 0).setUv(0f, 0f).setColor(1, 1, 1, alpha).setUv1(0, 0).setUv2(0, 0).setNormal(0, 1, 0);
-            buffer.addVertex(inPose, -halfRange, 1e-3f, Math.min(halfRange2, 0.25f)).setUv(0f, 0f).setColor(1, 1, 1, alpha).setUv1(0, 0).setUv2(0, 0).setNormal(0, 1, 0);
-            buffer.addVertex(inPose, -halfRange + 0.25f, 1e-3f, Math.min(halfRange2, 0.25f)).setUv(0.9999f, 0f).setColor(1, 1, 1, alpha).setUv1(0, 0).setUv2(0, 0).setNormal(0, 1, 0);
-            buffer.addVertex(inPose, -halfRange + 0.25f, 1e-3f, 0).setUv(0f, 0f).setColor(1, 1, 1, alpha).setUv1(0, 0).setUv2(0, 0).setNormal(0, 1, 0);
+            buffer.addVertex(inPose, -halfRange, 1e-3f, 0).setUv(0f, 0f).setColor(1, 1, 1, alpha).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setNormal(0, 1, 0);
+            buffer.addVertex(inPose, -halfRange, 1e-3f, Math.min(halfRange2, 0.25f)).setUv(0f, 0f).setColor(1, 1, 1, alpha).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setNormal(0, 1, 0);
+            buffer.addVertex(inPose, -halfRange + 0.25f, 1e-3f, Math.min(halfRange2, 0.25f)).setUv(0.9999f, 0f).setColor(1, 1, 1, alpha).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setNormal(0, 1, 0);
+            buffer.addVertex(inPose, -halfRange + 0.25f, 1e-3f, 0).setUv(0f, 0f).setColor(1, 1, 1, alpha).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setNormal(0, 1, 0);
 
-            buffer.addVertex(inPose, -halfRange + 0.25f, 1e-3f, 0).setUv(0f, 0f).setColor(1, 1, 1, alpha).setUv1(0, 0).setUv2(0, 0).setNormal(0, 1, 0);
-            buffer.addVertex(inPose, -halfRange + 0.25f, 1e-3f, Math.min(halfRange2, 0.25f)).setUv(0.9999f, 0f).setColor(1, 1, 1, alpha).setUv1(0, 0).setUv2(0, 0).setNormal(0, 1, 0);
-            buffer.addVertex(inPose, halfRange - 0.25f, 1e-3f, Math.min(halfRange2, 0.25f)).setUv(0.9999f, 0f).setColor(1, 1, 1, alpha).setUv1(0, 0).setUv2(0, 0).setNormal(0, 1, 0);
-            buffer.addVertex(inPose, halfRange - 0.25f, 1e-3f, 0).setUv(0f, 0f).setColor(1, 1, 1, alpha).setUv1(0, 0).setUv2(0, 0).setNormal(0, 1, 0);
+            buffer.addVertex(inPose, -halfRange + 0.25f, 1e-3f, 0).setUv(0f, 0f).setColor(1, 1, 1, alpha).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setNormal(0, 1, 0);
+            buffer.addVertex(inPose, -halfRange + 0.25f, 1e-3f, Math.min(halfRange2, 0.25f)).setUv(0.9999f, 0f).setColor(1, 1, 1, alpha).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setNormal(0, 1, 0);
+            buffer.addVertex(inPose, halfRange - 0.25f, 1e-3f, Math.min(halfRange2, 0.25f)).setUv(0.9999f, 0f).setColor(1, 1, 1, alpha).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setNormal(0, 1, 0);
+            buffer.addVertex(inPose, halfRange - 0.25f, 1e-3f, 0).setUv(0f, 0f).setColor(1, 1, 1, alpha).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setNormal(0, 1, 0);
 
-            buffer.addVertex(inPose, halfRange - 0.25f, 1e-3f, 0).setUv(0f, 0f).setColor(1, 1, 1, alpha).setUv1(0, 0).setUv2(0, 0).setNormal(0, 1, 0);
-            buffer.addVertex(inPose, halfRange - 0.25f, 1e-3f, Math.min(halfRange2, 0.25f)).setUv(0.9999f, 0f).setColor(1, 1, 1, alpha).setUv1(0, 0).setUv2(0, 0).setNormal(0, 1, 0);
-            buffer.addVertex(inPose, halfRange, 1e-3f, Math.min(halfRange2, 0.25f)).setUv(0f, 0f).setColor(1, 1, 1, alpha).setUv1(0, 0).setUv2(0, 0).setNormal(0, 1, 0);
-            buffer.addVertex(inPose, halfRange, 1e-3f, 0).setUv(0f, 0f).setColor(1, 1, 1, alpha).setUv1(0, 0).setUv2(0, 0).setNormal(0, 1, 0);
+            buffer.addVertex(inPose, halfRange - 0.25f, 1e-3f, 0).setUv(0f, 0f).setColor(1, 1, 1, alpha).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setNormal(0, 1, 0);
+            buffer.addVertex(inPose, halfRange - 0.25f, 1e-3f, Math.min(halfRange2, 0.25f)).setUv(0.9999f, 0f).setColor(1, 1, 1, alpha).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setNormal(0, 1, 0);
+            buffer.addVertex(inPose, halfRange, 1e-3f, Math.min(halfRange2, 0.25f)).setUv(0f, 0f).setColor(1, 1, 1, alpha).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setNormal(0, 1, 0);
+            buffer.addVertex(inPose, halfRange, 1e-3f, 0).setUv(0f, 0f).setColor(1, 1, 1, alpha).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setNormal(0, 1, 0);
 
-            buffer.addVertex(inPose, halfRange - 0.25f, 1e-3f, Math.min(halfRange2, 0.25f)).setUv(0.9999f, 0f).setColor(1, 1, 1, alpha).setUv1(0, 0).setUv2(0, 0).setNormal(0, 1, 0);
-            buffer.addVertex(inPose, halfRange - 0.25f, 1e-3f, range2 - Math.min(halfRange2, 0.25f)).setUv(0.9999f, 0f).setColor(1, 1, 1, alpha).setUv1(0, 0).setUv2(0, 0).setNormal(0, 1, 0);
-            buffer.addVertex(inPose, halfRange, 1e-3f,range2 - Math.min(halfRange2, 0.25f)).setUv(0f, 0f).setColor(1, 1, 1, alpha).setUv1(0, 0).setUv2(0, 0).setNormal(0, 1, 0);
-            buffer.addVertex(inPose, halfRange, 1e-3f, Math.min(halfRange2, 0.25f)).setUv(0f, 0f).setColor(1, 1, 1, alpha).setUv1(0, 0).setUv2(0, 0).setNormal(0, 1, 0);
+            buffer.addVertex(inPose, halfRange - 0.25f, 1e-3f, Math.min(halfRange2, 0.25f)).setUv(0.9999f, 0f).setColor(1, 1, 1, alpha).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setNormal(0, 1, 0);
+            buffer.addVertex(inPose, halfRange - 0.25f, 1e-3f, range2 - Math.min(halfRange2, 0.25f)).setUv(0.9999f, 0f).setColor(1, 1, 1, alpha).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setNormal(0, 1, 0);
+            buffer.addVertex(inPose, halfRange, 1e-3f,range2 - Math.min(halfRange2, 0.25f)).setUv(0f, 0f).setColor(1, 1, 1, alpha).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setNormal(0, 1, 0);
+            buffer.addVertex(inPose, halfRange, 1e-3f, Math.min(halfRange2, 0.25f)).setUv(0f, 0f).setColor(1, 1, 1, alpha).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setNormal(0, 1, 0);
 
-            buffer.addVertex(inPose, -halfRange + 0.25f, 1e-3f, Math.min(halfRange2, 0.25f)).setUv(0.9999f, 0f).setColor(1, 1, 1, alpha).setUv1(0, 0).setUv2(0, 0).setNormal(0, 1, 0);
-            buffer.addVertex(inPose, -halfRange + 0.25f, 1e-3f, range2 - Math.min(halfRange2, 0.25f)).setUv(0.9999f, 0f).setColor(1, 1, 1, alpha).setUv1(0, 0).setUv2(0, 0).setNormal(0, 1, 0);
-            buffer.addVertex(inPose, halfRange - 0.25f, 1e-3f, range2 - Math.min(halfRange2, 0.25f)).setUv(0.9999f, 0f).setColor(1, 1, 1, alpha).setUv1(0, 0).setUv2(0, 0).setNormal(0, 1, 0);
-            buffer.addVertex(inPose, halfRange - 0.25f, 1e-3f, Math.min(halfRange2, 0.25f)).setUv(0.9999f, 0f).setColor(1, 1, 1, alpha).setUv1(0, 0).setUv2(0, 0).setNormal(0, 1, 0);
+            buffer.addVertex(inPose, -halfRange + 0.25f, 1e-3f, Math.min(halfRange2, 0.25f)).setUv(0.9999f, 0f).setColor(1, 1, 1, alpha).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setNormal(0, 1, 0);
+            buffer.addVertex(inPose, -halfRange + 0.25f, 1e-3f, range2 - Math.min(halfRange2, 0.25f)).setUv(0.9999f, 0f).setColor(1, 1, 1, alpha).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setNormal(0, 1, 0);
+            buffer.addVertex(inPose, halfRange - 0.25f, 1e-3f, range2 - Math.min(halfRange2, 0.25f)).setUv(0.9999f, 0f).setColor(1, 1, 1, alpha).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setNormal(0, 1, 0);
+            buffer.addVertex(inPose, halfRange - 0.25f, 1e-3f, Math.min(halfRange2, 0.25f)).setUv(0.9999f, 0f).setColor(1, 1, 1, alpha).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setNormal(0, 1, 0);
 
-            buffer.addVertex(inPose, -halfRange, 1e-3f, Math.min(halfRange2, 0.25f)).setUv(0f, 0f).setColor(1, 1, 1, alpha).setUv1(0, 0).setUv2(0, 0).setNormal(0, 1, 0);
-            buffer.addVertex(inPose, -halfRange, 1e-3f, range2 - Math.min(halfRange2, 0.25f)).setUv(0f, 0f).setColor(1, 1, 1, alpha).setUv1(0, 0).setUv2(0, 0).setNormal(0, 1, 0);
-            buffer.addVertex(inPose, -halfRange + 0.25f, 1e-3f, range2 - Math.min(halfRange2, 0.25f)).setUv(0.9999f, 0f).setColor(1, 1, 1, alpha).setUv1(0, 0).setUv2(0, 0).setNormal(0, 1, 0);
-            buffer.addVertex(inPose, -halfRange + 0.25f, 1e-3f, Math.min(halfRange2, 0.25f)).setUv(0.9999f, 0f).setColor(1, 1, 1, alpha).setUv1(0, 0).setUv2(0, 0).setNormal(0, 1, 0);
+            buffer.addVertex(inPose, -halfRange, 1e-3f, Math.min(halfRange2, 0.25f)).setUv(0f, 0f).setColor(1, 1, 1, alpha).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setNormal(0, 1, 0);
+            buffer.addVertex(inPose, -halfRange, 1e-3f, range2 - Math.min(halfRange2, 0.25f)).setUv(0f, 0f).setColor(1, 1, 1, alpha).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setNormal(0, 1, 0);
+            buffer.addVertex(inPose, -halfRange + 0.25f, 1e-3f, range2 - Math.min(halfRange2, 0.25f)).setUv(0.9999f, 0f).setColor(1, 1, 1, alpha).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setNormal(0, 1, 0);
+            buffer.addVertex(inPose, -halfRange + 0.25f, 1e-3f, Math.min(halfRange2, 0.25f)).setUv(0.9999f, 0f).setColor(1, 1, 1, alpha).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setNormal(0, 1, 0);
 
-            buffer.addVertex(inPose, -halfRange, 1e-3f, range2 - Math.min(halfRange2, 0.25f)).setUv(0f, 0f).setColor(1, 1, 1, alpha).setUv1(0, 0).setUv2(0, 0).setNormal(0, 1, 0);
-            buffer.addVertex(inPose, -halfRange, 1e-3f, range2).setUv(0f, 0f).setColor(1, 1, 1, alpha).setUv1(0, 0).setUv2(0, 0).setNormal(0, 1, 0);
-            buffer.addVertex(inPose, -halfRange + 0.25f, 1e-3f, range2).setUv(0f, 0f).setColor(1, 1, 1, alpha).setUv1(0, 0).setUv2(0, 0).setNormal(0, 1, 0);
-            buffer.addVertex(inPose, -halfRange + 0.25f, 1e-3f, range2 - Math.min(halfRange2, 0.25f)).setUv(0.9999f, 0f).setColor(1, 1, 1, alpha).setUv1(0, 0).setUv2(0, 0).setNormal(0, 1, 0);
+            buffer.addVertex(inPose, -halfRange, 1e-3f, range2 - Math.min(halfRange2, 0.25f)).setUv(0f, 0f).setColor(1, 1, 1, alpha).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setNormal(0, 1, 0);
+            buffer.addVertex(inPose, -halfRange, 1e-3f, range2).setUv(0f, 0f).setColor(1, 1, 1, alpha).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setNormal(0, 1, 0);
+            buffer.addVertex(inPose, -halfRange + 0.25f, 1e-3f, range2).setUv(0f, 0f).setColor(1, 1, 1, alpha).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setNormal(0, 1, 0);
+            buffer.addVertex(inPose, -halfRange + 0.25f, 1e-3f, range2 - Math.min(halfRange2, 0.25f)).setUv(0.9999f, 0f).setColor(1, 1, 1, alpha).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setNormal(0, 1, 0);
 
-            buffer.addVertex(inPose, -halfRange + 0.25f, 1e-3f, range2 - Math.min(halfRange2, 0.25f)).setUv(0.9999f, 0f).setColor(1, 1, 1, alpha).setUv1(0, 0).setUv2(0, 0).setNormal(0, 1, 0);
-            buffer.addVertex(inPose, -halfRange + 0.25f, 1e-3f, range2).setUv(0, 0f).setColor(1, 1, 1, alpha).setUv1(0, 0).setUv2(0, 0).setNormal(0, 1, 0);
-            buffer.addVertex(inPose, halfRange - 0.25f, 1e-3f, range2).setUv(0f, 0f).setColor(1, 1, 1, alpha).setUv1(0, 0).setUv2(0, 0).setNormal(0, 1, 0);
-            buffer.addVertex(inPose, halfRange - 0.25f, 1e-3f, range2 - Math.min(halfRange2, 0.25f)).setUv(0.9999f, 0f).setColor(1, 1, 1, alpha).setUv1(0, 0).setUv2(0, 0).setNormal(0, 1, 0);
+            buffer.addVertex(inPose, -halfRange + 0.25f, 1e-3f, range2 - Math.min(halfRange2, 0.25f)).setUv(0.9999f, 0f).setColor(1, 1, 1, alpha).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setNormal(0, 1, 0);
+            buffer.addVertex(inPose, -halfRange + 0.25f, 1e-3f, range2).setUv(0, 0f).setColor(1, 1, 1, alpha).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setNormal(0, 1, 0);
+            buffer.addVertex(inPose, halfRange - 0.25f, 1e-3f, range2).setUv(0f, 0f).setColor(1, 1, 1, alpha).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setNormal(0, 1, 0);
+            buffer.addVertex(inPose, halfRange - 0.25f, 1e-3f, range2 - Math.min(halfRange2, 0.25f)).setUv(0.9999f, 0f).setColor(1, 1, 1, alpha).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setNormal(0, 1, 0);
 
-            buffer.addVertex(inPose, halfRange - 0.25f, 1e-3f, range2 - Math.min(halfRange2, 0.25f)).setUv(0.9999f, 0f).setColor(1, 1, 1, alpha).setUv1(0, 0).setUv2(0, 0).setNormal(0, 1, 0);
-            buffer.addVertex(inPose, halfRange - 0.25f, 1e-3f, range2).setUv(0.9999f, 0f).setColor(1, 1, 1, alpha).setUv1(0, 0).setUv2(0, 0).setNormal(0, 1, 0);
-            buffer.addVertex(inPose, halfRange, 1e-3f, range2).setUv(0f, 0f).setColor(1, 1, 1, alpha).setUv1(0, 0).setUv2(0, 0).setNormal(0, 1, 0);
-            buffer.addVertex(inPose, halfRange, 1e-3f, range2 - Math.min(halfRange2, 0.25f)).setUv(0f, 0f).setColor(1, 1, 1, alpha).setUv1(0, 0).setUv2(0, 0).setNormal(0, 1, 0);
+            buffer.addVertex(inPose, halfRange - 0.25f, 1e-3f, range2 - Math.min(halfRange2, 0.25f)).setUv(0.9999f, 0f).setColor(1, 1, 1, alpha).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setNormal(0, 1, 0);
+            buffer.addVertex(inPose, halfRange - 0.25f, 1e-3f, range2).setUv(0.9999f, 0f).setColor(1, 1, 1, alpha).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setNormal(0, 1, 0);
+            buffer.addVertex(inPose, halfRange, 1e-3f, range2).setUv(0f, 0f).setColor(1, 1, 1, alpha).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setNormal(0, 1, 0);
+            buffer.addVertex(inPose, halfRange, 1e-3f, range2 - Math.min(halfRange2, 0.25f)).setUv(0f, 0f).setColor(1, 1, 1, alpha).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setNormal(0, 1, 0);
         });
         submitNodeCollector.submitCustomGeometry(poseStack, RENDER_TYPE.apply(COLOR_SCHEME_MARKER_TEXTURE), (inPose, buffer) -> {
             var innerStack = new PoseStack();
             var dr2 = state.range2 * (t1 / 20f) - 0.25f;
             var halfRange = state.range * 0.5f;
             var halfRange2 = state.range2 * 0.5f;
-            buffer.addVertex(inPose, -halfRange, 2e-3f, dr2).setUv(0.9999f, 0f).setColor(1, 1, 1, alpha * a1).setUv1(0, 0).setUv2(0, 0).setNormal(0, 1, 0);
-            buffer.addVertex(inPose, -halfRange, 2e-3f, dr2 + Math.min(halfRange2, 0.25f)).setUv(0f, 0f).setColor(1, 1, 1, alpha * a1).setUv1(0, 0).setUv2(0, 0).setNormal(0, 1, 0);
-            buffer.addVertex(inPose, halfRange, 2e-3f, dr2 + Math.min(halfRange2, 0.25f)).setUv(0f, 0f).setColor(1, 1, 1, alpha * a1).setUv1(0, 0).setUv2(0, 0).setNormal(0, 1, 0);
-            buffer.addVertex(inPose, halfRange, 2e-3f, dr2).setUv(0.9999f, 0f).setColor(1, 1, 1, alpha * a1).setUv1(0, 0).setUv2(0, 0).setNormal(0, 1, 0);
+            buffer.addVertex(inPose, -halfRange, 2e-3f, dr2).setUv(0.9999f, 0f).setColor(1, 1, 1, alpha * a1).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setNormal(0, 1, 0);
+            buffer.addVertex(inPose, -halfRange, 2e-3f, dr2 + Math.min(halfRange2, 0.25f)).setUv(0f, 0f).setColor(1, 1, 1, alpha * a1).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setNormal(0, 1, 0);
+            buffer.addVertex(inPose, halfRange, 2e-3f, dr2 + Math.min(halfRange2, 0.25f)).setUv(0f, 0f).setColor(1, 1, 1, alpha * a1).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setNormal(0, 1, 0);
+            buffer.addVertex(inPose, halfRange, 2e-3f, dr2).setUv(0.9999f, 0f).setColor(1, 1, 1, alpha * a1).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setNormal(0, 1, 0);
         });
         poseStack.popPose();
     }
@@ -324,12 +329,12 @@ public class TargetMarkerRenderer extends EntityRenderer<TargetMarker, TargetMar
                 var cr = (float)Math.cos(rad);
                 var sr = (float)Math.sin(rad);
                 if(i == 0){
-                    buffer.addVertex(inPose, Math.max(0, halfRange - 0.25f) * cr, 1e-3f, Math.max(0, halfRange - 0.25f) * sr).setColor(1f, 1f, 1f, alpha).setUv(0.9999f, 0f).setUv1(0, 0).setUv2(0, 0).setNormal(0, 1, 0);
+                    buffer.addVertex(inPose, Math.max(0, halfRange - 0.25f) * cr, 1e-3f, Math.max(0, halfRange - 0.25f) * sr).setColor(1f, 1f, 1f, alpha).setUv(0.9999f, 0f).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setNormal(0, 1, 0);
                 }
-                buffer.addVertex(inPose, Math.max(0, halfRange - 0.25f) * cr, 1e-3f, Math.max(0, halfRange - 0.25f) * sr).setColor(1f, 1f, 1f, alpha).setUv(0.9999f, 0f).setUv1(0, 0).setUv2(0, 0).setNormal(0, 1, 0);
-                buffer.addVertex(inPose, halfRange * cr, 1e-3f, halfRange * sr).setColor(1f, 1f, 1f, alpha).setUv(0f, 0f).setUv1(0, 0).setUv2(0, 0).setNormal(0, 1, 0);
+                buffer.addVertex(inPose, Math.max(0, halfRange - 0.25f) * cr, 1e-3f, Math.max(0, halfRange - 0.25f) * sr).setColor(1f, 1f, 1f, alpha).setUv(0.9999f, 0f).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setNormal(0, 1, 0);
+                buffer.addVertex(inPose, halfRange * cr, 1e-3f, halfRange * sr).setColor(1f, 1f, 1f, alpha).setUv(0f, 0f).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setNormal(0, 1, 0);
                 if(i + 1 >= angle + 1){
-                    buffer.addVertex(inPose, halfRange * cr, 1e-3f, halfRange * sr).setColor(1f, 1f, 1f, alpha).setUv(0f, 0f).setUv1(0, 0).setUv2(0, 0).setNormal(0, 1, 0);
+                    buffer.addVertex(inPose, halfRange * cr, 1e-3f, halfRange * sr).setColor(1f, 1f, 1f, alpha).setUv(0f, 0f).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setNormal(0, 1, 0);
                 }
             }
             for (int i = 0; i < angle + 1; i++) {
@@ -340,12 +345,12 @@ public class TargetMarkerRenderer extends EntityRenderer<TargetMarker, TargetMar
                 var cr = (float)Math.cos(rad);
                 var sr = (float)Math.sin(rad);
                 if(i == 0){
-                    buffer.addVertex(inPose, 0, 1e-3f, 0).setColor(1f, 1f, 1f, alpha).setUv(0.999f, 0f).setUv1(0, 0).setUv2(0, 0).setNormal(0, 1, 0);
+                    buffer.addVertex(inPose, 0, 1e-3f, 0).setColor(1f, 1f, 1f, alpha).setUv(0.999f, 0f).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setNormal(0, 1, 0);
                 }
-                buffer.addVertex(inPose, 0, 1e-3f, 0).setColor(1f, 1f, 1f, alpha).setUv(0.999f, 0f).setUv1(0, 0).setUv2(0, 0).setNormal(0, 1, 0);
-                buffer.addVertex(inPose, Math.max(0, halfRange - 0.25f) * cr, 1e-3f, Math.max(0, halfRange - 0.25f) * sr).setColor(1f, 1f, 1f, alpha).setUv(0.999f, 0f).setUv1(0, 0).setUv2(0, 0).setNormal(0, 1, 0);
+                buffer.addVertex(inPose, 0, 1e-3f, 0).setColor(1f, 1f, 1f, alpha).setUv(0.999f, 0f).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setNormal(0, 1, 0);
+                buffer.addVertex(inPose, Math.max(0, halfRange - 0.25f) * cr, 1e-3f, Math.max(0, halfRange - 0.25f) * sr).setColor(1f, 1f, 1f, alpha).setUv(0.999f, 0f).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setNormal(0, 1, 0);
                 if(i + 1 >= angle + 1){
-                    buffer.addVertex(inPose, Math.max(0, halfRange - 0.25f) * cr, 1e-3f, Math.max(0, halfRange - 0.25f) * sr).setColor(1f, 1f, 1f, alpha).setUv(0.999f, 0f).setUv1(0, 0).setUv2(0, 0).setNormal(0, 1, 0);
+                    buffer.addVertex(inPose, Math.max(0, halfRange - 0.25f) * cr, 1e-3f, Math.max(0, halfRange - 0.25f) * sr).setColor(1f, 1f, 1f, alpha).setUv(0.999f, 0f).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setNormal(0, 1, 0);
                 }
             }
         });
@@ -360,12 +365,12 @@ public class TargetMarkerRenderer extends EntityRenderer<TargetMarker, TargetMar
                 var cr = (float)Math.cos(rad);
                 var sr = (float)Math.sin(rad);
                 if(i == 0){
-                    buffer.addVertex(inPose, Math.max(0, halfRange - 0.125f) * cr, 3e-3f, Math.max(0, halfRange - 0.125f) * sr).setColor(1f, 1f, 1f, alpha * a1).setUv(0f, 0f).setUv1(0, 0).setUv2(0, 0).setNormal(0, 1, 0);
+                    buffer.addVertex(inPose, Math.max(0, halfRange - 0.125f) * cr, 3e-3f, Math.max(0, halfRange - 0.125f) * sr).setColor(1f, 1f, 1f, alpha * a1).setUv(0f, 0f).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setNormal(0, 1, 0);
                 }
-                buffer.addVertex(inPose, Math.max(0, halfRange - 0.125f) * cr, 3e-3f, Math.max(0, halfRange - 0.125f) * sr).setColor(1f, 1f, 1f, alpha * a1).setUv(0f, 0f).setUv1(0, 0).setUv2(0, 0).setNormal(0, 1, 0);
-                buffer.addVertex(inPose, halfRange * cr, 3e-3f, halfRange * sr).setColor(1f, 1f, 1f, alpha * a1).setUv(0f, 0f).setUv1(0, 0).setUv2(0, 0).setNormal(0, 1, 0);
+                buffer.addVertex(inPose, Math.max(0, halfRange - 0.125f) * cr, 3e-3f, Math.max(0, halfRange - 0.125f) * sr).setColor(1f, 1f, 1f, alpha * a1).setUv(0f, 0f).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setNormal(0, 1, 0);
+                buffer.addVertex(inPose, halfRange * cr, 3e-3f, halfRange * sr).setColor(1f, 1f, 1f, alpha * a1).setUv(0f, 0f).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setNormal(0, 1, 0);
                 if(i + 1 >= angle + 1){
-                    buffer.addVertex(inPose, halfRange * cr, 3e-3f, halfRange * sr).setColor(1f, 1f, 1f, alpha * a1).setUv(0f, 0f).setUv1(0, 0).setUv2(0, 0).setNormal(0, 1, 0);
+                    buffer.addVertex(inPose, halfRange * cr, 3e-3f, halfRange * sr).setColor(1f, 1f, 1f, alpha * a1).setUv(0f, 0f).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setNormal(0, 1, 0);
                 }
             }
         });
@@ -381,16 +386,16 @@ public class TargetMarkerRenderer extends EntityRenderer<TargetMarker, TargetMar
             innerStack.translate(0, state.markerHeight, 0);
             var pose = innerStack.last();
             var halfRange = state.range * 0.5f;
-            buffer.addVertex(pose, Math.max(0, halfRange - 0.125f), 1e-3f, 0).setColor(1f, 1f, 1f, alpha).setUv((129 + 121) / 512f, (129) / 256f).setUv1(0, 0).setUv2(0, 0).setNormal(0, 1, 0);
+            buffer.addVertex(pose, Math.max(0, halfRange - 0.125f), 1e-3f, 0).setColor(1f, 1f, 1f, alpha).setUv((129 + 121) / 512f, (129) / 256f).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setNormal(0, 1, 0);
             for (int i = 0; i < 361; i++) {
                 var rad = Math.PI * i / 180f;
                 var cr = (float)Math.cos(rad);
                 var sr = (float)Math.sin(rad);
-                buffer.addVertex(pose, Math.max(0, halfRange - 0.125f) * cr, 1e-3f, Math.max(0, halfRange - 0.125f) * sr).setColor(1f, 1f, 1f, alpha).setUv((129 + 121 * cr) / 512f, (129 + 121 * sr) / 256f).setUv1(0, 0).setUv2(0, 0).setNormal(0, 1, 0);
-                buffer.addVertex(pose, halfRange * cr, 1e-3f, halfRange * sr).setColor(1f, 1f, 1f, alpha).setUv((129 + 125 * cr) / 512f, (129 + 125 * sr) / 256f).setUv1(0, 0).setUv2(0, 0).setNormal(0, 1, 0);
+                buffer.addVertex(pose, Math.max(0, halfRange - 0.125f) * cr, 1e-3f, Math.max(0, halfRange - 0.125f) * sr).setColor(1f, 1f, 1f, alpha).setUv((129 + 121 * cr) / 512f, (129 + 121 * sr) / 256f).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setNormal(0, 1, 0);
+                buffer.addVertex(pose, halfRange * cr, 1e-3f, halfRange * sr).setColor(1f, 1f, 1f, alpha).setUv((129 + 125 * cr) / 512f, (129 + 125 * sr) / 256f).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setNormal(0, 1, 0);
             }
-            buffer.addVertex(pose, 0, 1e-3f, 0).setColor(1f, 1f, 1f, alpha).setUv(129 / 512f, 129 / 256f).setUv1(0, 0).setUv2(0, 0).setNormal(0, 1, 0);
-            buffer.addVertex(pose, 0, 1e-3f, 0).setColor(1f, 1f, 1f, alpha).setUv(129 / 512f, 129 / 256f).setUv1(0, 0).setUv2(0, 0).setNormal(0, 1, 0);
+            buffer.addVertex(pose, 0, 1e-3f, 0).setColor(1f, 1f, 1f, alpha).setUv(129 / 512f, 129 / 256f).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setNormal(0, 1, 0);
+            buffer.addVertex(pose, 0, 1e-3f, 0).setColor(1f, 1f, 1f, alpha).setUv(129 / 512f, 129 / 256f).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setNormal(0, 1, 0);
             innerStack.popPose();
         });
         submitNodeCollector.submitCustomGeometry(poseStack, RENDER_TYPE.apply(STACK_ATTACK_MARKER_TEXTURE), (inPose, buffer) -> {
@@ -400,26 +405,26 @@ public class TargetMarkerRenderer extends EntityRenderer<TargetMarker, TargetMar
             innerStack.rotateAround(new Quaternionf().rotateY((float) Math.toRadians(-camera.yRot)), 0, 0, 0);
             innerStack.translate(0, state.overheadOffset + 0.5f, 0);
             var pose = innerStack.last();
-            buffer.addVertex(pose, -0.5f, 0.4f, 0).setUv(0.5f, 0).setUv1(0, 0).setUv2(0, 0).setColor(1f, 1f, 1f, alpha).setNormal(0, 0, 1);
-            buffer.addVertex(pose, -0.5f, 0, 0).setUv(0.5f, LETHAL_ATTACK_ARROW_1_HEIGHT / 256f).setUv1(0, 0).setUv2(0, 0).setColor(1f, 1f, 1f, alpha).setNormal(0, 0, 1);
-            buffer.addVertex(pose, 0.5f, 0, 0).setUv(0.5f + LETHAL_ATTACK_ARROW_1_WIDTH / 512f, LETHAL_ATTACK_ARROW_1_HEIGHT / 256f).setUv1(0, 0).setUv2(0, 0).setColor(1f, 1f, 1f, alpha).setNormal(0, 0, 1);
-            buffer.addVertex(pose, 0.5f, 0.4f, 0).setUv(0.5f + LETHAL_ATTACK_ARROW_1_WIDTH / 512f, 0).setUv1(0, 0).setUv2(0, 0).setColor(1f, 1f, 1f, alpha).setNormal(0, 0, 1);
+            buffer.addVertex(pose, -0.5f, 0.4f, 0).setUv(0.5f, 0).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setColor(1f, 1f, 1f, alpha).setNormal(0, 0, 1);
+            buffer.addVertex(pose, -0.5f, 0, 0).setUv(0.5f, LETHAL_ATTACK_ARROW_1_HEIGHT / 256f).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setColor(1f, 1f, 1f, alpha).setNormal(0, 0, 1);
+            buffer.addVertex(pose, 0.5f, 0, 0).setUv(0.5f + LETHAL_ATTACK_ARROW_1_WIDTH / 512f, LETHAL_ATTACK_ARROW_1_HEIGHT / 256f).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setColor(1f, 1f, 1f, alpha).setNormal(0, 0, 1);
+            buffer.addVertex(pose, 0.5f, 0.4f, 0).setUv(0.5f + LETHAL_ATTACK_ARROW_1_WIDTH / 512f, 0).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setColor(1f, 1f, 1f, alpha).setNormal(0, 0, 1);
 
             innerStack.translate(0, 0.2f + 0.2f * ((float) Math.cos(Math.PI * state.ageInTicks * 0.1) + 1), 0);
             pose = innerStack.last();
-            buffer.addVertex(pose, -0.25f, 0.4f, 0).setUv(0.5f, LETHAL_ATTACK_ARROW_1_HEIGHT / 256f).setUv1(0, 0).setUv2(0, 0).setColor(1f, 1f, 1f, alpha).setNormal(0, 0, 1);
-            buffer.addVertex(pose, -0.25f, 0, 0).setUv(0.5f, (LETHAL_ATTACK_ARROW_1_HEIGHT + LETHAL_ATTACK_ARROW_2_HEIGHT) / 256f).setUv1(0, 0).setUv2(0, 0).setColor(1f, 1f, 1f, alpha).setNormal(0, 0, 1);
-            buffer.addVertex(pose, 0.25f, 0, 0).setUv(0.5f + LETHAL_ATTACK_ARROW_2_WIDTH / 512f, (LETHAL_ATTACK_ARROW_1_HEIGHT + LETHAL_ATTACK_ARROW_2_HEIGHT) / 256f).setUv1(0, 0).setUv2(0, 0).setColor(1f, 1f, 1f, alpha).setNormal(0, 0, 1);
-            buffer.addVertex(pose, 0.25f, 0.4f, 0).setUv(0.5f + LETHAL_ATTACK_ARROW_2_WIDTH / 512f, LETHAL_ATTACK_ARROW_1_HEIGHT / 256f).setUv1(0, 0).setUv2(0, 0).setColor(1f, 1f, 1f, alpha).setNormal(0, 0, 1);
-            buffer.addVertex(pose, -0.25f, 0.7f, 0).setUv(0.5f, LETHAL_ATTACK_ARROW_1_HEIGHT / 256f).setUv1(0, 0).setUv2(0, 0).setColor(1f, 1f, 1f, alpha).setNormal(0, 0, 1);
-            buffer.addVertex(pose, -0.25f, 0.3f, 0).setUv(0.5f, (LETHAL_ATTACK_ARROW_1_HEIGHT + LETHAL_ATTACK_ARROW_2_HEIGHT) / 256f).setUv1(0, 0).setUv2(0, 0).setColor(1f, 1f, 1f, alpha).setNormal(0, 0, 1);
-            buffer.addVertex(pose, 0.25f, 0.3f, 0).setUv(0.5f + LETHAL_ATTACK_ARROW_2_WIDTH / 512f, (LETHAL_ATTACK_ARROW_1_HEIGHT + LETHAL_ATTACK_ARROW_2_HEIGHT) / 256f).setUv1(0, 0).setUv2(0, 0).setColor(1f, 1f, 1f, alpha).setNormal(0, 0, 1);
-            buffer.addVertex(pose, 0.25f, 0.7f, 0).setUv(0.5f + LETHAL_ATTACK_ARROW_2_WIDTH / 512f, LETHAL_ATTACK_ARROW_1_HEIGHT / 256f).setUv1(0, 0).setUv2(0, 0).setColor(1f, 1f, 1f, alpha).setNormal(0, 0, 1);
+            buffer.addVertex(pose, -0.25f, 0.4f, 0).setUv(0.5f, LETHAL_ATTACK_ARROW_1_HEIGHT / 256f).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setColor(1f, 1f, 1f, alpha).setNormal(0, 0, 1);
+            buffer.addVertex(pose, -0.25f, 0, 0).setUv(0.5f, (LETHAL_ATTACK_ARROW_1_HEIGHT + LETHAL_ATTACK_ARROW_2_HEIGHT) / 256f).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setColor(1f, 1f, 1f, alpha).setNormal(0, 0, 1);
+            buffer.addVertex(pose, 0.25f, 0, 0).setUv(0.5f + LETHAL_ATTACK_ARROW_2_WIDTH / 512f, (LETHAL_ATTACK_ARROW_1_HEIGHT + LETHAL_ATTACK_ARROW_2_HEIGHT) / 256f).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setColor(1f, 1f, 1f, alpha).setNormal(0, 0, 1);
+            buffer.addVertex(pose, 0.25f, 0.4f, 0).setUv(0.5f + LETHAL_ATTACK_ARROW_2_WIDTH / 512f, LETHAL_ATTACK_ARROW_1_HEIGHT / 256f).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setColor(1f, 1f, 1f, alpha).setNormal(0, 0, 1);
+            buffer.addVertex(pose, -0.25f, 0.7f, 0).setUv(0.5f, LETHAL_ATTACK_ARROW_1_HEIGHT / 256f).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setColor(1f, 1f, 1f, alpha).setNormal(0, 0, 1);
+            buffer.addVertex(pose, -0.25f, 0.3f, 0).setUv(0.5f, (LETHAL_ATTACK_ARROW_1_HEIGHT + LETHAL_ATTACK_ARROW_2_HEIGHT) / 256f).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setColor(1f, 1f, 1f, alpha).setNormal(0, 0, 1);
+            buffer.addVertex(pose, 0.25f, 0.3f, 0).setUv(0.5f + LETHAL_ATTACK_ARROW_2_WIDTH / 512f, (LETHAL_ATTACK_ARROW_1_HEIGHT + LETHAL_ATTACK_ARROW_2_HEIGHT) / 256f).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setColor(1f, 1f, 1f, alpha).setNormal(0, 0, 1);
+            buffer.addVertex(pose, 0.25f, 0.7f, 0).setUv(0.5f + LETHAL_ATTACK_ARROW_2_WIDTH / 512f, LETHAL_ATTACK_ARROW_1_HEIGHT / 256f).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setColor(1f, 1f, 1f, alpha).setNormal(0, 0, 1);
             innerStack.popPose();
             var halfRange = 2.0f;
             for (int i1 = 0; i1 < 4; i1++) {
                 innerStack.pushPose();
-                if(state.isFirstPerson){
+                if(state.isFirstPerson && state.isTargetingSelf){
                     innerStack.rotateAround(new Quaternionf().rotateY((float) (Math.toRadians(-camera.yRot) + Math.PI * 0.25)), 0, 0, 0);
                 }
                 innerStack.rotateAround(new Quaternionf().rotateY((float) (Math.PI * 0.5 * i1)), 0, 0, 0);
@@ -430,10 +435,10 @@ public class TargetMarkerRenderer extends EntityRenderer<TargetMarker, TargetMar
                     float deltaRadius = (float) (2.0 * (1 - (1 - Math.pow(1 - t2 / 20f, 5))));
                     float alpha3 = t2 < 15 ? 1 : (20 - t2) / 5;
                     float alpha4 = t2 < 10 ? t2 * 0.7f / 10 + 0.3f : 1;
-                    buffer.addVertex(pose, 0.75f + deltaRadius, 0, -0.625f).setUv(0.5f, 0).setUv1(0, 0).setUv2(0, 0).setColor(alpha4, 1f, alpha4, alpha * alpha3).setNormal(0, 1, 0);
-                    buffer.addVertex(pose, 0 + deltaRadius, 0, -0.625f).setUv(0.5f, LETHAL_ATTACK_ARROW_1_HEIGHT / 256f).setUv1(0, 0).setUv2(0, 0).setColor(alpha4, 1f, alpha4, alpha * alpha3).setNormal(0, 1, 0);
-                    buffer.addVertex(pose, 0 + deltaRadius, 0, 0.625f).setUv(0.5f + LETHAL_ATTACK_ARROW_1_WIDTH / 512f, LETHAL_ATTACK_ARROW_1_HEIGHT / 256f).setUv1(0, 0).setUv2(0, 0).setColor(alpha4, 1f, alpha4, alpha * alpha3).setNormal(0, 1, 0);
-                    buffer.addVertex(pose, 0.75f + deltaRadius, 0.0f, 0.625f).setUv(0.5f + LETHAL_ATTACK_ARROW_1_WIDTH / 512f, 0).setUv1(0, 0).setUv2(0, 0).setColor(alpha4, 1f, alpha4, alpha * alpha3).setNormal(0, 1, 0);
+                    buffer.addVertex(pose, 0.75f + deltaRadius, 0, -0.625f).setUv(0.5f, 0).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setColor(alpha4, 1f, alpha4, alpha * alpha3).setNormal(0, 1, 0);
+                    buffer.addVertex(pose, 0 + deltaRadius, 0, -0.625f).setUv(0.5f, LETHAL_ATTACK_ARROW_1_HEIGHT / 256f).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setColor(alpha4, 1f, alpha4, alpha * alpha3).setNormal(0, 1, 0);
+                    buffer.addVertex(pose, 0 + deltaRadius, 0, 0.625f).setUv(0.5f + LETHAL_ATTACK_ARROW_1_WIDTH / 512f, LETHAL_ATTACK_ARROW_1_HEIGHT / 256f).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setColor(alpha4, 1f, alpha4, alpha * alpha3).setNormal(0, 1, 0);
+                    buffer.addVertex(pose, 0.75f + deltaRadius, 0.0f, 0.625f).setUv(0.5f + LETHAL_ATTACK_ARROW_1_WIDTH / 512f, 0).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setColor(alpha4, 1f, alpha4, alpha * alpha3).setNormal(0, 1, 0);
                 }
                 innerStack.popPose();
             }
@@ -448,21 +453,21 @@ public class TargetMarkerRenderer extends EntityRenderer<TargetMarker, TargetMar
             innerStack.rotateAround(new Quaternionf().rotateY((float) Math.toRadians(-camera.yRot)), 0, 0, 0);
             innerStack.translate(0, state.overheadOffset + 0.5f, 0);
             var pose = innerStack.last();
-            buffer.addVertex(pose, -0.5f, 0.4f, 0).setUv(0.5f, 0).setUv1(0, 0).setUv2(0, 0).setColor(1f, 1f, 1f, alpha).setNormal(0, 0, 1);
-            buffer.addVertex(pose, -0.5f, 0, 0).setUv(0.5f, LETHAL_ATTACK_ARROW_1_HEIGHT / 256f).setUv1(0, 0).setUv2(0, 0).setColor(1f, 1f, 1f, alpha).setNormal(0, 0, 1);
-            buffer.addVertex(pose, 0.5f, 0, 0).setUv(0.5f + LETHAL_ATTACK_ARROW_1_WIDTH / 512f, LETHAL_ATTACK_ARROW_1_HEIGHT / 256f).setUv1(0, 0).setUv2(0, 0).setColor(1f, 1f, 1f, alpha).setNormal(0, 0, 1);
-            buffer.addVertex(pose, 0.5f, 0.4f, 0).setUv(0.5f + LETHAL_ATTACK_ARROW_1_WIDTH / 512f, 0).setUv1(0, 0).setUv2(0, 0).setColor(1f, 1f, 1f, alpha).setNormal(0, 0, 1);
+            buffer.addVertex(pose, -0.5f, 0.4f, 0).setUv(0.5f, 0).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setColor(1f, 1f, 1f, alpha).setNormal(0, 0, 1);
+            buffer.addVertex(pose, -0.5f, 0, 0).setUv(0.5f, LETHAL_ATTACK_ARROW_1_HEIGHT / 256f).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setColor(1f, 1f, 1f, alpha).setNormal(0, 0, 1);
+            buffer.addVertex(pose, 0.5f, 0, 0).setUv(0.5f + LETHAL_ATTACK_ARROW_1_WIDTH / 512f, LETHAL_ATTACK_ARROW_1_HEIGHT / 256f).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setColor(1f, 1f, 1f, alpha).setNormal(0, 0, 1);
+            buffer.addVertex(pose, 0.5f, 0.4f, 0).setUv(0.5f + LETHAL_ATTACK_ARROW_1_WIDTH / 512f, 0).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setColor(1f, 1f, 1f, alpha).setNormal(0, 0, 1);
 
             innerStack.translate(0, 0.2f + 0.2f * ((float) Math.cos(Math.PI * state.ageInTicks * 0.1) + 1), 0);
             pose = innerStack.last();
-            buffer.addVertex(pose, -0.25f, 0.4f, 0).setUv(0.5f, LETHAL_ATTACK_ARROW_1_HEIGHT / 256f).setUv1(0, 0).setUv2(0, 0).setColor(1f, 1f, 1f, alpha).setNormal(0, 0, 1);
-            buffer.addVertex(pose, -0.25f, 0, 0).setUv(0.5f, (LETHAL_ATTACK_ARROW_1_HEIGHT + LETHAL_ATTACK_ARROW_2_HEIGHT) / 256f).setUv1(0, 0).setUv2(0, 0).setColor(1f, 1f, 1f, alpha).setNormal(0, 0, 1);
-            buffer.addVertex(pose, 0.25f, 0, 0).setUv(0.5f + LETHAL_ATTACK_ARROW_2_WIDTH / 512f, (LETHAL_ATTACK_ARROW_1_HEIGHT + LETHAL_ATTACK_ARROW_2_HEIGHT) / 256f).setUv1(0, 0).setUv2(0, 0).setColor(1f, 1f, 1f, alpha).setNormal(0, 0, 1);
-            buffer.addVertex(pose, 0.25f, 0.4f, 0).setUv(0.5f + LETHAL_ATTACK_ARROW_2_WIDTH / 512f, LETHAL_ATTACK_ARROW_1_HEIGHT / 256f).setUv1(0, 0).setUv2(0, 0).setColor(1f, 1f, 1f, alpha).setNormal(0, 0, 1);
-            buffer.addVertex(pose, -0.25f, 0.7f, 0).setUv(0.5f, LETHAL_ATTACK_ARROW_1_HEIGHT / 256f).setUv1(0, 0).setUv2(0, 0).setColor(1f, 1f, 1f, alpha).setNormal(0, 0, 1);
-            buffer.addVertex(pose, -0.25f, 0.3f, 0).setUv(0.5f, (LETHAL_ATTACK_ARROW_1_HEIGHT + LETHAL_ATTACK_ARROW_2_HEIGHT) / 256f).setUv1(0, 0).setUv2(0, 0).setColor(1f, 1f, 1f, alpha).setNormal(0, 0, 1);
-            buffer.addVertex(pose, 0.25f, 0.3f, 0).setUv(0.5f + LETHAL_ATTACK_ARROW_2_WIDTH / 512f, (LETHAL_ATTACK_ARROW_1_HEIGHT + LETHAL_ATTACK_ARROW_2_HEIGHT) / 256f).setUv1(0, 0).setUv2(0, 0).setColor(1f, 1f, 1f, alpha).setNormal(0, 0, 1);
-            buffer.addVertex(pose, 0.25f, 0.7f, 0).setUv(0.5f + LETHAL_ATTACK_ARROW_2_WIDTH / 512f, LETHAL_ATTACK_ARROW_1_HEIGHT / 256f).setUv1(0, 0).setUv2(0, 0).setColor(1f, 1f, 1f, alpha).setNormal(0, 0, 1);
+            buffer.addVertex(pose, -0.25f, 0.4f, 0).setUv(0.5f, LETHAL_ATTACK_ARROW_1_HEIGHT / 256f).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setColor(1f, 1f, 1f, alpha).setNormal(0, 0, 1);
+            buffer.addVertex(pose, -0.25f, 0, 0).setUv(0.5f, (LETHAL_ATTACK_ARROW_1_HEIGHT + LETHAL_ATTACK_ARROW_2_HEIGHT) / 256f).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setColor(1f, 1f, 1f, alpha).setNormal(0, 0, 1);
+            buffer.addVertex(pose, 0.25f, 0, 0).setUv(0.5f + LETHAL_ATTACK_ARROW_2_WIDTH / 512f, (LETHAL_ATTACK_ARROW_1_HEIGHT + LETHAL_ATTACK_ARROW_2_HEIGHT) / 256f).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setColor(1f, 1f, 1f, alpha).setNormal(0, 0, 1);
+            buffer.addVertex(pose, 0.25f, 0.4f, 0).setUv(0.5f + LETHAL_ATTACK_ARROW_2_WIDTH / 512f, LETHAL_ATTACK_ARROW_1_HEIGHT / 256f).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setColor(1f, 1f, 1f, alpha).setNormal(0, 0, 1);
+            buffer.addVertex(pose, -0.25f, 0.7f, 0).setUv(0.5f, LETHAL_ATTACK_ARROW_1_HEIGHT / 256f).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setColor(1f, 1f, 1f, alpha).setNormal(0, 0, 1);
+            buffer.addVertex(pose, -0.25f, 0.3f, 0).setUv(0.5f, (LETHAL_ATTACK_ARROW_1_HEIGHT + LETHAL_ATTACK_ARROW_2_HEIGHT) / 256f).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setColor(1f, 1f, 1f, alpha).setNormal(0, 0, 1);
+            buffer.addVertex(pose, 0.25f, 0.3f, 0).setUv(0.5f + LETHAL_ATTACK_ARROW_2_WIDTH / 512f, (LETHAL_ATTACK_ARROW_1_HEIGHT + LETHAL_ATTACK_ARROW_2_HEIGHT) / 256f).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setColor(1f, 1f, 1f, alpha).setNormal(0, 0, 1);
+            buffer.addVertex(pose, 0.25f, 0.7f, 0).setUv(0.5f + LETHAL_ATTACK_ARROW_2_WIDTH / 512f, LETHAL_ATTACK_ARROW_1_HEIGHT / 256f).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setColor(1f, 1f, 1f, alpha).setNormal(0, 0, 1);
             innerStack.popPose();
 
             var halfRange = state.range * 0.5f;
@@ -479,10 +484,10 @@ public class TargetMarkerRenderer extends EntityRenderer<TargetMarker, TargetMar
                     float deltaRadius = (float) (2.0 * (1 - (1 - Math.pow(1 - t2 / 20f, 5))));
                     float alpha3 = t2 < 15 ? 1 : (20 - t2) / 5;
                     float alpha4 = t2 < 10 ? t2 * 0.7f / 10 + 0.3f : 1;
-                    buffer.addVertex(pose, 0.75f + deltaRadius, 0, -0.625f).setUv(0.5f, 0).setUv1(0, 0).setUv2(0, 0).setColor(alpha4, 1f, alpha4, alpha * alpha3).setNormal(0, 1, 0);
-                    buffer.addVertex(pose, 0 + deltaRadius, 0, -0.625f).setUv(0.5f, LETHAL_ATTACK_ARROW_1_HEIGHT / 256f).setUv1(0, 0).setUv2(0, 0).setColor(alpha4, 1f, alpha4, alpha * alpha3).setNormal(0, 1, 0);
-                    buffer.addVertex(pose, 0 + deltaRadius, 0, 0.625f).setUv(0.5f + LETHAL_ATTACK_ARROW_1_WIDTH / 512f, LETHAL_ATTACK_ARROW_1_HEIGHT / 256f).setUv1(0, 0).setUv2(0, 0).setColor(alpha4, 1f, alpha4, alpha * alpha3).setNormal(0, 1, 0);
-                    buffer.addVertex(pose, 0.75f + deltaRadius, 0.0f, 0.625f).setUv(0.5f + LETHAL_ATTACK_ARROW_1_WIDTH / 512f, 0).setUv1(0, 0).setUv2(0, 0).setColor(alpha4, 1f, alpha4, alpha * alpha3).setNormal(0, 1, 0);
+                    buffer.addVertex(pose, 0.75f + deltaRadius, 0, -0.625f).setUv(0.5f, 0).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setColor(alpha4, 1f, alpha4, alpha * alpha3).setNormal(0, 1, 0);
+                    buffer.addVertex(pose, 0 + deltaRadius, 0, -0.625f).setUv(0.5f, LETHAL_ATTACK_ARROW_1_HEIGHT / 256f).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setColor(alpha4, 1f, alpha4, alpha * alpha3).setNormal(0, 1, 0);
+                    buffer.addVertex(pose, 0 + deltaRadius, 0, 0.625f).setUv(0.5f + LETHAL_ATTACK_ARROW_1_WIDTH / 512f, LETHAL_ATTACK_ARROW_1_HEIGHT / 256f).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setColor(alpha4, 1f, alpha4, alpha * alpha3).setNormal(0, 1, 0);
+                    buffer.addVertex(pose, 0.75f + deltaRadius, 0.0f, 0.625f).setUv(0.5f + LETHAL_ATTACK_ARROW_1_WIDTH / 512f, 0).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setColor(alpha4, 1f, alpha4, alpha * alpha3).setNormal(0, 1, 0);
                 }
                 innerStack.popPose();
             }
@@ -559,24 +564,24 @@ public class TargetMarkerRenderer extends EntityRenderer<TargetMarker, TargetMar
             innerStack.rotateAround(new Quaternionf().rotateY((float) (Math.PI * state.ageInTicks * 0.05)), 0, 0, 0);
             innerStack.translate(0, 1e-3f, 0);
             var pose = innerStack.last();
-            buffer.addVertex(pose, -1, 0, -1).setUv(0, 0).setUv1(0, 0).setUv2(0, 0).setColor(1f, 1f, 1f, alpha).setNormal(0, 1, 0);
-            buffer.addVertex(pose, -1, 0, 1).setUv(0, 1).setUv1(0, 0).setUv2(0, 0).setColor(1f, 1f, 1f, alpha).setNormal(0, 1, 0);
-            buffer.addVertex(pose, 1, 0, 1).setUv(1, 1).setUv1(0, 0).setUv2(0, 0).setColor(1f, 1f, 1f, alpha).setNormal(0, 1, 0);
-            buffer.addVertex(pose, 1, 0, -1).setUv(1, 0).setUv1(0, 0).setUv2(0, 0).setColor(1f, 1f, 1f, alpha).setNormal(0, 1, 0);
+            buffer.addVertex(pose, -1, 0, -1).setUv(0, 0).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setColor(1f, 1f, 1f, alpha).setNormal(0, 1, 0);
+            buffer.addVertex(pose, -1, 0, 1).setUv(0, 1).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setColor(1f, 1f, 1f, alpha).setNormal(0, 1, 0);
+            buffer.addVertex(pose, 1, 0, 1).setUv(1, 1).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setColor(1f, 1f, 1f, alpha).setNormal(0, 1, 0);
+            buffer.addVertex(pose, 1, 0, -1).setUv(1, 0).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setColor(1f, 1f, 1f, alpha).setNormal(0, 1, 0);
             innerStack.popPose();
         });
         submitNodeCollector.submitCustomGeometry(poseStack, TRIANGLE_STRIP_RENDER_TYPE.apply(COLOR_SCHEME_MARKER_TEXTURE), (inPose, buffer) -> {
             var innerStack = new PoseStack();
             var halfRange = state.range * 0.5f * (t1 / 20f);
-            buffer.addVertex(inPose, Math.max(0, halfRange - 0.125f), 2e-3f, 0).setColor(1f, 1f, 1f, alpha * a1).setUv(0f, 0f).setUv1(0, 0).setUv2(0, 0).setNormal(0, 1, 0);
+            buffer.addVertex(inPose, Math.max(0, halfRange - 0.125f), 2e-3f, 0).setColor(1f, 1f, 1f, alpha * a1).setUv(0f, 0f).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setNormal(0, 1, 0);
             for (int i = 0; i < 361; i++) {
                 var rad = Math.PI * i / 180f;
                 var cr = (float)Math.cos(rad);
                 var sr = (float)Math.sin(rad);
-                buffer.addVertex(inPose, Math.max(0, halfRange - 0.125f) * cr, 2e-3f, Math.max(0, halfRange - 0.125f) * sr).setColor(1f, 1f, 1f, alpha * a1).setUv(0f, 0f).setUv1(0, 0).setUv2(0, 0).setNormal(0, 1, 0);
-                buffer.addVertex(inPose, halfRange * cr, 2e-3f, halfRange * sr).setColor(1f, 1f, 1f, alpha * a1).setUv(0f, 0f).setUv1(0, 0).setUv2(0, 0).setNormal(0, 1, 0);
+                buffer.addVertex(inPose, Math.max(0, halfRange - 0.125f) * cr, 2e-3f, Math.max(0, halfRange - 0.125f) * sr).setColor(1f, 1f, 1f, alpha * a1).setUv(0f, 0f).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setNormal(0, 1, 0);
+                buffer.addVertex(inPose, halfRange * cr, 2e-3f, halfRange * sr).setColor(1f, 1f, 1f, alpha * a1).setUv(0f, 0f).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setNormal(0, 1, 0);
             }
-            buffer.addVertex(inPose, halfRange, 2e-3f, 0).setColor(1f, 1f, 1f, alpha * a1).setUv(0f, 0f).setUv1(0, 0).setUv2(0, 0).setNormal(0, 1, 0);
+            buffer.addVertex(inPose, halfRange, 2e-3f, 0).setColor(1f, 1f, 1f, alpha * a1).setUv(0f, 0f).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setNormal(0, 1, 0);
         });
     }
 }
