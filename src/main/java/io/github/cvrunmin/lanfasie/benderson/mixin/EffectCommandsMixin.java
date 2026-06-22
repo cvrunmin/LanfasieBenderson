@@ -13,6 +13,17 @@ import org.spongepowered.asm.mixin.injection.At;
 
 @Mixin(EffectCommands.class)
 public class EffectCommandsMixin {
+
+    @WrapOperation(method = "clearEffects", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;removeAllEffects()Z"))
+    private static boolean allowClearEffectsToClearProtectedEffect(LivingEntity instance, Operation<Boolean> original){
+        var originalResult = original.call(instance);
+        if(originalResult){
+            if(instance.hasEffect(AllMobEffects.VULNERABILITY_UP)) MobEffectRemovalProtector.grantAndRemove(instance, AllMobEffects.VULNERABILITY_UP);
+            if(instance.hasEffect(AllMobEffects.AGGRO_UP)) MobEffectRemovalProtector.grantAndRemove(instance, AllMobEffects.AGGRO_UP);
+        }
+        return originalResult;
+    }
+
     @WrapOperation(method = "clearEffect", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;removeEffect(Lnet/minecraft/core/Holder;)Z"))
     private static boolean redirectToGrantedRemoveIfNeeded(LivingEntity instance, Holder<MobEffect> effect, Operation<Boolean> original){
         if(effect.is(AllMobEffects.VULNERABILITY_UP) || effect.is(AllMobEffects.AGGRO_UP)){

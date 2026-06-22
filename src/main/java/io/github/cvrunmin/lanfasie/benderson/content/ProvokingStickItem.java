@@ -7,6 +7,7 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 
 public class ProvokingStickItem extends Item {
@@ -24,5 +25,13 @@ public class ProvokingStickItem extends Item {
             }
         }
         return InteractionResult.SUCCESS;
+    }
+
+    @Override
+    public boolean onDroppedByPlayer(ItemStack item, Player player) {
+        if(player.hasEffect(AllMobEffects.AGGRO_UP)){
+            MobEffectRemovalProtector.grantAndRemove(player, AllMobEffects.AGGRO_UP);
+        }
+        return super.onDroppedByPlayer(item, player);
     }
 }
