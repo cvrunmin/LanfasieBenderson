@@ -34,6 +34,7 @@ public class MyLanguageProvider extends LanguageProvider {
         this.addItem(AllItems.MUNDANE_PRAISER_MANA_FOCI, "Mundane Praiser Mana Foci");
         this.addBlock(AllBlocks.DEEP_LATENT_BLOCK, "Deep Latent Block");
         this.addBlock(AllBlocks.DEEP_LATENT_CALLER, "Deep Latent Caller");
+        this.addBlock(AllBlocks.END_GUARDIAN_STATUE, "End Guardian Statue");
         this.add("itemGroup.lanfasie_benderson", "Lanfasie: Benderson");
         this.addEntityType(AllEntityTypes.BENDERSON, "Benderson the Abyss-sunken Dawnwaiter");
         this.addEntityType(AllEntityTypes.PROJECTED_BENDERSON, "Benderson the Abyss-sunken Dawnwaiter (Projected)");
@@ -64,6 +65,11 @@ public class MyLanguageProvider extends LanguageProvider {
         this.addEffect(AllMobEffects.CURSE_HYDRO_DREAMER, "Anticalabrum: Hydrous Dreamer");
         this.addEffect(AllMobEffects.CURSE_NETHER_DOG, "Anticalabrum: Nether Cerberus");
         this.addEffect(AllMobEffects.CURSE_VOID_HARE, "Anticalabrum: Void Hare");
+        this.addEffect(AllMobEffects.SUMMER_SEPTET, "Summer Septet");
+        this.addEffect(AllMobEffects.MUNDANE_TRIO, "Mundane Trio");
+        this.addEffect(AllMobEffects.OPENING_MINUET, "Opening Minuet (Mundane Trio)");
+        this.addEffect(AllMobEffects.TWIN_BALLAD, "Twin Ballad (Mundane Trio)");
+        this.addEffect(AllMobEffects.BELOVED_PAEAN, "Beloved's Paean (Mundane Trio)");
         this.add("death.attack.lethal_attack", "%1$s could not survive from high damage of %2$s");
         this.add("death.attack.lethal_attack.player", "%1$s could not survive from high damage of %2$s");
         this.add("death.attack.lethal_attack.item", "%1$s could not survive from high damage of %2$s using %3$s");
@@ -75,6 +81,7 @@ public class MyLanguageProvider extends LanguageProvider {
         this.add("death.attack.ecliptic_meteor.item", "%1$s ordered an Ecliptic Meteorite Latte, and made a default review for %2$s holding %3$s");
         this.add("text.lanfasie_benderson.enmity_bar.aggro", "A");
         this.add("attributes.lanfasie_benderson.enmity_multiplier", "Enmity multiplier");
+        this.add("attributes.lanfasie_benderson.damage_gate", "Damage Gate Percentage");
         this.add("attributes.lanfasie_benderson.extreme", "Extreme Mode");
         this.add("config.lanfasie_benderson.benderson_normal_attack_damage_multiplier", "Benderson Normal Attack Damage Multiplier");
         this.add("config.lanfasie_benderson.benderson_circular_stackable_aoe_damage_multiplier", "Benderson Circular Stackable AoE Damage Multiplier");

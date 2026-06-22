@@ -7,6 +7,9 @@ import io.github.cvrunmin.lanfasie.benderson.index.AllItems;
 import net.minecraft.client.data.models.BlockModelGenerators;
 import net.minecraft.client.data.models.ItemModelGenerators;
 import net.minecraft.client.data.models.ModelProvider;
+import net.minecraft.client.data.models.MultiVariant;
+import net.minecraft.client.data.models.blockstates.MultiVariantGenerator;
+import net.minecraft.client.data.models.blockstates.PropertyDispatch;
 import net.minecraft.client.data.models.model.*;
 import net.minecraft.client.renderer.item.ConditionalItemModel;
 import net.minecraft.client.renderer.item.CuboidItemModelWrapper;
@@ -14,10 +17,13 @@ import net.minecraft.client.renderer.item.ItemModel;
 import net.minecraft.client.renderer.item.properties.numeric.UseDuration;
 import net.minecraft.client.renderer.special.ShieldSpecialRenderer;
 import net.minecraft.client.resources.model.sprite.Material;
+import net.minecraft.core.Direction;
 import net.minecraft.data.PackOutput;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemDisplayContext;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
 import net.neoforged.neoforge.client.model.generators.template.ExtendedModelTemplate;
 import net.neoforged.neoforge.client.model.generators.template.ExtendedModelTemplateBuilder;
 
@@ -33,6 +39,25 @@ public class MyModelProvider extends ModelProvider {
     protected void registerModels(BlockModelGenerators blockModels, ItemModelGenerators itemModels) {
         blockModels.createTrivialCube(AllBlocks.DEEP_LATENT_BLOCK.get());
         blockModels.createTrivialCube(AllBlocks.DEEP_LATENT_CALLER.get());
+
+        {
+            MultiVariant lower = BlockModelGenerators.plainVariant(Identifier.fromNamespaceAndPath(LanfasieBenderson.MODID, "block/statue/end_guardian_lower"));
+            MultiVariant upper = BlockModelGenerators.plainVariant(Identifier.fromNamespaceAndPath(LanfasieBenderson.MODID, "block/statue/end_guardian_upper"));
+            blockModels.blockStateOutput.accept(MultiVariantGenerator
+                    .dispatch(AllBlocks.END_GUARDIAN_STATUE.get())
+                    .with(PropertyDispatch.initial(BlockStateProperties.HORIZONTAL_FACING, BlockStateProperties.DOUBLE_BLOCK_HALF)
+                            .select(Direction.NORTH, DoubleBlockHalf.LOWER, lower)
+                            .select(Direction.EAST, DoubleBlockHalf.LOWER, lower.with(BlockModelGenerators.Y_ROT_90))
+                            .select(Direction.SOUTH, DoubleBlockHalf.LOWER, lower.with(BlockModelGenerators.Y_ROT_180))
+                            .select(Direction.WEST, DoubleBlockHalf.LOWER, lower.with(BlockModelGenerators.Y_ROT_270))
+                            .select(Direction.NORTH, DoubleBlockHalf.UPPER, upper)
+                            .select(Direction.EAST, DoubleBlockHalf.UPPER, upper.with(BlockModelGenerators.Y_ROT_90))
+                            .select(Direction.SOUTH, DoubleBlockHalf.UPPER, upper.with(BlockModelGenerators.Y_ROT_180))
+                            .select(Direction.WEST, DoubleBlockHalf.UPPER, upper.with(BlockModelGenerators.Y_ROT_270))
+                    )
+            );
+        }
+
         itemModels.generateFlatItem(AllItems.AGGRO_UP_ICON.get(), ModelTemplates.FLAT_ITEM);
         itemModels.generateFlatItem(AllItems.DAWNWAITER_TOTEM.get(), ModelTemplates.FLAT_ITEM);
         {

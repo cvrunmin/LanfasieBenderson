@@ -27,6 +27,12 @@ public class AllMobEffects {
     public static final DeferredHolder<MobEffect, CurseVoidHareMobEffect> CURSE_VOID_HARE = MOB_EFFECT.register("curse_void_hare", () -> ((CurseVoidHareMobEffect) new CurseVoidHareMobEffect(MobEffectCategory.HARMFUL, 0)
             .addAttributeModifier(Attributes.GRAVITY, Identifier.fromNamespaceAndPath(LanfasieBenderson.MODID, "effect.void_hare"), -0.5, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL)));
 
+    public static final DeferredHolder<MobEffect, SummerSeptetMobEffect> SUMMER_SEPTET = MOB_EFFECT.register("summer_septet", () -> new SummerSeptetMobEffect(MobEffectCategory.NEUTRAL));
+    public static final DeferredHolder<MobEffect, MundaneTrioMobEffect> MUNDANE_TRIO = MOB_EFFECT.register("mundane_trio", () -> new MundaneTrioMobEffect(MobEffectCategory.NEUTRAL));
+    public static final DeferredHolder<MobEffect, MundaneTrioMobEffect.MundaneTrioBigOrangeMobEffect> OPENING_MINUET = MOB_EFFECT.register("opening_minuet", () -> new MundaneTrioMobEffect.MundaneTrioBigOrangeMobEffect(MobEffectCategory.BENEFICIAL));
+    public static final DeferredHolder<MobEffect, MundaneTrioMobEffect.MundaneTrioLittleOrangeMobEffect> TWIN_BALLAD = MOB_EFFECT.register("twin_ballad", () -> new MundaneTrioMobEffect.MundaneTrioLittleOrangeMobEffect(MobEffectCategory.BENEFICIAL));
+    public static final DeferredHolder<MobEffect, MundaneTrioMobEffect.MundaneTrioPentaMobEffect> BELOVED_PAEAN = MOB_EFFECT.register("beloved_paean", () -> new MundaneTrioMobEffect.MundaneTrioPentaMobEffect(MobEffectCategory.BENEFICIAL));
+
     public static void register(IEventBus modBus){
         MOB_EFFECT.register(modBus);
     }

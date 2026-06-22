@@ -12,6 +12,7 @@ import com.geckolib.constant.DefaultAnimations;
 import com.geckolib.util.GeckoLibUtil;
 import com.mojang.serialization.Codec;
 import io.github.cvrunmin.lanfasie.benderson.LanfasieBenderson;
+import io.github.cvrunmin.lanfasie.benderson.MobEffectRemovalProtector;
 import io.github.cvrunmin.lanfasie.benderson.ServerConfig;
 import io.github.cvrunmin.lanfasie.benderson.compat.projectme.ProjectMeCompat;
 import io.github.cvrunmin.lanfasie.benderson.content.benderson.phases.*;
@@ -237,6 +238,7 @@ public class Benderson extends Monster implements GeoEntity, BendersonStatesGett
                 .add(Attributes.KNOCKBACK_RESISTANCE, 1.0f)
                 .add(Attributes.EXPLOSION_KNOCKBACK_RESISTANCE, 1.0f)
                 .add(AllAttributes.EXTREME, 0)
+                .add(AllAttributes.DAMAGE_GATE_PERCENTAGE, 0.1)
                 .add(Attributes.ATTACK_KNOCKBACK, 0.0f);
     }
 
@@ -637,9 +639,8 @@ public class Benderson extends Monster implements GeoEntity, BendersonStatesGett
                 this.getAttribute(AllAttributes.EXTREME).addPermanentModifier(new AttributeModifier(Identifier.fromNamespaceAndPath(LanfasieBenderson.MODID, "extreme"), 1, AttributeModifier.Operation.ADD_VALUE));
                 damage = 0.01f;
             }
-            damage = Math.min(damage, this.getMaxHealth() * 0.01f);
             var totalDamageInGate = damageGate.getTotalDamage();
-            var timegatedDamage = this.getMaxHealth() * 0.01f;
+            var timegatedDamage = (float)(this.getMaxHealth() * this.getAttributeValue(AllAttributes.DAMAGE_GATE_PERCENTAGE));
             if(totalDamageInGate + damage > timegatedDamage){
                 damage = Math.max(0, timegatedDamage - totalDamageInGate);
             }
@@ -699,6 +700,13 @@ public class Benderson extends Monster implements GeoEntity, BendersonStatesGett
         }
         if(!level().isClientSide()) {
             this.bossEvent.setProgress(0);
+            for (UUID uuid : enmityList.keySet()) {
+                if (level().getEntity(uuid) instanceof LivingEntity livingEntity) {
+                    if(livingEntity.hasEffect(AllMobEffects.VULNERABILITY_UP)){
+                        MobEffectRemovalProtector.grantAndRemove(livingEntity, AllMobEffects.VULNERABILITY_UP);
+                    }
+                }
+            }
         }
         super.die(source);
     }
