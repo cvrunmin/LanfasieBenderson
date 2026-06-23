@@ -1,33 +1,33 @@
 {
   "variants": {
     "facing=east,half=lower": {
-      "model": "lanfasie_benderson:block/statue/end_guardian_lower",
+      "model": "lanfasie_benderson:block/statue/end_guardian_statue",
       "y": 90
     },
     "facing=east,half=upper": {
-      "model": "lanfasie_benderson:block/statue/end_guardian_upper",
+      "model": "lanfasie_benderson:block/statue/end_guardian_statue_upper",
       "y": 90
     },
     "facing=north,half=lower": {
-      "model": "lanfasie_benderson:block/statue/end_guardian_lower"
+      "model": "lanfasie_benderson:block/statue/end_guardian_statue"
     },
     "facing=north,half=upper": {
-      "model": "lanfasie_benderson:block/statue/end_guardian_upper"
+      "model": "lanfasie_benderson:block/statue/end_guardian_statue_upper"
     },
     "facing=south,half=lower": {
-      "model": "lanfasie_benderson:block/statue/end_guardian_lower",
+      "model": "lanfasie_benderson:block/statue/end_guardian_statue",
       "y": 180
     },
     "facing=south,half=upper": {
-      "model": "lanfasie_benderson:block/statue/end_guardian_upper",
+      "model": "lanfasie_benderson:block/statue/end_guardian_statue_upper",
       "y": 180
     },
     "facing=west,half=lower": {
-      "model": "lanfasie_benderson:block/statue/end_guardian_lower",
+      "model": "lanfasie_benderson:block/statue/end_guardian_statue",
       "y": 270
     },
     "facing=west,half=upper": {
-      "model": "lanfasie_benderson:block/statue/end_guardian_upper",
+      "model": "lanfasie_benderson:block/statue/end_guardian_statue_upper",
       "y": 270
     }
   }

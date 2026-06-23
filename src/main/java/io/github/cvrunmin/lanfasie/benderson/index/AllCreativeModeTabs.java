@@ -27,6 +27,7 @@ public class AllCreativeModeTabs {
             output.accept(AllItems.MUNDANE_PRAISER_RAPIER);
             output.accept(AllItems.MUNDANE_PRAISER_MANA_FOCI);
             output.accept(AllItems.DAWNWAITER_TOTEM);
+            output.accept(AllItems.END_GUARDIAN_STATUE);
             output.accept(AllItems.UNFORGIVEN_PERFIDY_SPAWN_EGG);
             output.accept(AllItems.UNFORGIVEN_RIDICULE_SPAWN_EGG);
             output.accept(AllItems.UNFORGIVEN_INDISCRETION_SPAWN_EGG);

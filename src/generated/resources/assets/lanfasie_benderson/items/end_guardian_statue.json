@@ -1,6 +1,6 @@
 {
   "model": {
     "type": "minecraft:model",
-    "model": "lanfasie_benderson:block/end_guardian_statue"
+    "model": "lanfasie_benderson:item/end_guardian_statue"
   }
 }

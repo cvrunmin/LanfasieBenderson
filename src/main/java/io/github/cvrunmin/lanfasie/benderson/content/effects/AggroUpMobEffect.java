@@ -35,7 +35,10 @@ public class AggroUpMobEffect extends MobEffect {
             if (player.getInventory().contains(stack -> stack.is(AllItems.PROVOKING_STICK))) {
                 return true;
             }
-            return player.inventoryMenu.getCarried().is(AllItems.PROVOKING_STICK);
+            if(player.containerMenu != null) {
+                return player.containerMenu.getCarried().is(AllItems.PROVOKING_STICK);
+            }
+            return false;
         }
         return false;
     }
