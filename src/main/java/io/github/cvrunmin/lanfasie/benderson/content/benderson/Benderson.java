@@ -238,7 +238,7 @@ public class Benderson extends Monster implements GeoEntity, BendersonStatesGett
                 .add(Attributes.KNOCKBACK_RESISTANCE, 1.0f)
                 .add(Attributes.EXPLOSION_KNOCKBACK_RESISTANCE, 1.0f)
                 .add(AllAttributes.EXTREME, 0)
-                .add(AllAttributes.DAMAGE_GATE_PERCENTAGE, 0.1)
+                .add(AllAttributes.DAMAGE_GATE_PERCENTAGE, 0.01)
                 .add(Attributes.ATTACK_KNOCKBACK, 0.0f);
     }
 
