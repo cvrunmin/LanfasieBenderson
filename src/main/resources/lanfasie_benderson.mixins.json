@@ -18,6 +18,7 @@
   },
   "client": [
     "ItemLayerRenderStateAccessor",
+    "ItemModelGeneratorInvoker",
     "ItemStackRenderStateAccessor",
     "LevelRendererAccessor",
     "ParticleAccessor",

@@ -2,7 +2,10 @@
   "children": {
     "base_statue": "lanfasie_benderson:block/statue/end_guardian_statue_base",
     "sword": {
-      "parent": "minecraft:item/diamond_sword",
+      "loader": "lanfasie_benderson:item_block",
+      "textures": {
+        "layer0": "minecraft:item/diamond_sword"
+      },
       "transform": {
         "rotation": [
           0.0,
@@ -11,9 +14,14 @@
           0.3826835
         ],
         "scale": [
-          1.5,
-          1.5,
-          1.5
+          1.1,
+          1.1,
+          1.0
+        ],
+        "translation": [
+          -0.5,
+          -1.0,
+          -0.25
         ]
       }
     }
@@ -22,5 +30,8 @@
     "base_statue",
     "sword"
   ],
-  "loader": "neoforge:composite"
+  "loader": "neoforge:composite",
+  "textures": {
+    "particle": "minecraft:block/polished_andesite"
+  }
 }

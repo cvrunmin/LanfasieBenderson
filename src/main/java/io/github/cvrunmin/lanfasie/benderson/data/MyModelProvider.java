@@ -2,6 +2,7 @@ package io.github.cvrunmin.lanfasie.benderson.data;
 
 import io.github.cvrunmin.lanfasie.benderson.LanfasieBenderson;
 import io.github.cvrunmin.lanfasie.benderson.content.equipment.ShallowayShieldSpecialRenderer;
+import io.github.cvrunmin.lanfasie.benderson.foundation.ItemBlockModelLoader;
 import io.github.cvrunmin.lanfasie.benderson.index.AllBlocks;
 import io.github.cvrunmin.lanfasie.benderson.index.AllItems;
 import net.minecraft.client.data.models.BlockModelGenerators;
@@ -23,6 +24,7 @@ import net.minecraft.data.PackOutput;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemDisplayContext;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
@@ -44,11 +46,13 @@ public class MyModelProvider extends ModelProvider {
         blockModels.createTrivialCube(AllBlocks.DEEP_LATENT_CALLER.get());
 
         {
-            MultiVariant lower = BlockModelGenerators.plainVariant(ExtendedModelTemplateBuilder.builder().customLoader(CompositeModelBuilder::new, loader ->
+            MultiVariant lower = BlockModelGenerators.plainVariant(ModelTemplates.PARTICLE_ONLY.extend().customLoader(CompositeModelBuilder::new, loader ->
                     loader.child("base_statue", Identifier.fromNamespaceAndPath(LanfasieBenderson.MODID, "block/statue/end_guardian_statue_base"))
-                            .inlineChild("sword", ExtendedModelTemplateBuilder.of(ModelTemplates.createItem("diamond_sword"))
-                                    .rootTransforms(transform -> transform.rotation(0, 0, -135, true).scale(1.5f))
-                                    .build(), new TextureMapping())).build().create(Identifier.fromNamespaceAndPath(LanfasieBenderson.MODID, "block/statue/end_guardian_statue"), new TextureMapping(), blockModels.modelOutput));
+                            .inlineChild("sword", ModelTemplates.create(TextureSlot.LAYER0).extend()
+                                    .rootTransforms(transform -> transform.translation(-0.5f, -1.0f, -0.25f).rotation(0, 0, -135, true).scale(1.1f, 1.1f, 1.0f))
+                                    .customLoader(ItemBlockModelLoader.Builder::new, _ -> {})
+                                    .build(), TextureMapping.layer0(Items.DIAMOND_SWORD))).build()
+                    .create(Identifier.fromNamespaceAndPath(LanfasieBenderson.MODID, "block/statue/end_guardian_statue"), TextureMapping.particle(Blocks.POLISHED_ANDESITE), blockModels.modelOutput));
             MultiVariant upper = BlockModelGenerators.plainVariant(ModelTemplates.PARTICLE_ONLY.create(AllBlocks.END_GUARDIAN_STATUE.getId().withPath(path -> "block/statue/" + path + "_upper"), TextureMapping.particle(Blocks.POLISHED_ANDESITE), blockModels.modelOutput));
             blockModels.blockStateOutput.accept(MultiVariantGenerator
                     .dispatch(AllBlocks.END_GUARDIAN_STATUE.get())

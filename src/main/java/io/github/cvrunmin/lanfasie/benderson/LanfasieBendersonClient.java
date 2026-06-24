@@ -17,6 +17,7 @@ import io.github.cvrunmin.lanfasie.benderson.content.particles.DustSuckingBlowin
 import io.github.cvrunmin.lanfasie.benderson.content.unforgiven.*;
 import io.github.cvrunmin.lanfasie.benderson.data.*;
 import io.github.cvrunmin.lanfasie.benderson.foundation.HeiTideSkyboxRenderer;
+import io.github.cvrunmin.lanfasie.benderson.foundation.ItemBlockModelLoader;
 import io.github.cvrunmin.lanfasie.benderson.foundation.MyGlobalRenderPipelines;
 import io.github.cvrunmin.lanfasie.benderson.index.AllDamageTypes;
 import io.github.cvrunmin.lanfasie.benderson.index.AllEntityTypes;
@@ -98,6 +99,11 @@ public class LanfasieBendersonClient {
     @SubscribeEvent
     public static void registerSpecialRenderers(RegisterSpecialModelRendererEvent event){
         event.register(Identifier.fromNamespaceAndPath(LanfasieBenderson.MODID, "shalloway_shield"), ShallowayShieldSpecialRenderer.Unbaked.MAP_CODEC);
+    }
+
+    @SubscribeEvent
+    public static void registerCustomModelLoader(ModelEvent.RegisterLoaders event){
+        event.register(ItemBlockModelLoader.ID, ItemBlockModelLoader.INSTANCE);
     }
 
     @SubscribeEvent
