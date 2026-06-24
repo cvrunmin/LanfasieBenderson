@@ -44,7 +44,11 @@ public class MyModelProvider extends ModelProvider {
         blockModels.createTrivialCube(AllBlocks.DEEP_LATENT_CALLER.get());
 
         {
-            MultiVariant lower = BlockModelGenerators.plainVariant(Identifier.fromNamespaceAndPath(LanfasieBenderson.MODID, "block/statue/end_guardian_statue"));
+            MultiVariant lower = BlockModelGenerators.plainVariant(ExtendedModelTemplateBuilder.builder().customLoader(CompositeModelBuilder::new, loader ->
+                    loader.child("base_statue", Identifier.fromNamespaceAndPath(LanfasieBenderson.MODID, "block/statue/end_guardian_statue_base"))
+                            .inlineChild("sword", ExtendedModelTemplateBuilder.of(ModelTemplates.createItem("diamond_sword"))
+                                    .rootTransforms(transform -> transform.rotation(0, 0, -135, true).scale(1.5f))
+                                    .build(), new TextureMapping())).build().create(Identifier.fromNamespaceAndPath(LanfasieBenderson.MODID, "block/statue/end_guardian_statue"), new TextureMapping(), blockModels.modelOutput));
             MultiVariant upper = BlockModelGenerators.plainVariant(ModelTemplates.PARTICLE_ONLY.create(AllBlocks.END_GUARDIAN_STATUE.getId().withPath(path -> "block/statue/" + path + "_upper"), TextureMapping.particle(Blocks.POLISHED_ANDESITE), blockModels.modelOutput));
             blockModels.blockStateOutput.accept(MultiVariantGenerator
                     .dispatch(AllBlocks.END_GUARDIAN_STATUE.get())

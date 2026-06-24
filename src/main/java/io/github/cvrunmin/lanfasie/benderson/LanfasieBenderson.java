@@ -50,6 +50,7 @@ public class LanfasieBenderson {
         modEventBus.addListener(this::commonSetup);
 
         AllDataComponents.register(modEventBus);
+        AllDataAttachments.register(modEventBus);
         AllBlocks.register(modEventBus);
         AllItems.register(modEventBus);
         AllAttributes.register(modEventBus);
