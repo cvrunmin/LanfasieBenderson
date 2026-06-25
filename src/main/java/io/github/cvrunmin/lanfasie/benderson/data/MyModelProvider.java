@@ -70,6 +70,7 @@ public class MyModelProvider extends ModelProvider {
             blockModels.registerSimpleFlatItemModel(AllBlocks.END_GUARDIAN_STATUE.asItem());
         }
 
+        itemModels.generateFlatItem(AllItems.BARDS_LUTE.get(), ModelTemplates.FLAT_ITEM);
         itemModels.generateFlatItem(AllItems.AGGRO_UP_ICON.get(), ModelTemplates.FLAT_ITEM);
         itemModels.generateFlatItem(AllItems.DAWNWAITER_TOTEM.get(), ModelTemplates.FLAT_ITEM);
         {

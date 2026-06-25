@@ -23,6 +23,7 @@ public class AllItems {
     public static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(LanfasieBenderson.MODID);
 
     public static final DeferredItem<Item> AGGRO_UP_ICON = ITEMS.registerSimpleItem("aggro_up_icon");
+    public static final DeferredItem<Item> BARDS_LUTE = ITEMS.registerSimpleItem("bards_lute");
     public static final DeferredItem<BlockItem> DEEP_LATENT_CALLER = ITEMS.registerSimpleBlockItem(AllBlocks.DEEP_LATENT_CALLER);
     public static final DeferredItem<BlockItem> END_GUARDIAN_STATUE = ITEMS.registerItem(AllBlocks.END_GUARDIAN_STATUE.getId().getPath(), prop -> new DoubleHighBlockItem(AllBlocks.END_GUARDIAN_STATUE.get(), prop), () -> new Item.Properties().useBlockDescriptionPrefix() );
     public static final DeferredItem<Item> SWORD_OF_DAWNWAITER = ITEMS.registerItem("sword_of_dawnwaiter", properties -> new Item(properties.sword(ToolMaterial.DIAMOND, 4.5f, -2.8f)));

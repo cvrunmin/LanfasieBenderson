@@ -2,7 +2,7 @@ plugins {
     id 'java-library'
     id 'maven-publish'
     id 'net.neoforged.moddev' version '2.0.141'
-    id("dev.vfyjxf.gradle.production") version "0.1.0"
+//    id("dev.vfyjxf.gradle.production") version "0.1.0"
     id 'idea'
 }
 
@@ -204,50 +204,50 @@ sourceSets.main.resources.srcDir generateModMetadata
 // To avoid having to run "generateModMetadata" manually, make it run on every project reload
 neoForge.ideSyncTask generateModMetadata
 
-production {
-    idea {
-        overwrite = true
-    }
-
-    runs.configureEach {
-        javaVersion = 25
-        minecraftVersion = "26.1.2"
-        loader = "neoforge"
-        loaderVersion = neo_version
-        userName = "Production"
-        mods {
-            includeProject true
-            includeRequiredDependencies true
-            includeOptionalDependencies false
-        }
-    }
-
-    runs {
-        client {
-            type = "client"
-            instanceDir = file("run-production/client")
-            jvmArgs "-Xmx2G"
-            mods {
-                modrinth("iris") {
-                    version = "1.10.9+26.1-neoforge"
-                }
-                modrinth("sodium") {
-                    version = "mc26.1.2-0.8.12-neoforge"
-                }
-                modrinth("geckolib") {
-                    version = "5.5.1"
-                }
-            }
-        }
-        server {
-            type = "server"
-            instanceDir = file("run-production/server")
-            eula true
-            jvmArgs "-Xmx2G"
-            gameArgs "nogui"
-        }
-    }
-}
+//production {
+//    idea {
+//        overwrite = true
+//    }
+//
+//    runs.configureEach {
+//        javaVersion = 25
+//        minecraftVersion = "26.1.2"
+//        loader = "neoforge"
+//        loaderVersion = neo_version
+//        userName = "Production"
+//        mods {
+//            includeProject true
+//            includeRequiredDependencies true
+//            includeOptionalDependencies false
+//        }
+//    }
+//
+//    runs {
+//        client {
+//            type = "client"
+//            instanceDir = file("run-production/client")
+//            jvmArgs "-Xmx2G"
+//            mods {
+//                modrinth("iris") {
+//                    version = "1.10.9+26.1-neoforge"
+//                }
+//                modrinth("sodium") {
+//                    version = "mc26.1.2-0.8.12-neoforge"
+//                }
+//                modrinth("geckolib") {
+//                    version = "5.5.1"
+//                }
+//            }
+//        }
+//        server {
+//            type = "server"
+//            instanceDir = file("run-production/server")
+//            eula true
+//            jvmArgs "-Xmx2G"
+//            gameArgs "nogui"
+//        }
+//    }
+//}
 
 
 // Example configuration to allow publishing using the maven-publish plugin

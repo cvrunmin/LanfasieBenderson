@@ -5,6 +5,7 @@ import io.github.cvrunmin.lanfasie.benderson.compat.projectme.content.ProjectedB
 import io.github.cvrunmin.lanfasie.benderson.content.anticalabrum.Anticalabrum;
 import io.github.cvrunmin.lanfasie.benderson.content.benderson.Benderson;
 import io.github.cvrunmin.lanfasie.benderson.content.dawn.DawnEntity;
+import io.github.cvrunmin.lanfasie.benderson.content.lanfasie.LanfasieEntity;
 import io.github.cvrunmin.lanfasie.benderson.content.marker.DelayedAttackMarker;
 import io.github.cvrunmin.lanfasie.benderson.content.marker.TargetMarker;
 import io.github.cvrunmin.lanfasie.benderson.content.mundane_praisers.MundanePraiserBard;
@@ -21,6 +22,9 @@ import net.neoforged.neoforge.registries.DeferredRegister;
 
 public class AllEntityTypes {
     public static final DeferredRegister.Entities ENTITY_TYPES = DeferredRegister.createEntities(LanfasieBenderson.MODID);
+
+    public static final DeferredHolder<EntityType<?>, EntityType<LanfasieEntity>> LANFASIE = ENTITY_TYPES.registerEntityType("lanfasie_phantom", LanfasieEntity::new, MobCategory.CREATURE,
+            b -> b.fireImmune().sized(0.6f, 1.8f).noLootTable().canSpawnFarFromPlayer().clientTrackingRange(12));
 
     public static final DeferredHolder<EntityType<?>, EntityType<Benderson>> BENDERSON = ENTITY_TYPES.registerEntityType("benderson", Benderson::new, MobCategory.MONSTER,
             b -> b.fireImmune().sized(0.6f, 2.375f).noLootTable().immuneTo(Blocks.WITHER_ROSE).clientTrackingRange(12));
@@ -66,6 +70,7 @@ public class AllEntityTypes {
     }
 
     public static void createDefaultAttributes(EntityAttributeCreationEvent event){
+        event.put(LANFASIE.get(), LanfasieEntity.createAttributes().build());
         event.put(BENDERSON.get(), Benderson.createAttributes().build());
         event.put(PROJECTED_BENDERSON.get(), ProjectedBenderson.createAttributes().build());
         event.put(DAWN.get(), DawnEntity.createAttributes().build());

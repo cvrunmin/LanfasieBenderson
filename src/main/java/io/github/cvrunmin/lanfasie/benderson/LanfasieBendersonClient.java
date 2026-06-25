@@ -7,6 +7,7 @@ import io.github.cvrunmin.lanfasie.benderson.content.anticalabrum.AnticalabrumRe
 import io.github.cvrunmin.lanfasie.benderson.content.benderson.BendersonRenderer;
 import io.github.cvrunmin.lanfasie.benderson.content.dawn.DawnEntityRenderer;
 import io.github.cvrunmin.lanfasie.benderson.content.equipment.ShallowayShieldSpecialRenderer;
+import io.github.cvrunmin.lanfasie.benderson.content.lanfasie.LanfasieRenderer;
 import io.github.cvrunmin.lanfasie.benderson.content.marker.DelayedAttackMarkerRenderer;
 import io.github.cvrunmin.lanfasie.benderson.content.marker.TargetMarkerRenderer;
 import io.github.cvrunmin.lanfasie.benderson.content.mundane_praisers.MundanePraiserBardRenderer;
@@ -70,6 +71,7 @@ public class LanfasieBendersonClient {
 
     @SubscribeEvent
     public static void registerEntityRenderers(EntityRenderersEvent.RegisterRenderers event){
+        event.registerEntityRenderer(AllEntityTypes.LANFASIE.get(), LanfasieRenderer::new);
         event.registerEntityRenderer(AllEntityTypes.BENDERSON.get(), BendersonRenderer::new);
         event.registerEntityRenderer(AllEntityTypes.PROJECTED_BENDERSON.get(), BendersonRenderer::new);
         event.registerEntityRenderer(AllEntityTypes.TARGET_MARKER.get(), TargetMarkerRenderer::new);
