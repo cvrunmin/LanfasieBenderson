@@ -1,4 +1,10 @@
 {
+  "beloved_paean": {
+    "sounds": [
+      "lanfasie_benderson:sfx/beloved_paean"
+    ],
+    "subtitle": "subtitles.lanfasie_benderson.beloved_paean"
+  },
   "benderson_boss_theme_1": {
     "sounds": [
       {
@@ -57,6 +63,12 @@
     ],
     "subtitle": "subtitles.lanfasie_benderson.lethal_attack"
   },
+  "opening_minuet": {
+    "sounds": [
+      "lanfasie_benderson:sfx/opening_minuet"
+    ],
+    "subtitle": "subtitles.lanfasie_benderson.opening_minuet"
+  },
   "stack_attack_sfx": {
     "sounds": [
       {
@@ -65,5 +77,11 @@
       }
     ],
     "subtitle": "subtitles.lanfasie_benderson.stack_attack"
+  },
+  "twin_balled": {
+    "sounds": [
+      "lanfasie_benderson:sfx/twin_ballad"
+    ],
+    "subtitle": "subtitles.lanfasie_benderson.twin_ballad"
   }
 }
