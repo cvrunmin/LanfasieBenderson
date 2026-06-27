@@ -5,6 +5,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.AnimationState;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -46,7 +47,7 @@ public class UnforgivenSpoiling extends Monster {
     @Override
     protected void registerGoals() {
         this.goalSelector.addGoal(1, new FloatGoal(this));
-        this.goalSelector.addGoal(4, new MeleeAttackGoal(this, 1.2, true));
+        this.goalSelector.addGoal(4, new MeleeAttackGoal(this, 2.5, true));
         this.goalSelector.addGoal(6, new WaterAvoidingRandomStrollGoal(this, 0.8));
         this.targetSelector.addGoal(1, new HurtByTargetGoal(this).setAlertOthers());
     }
@@ -80,7 +81,7 @@ public class UnforgivenSpoiling extends Monster {
         if (speedModifier > 0.0) {
             double current = this.getDeltaMovement().horizontalDistanceSqr();
             if (current < 0.01) {
-                this.moveRelative(0.1F, new Vec3(0.0, 3, 1.0));
+                this.moveRelative(0.1F, new Vec3(0.0, 1.5, 1.0));
             }
         }
 
@@ -125,6 +126,16 @@ public class UnforgivenSpoiling extends Monster {
             if (!this.wasOnGround) {
                 this.setJumping(false);
                 this.checkLandingDelay();
+            }
+
+            if (this.jumpDelayTicks == 0) {
+                LivingEntity target = this.getTarget();
+                if (target != null && this.distanceToSqr(target) < 36.0) {
+                    this.facePoint(target.getX(), target.getZ());
+                    this.moveControl.setWantedPosition(target.getX(), target.getY(), target.getZ(), this.moveControl.getSpeedModifier());
+                    this.startJumping();
+                    this.wasOnGround = true;
+                }
             }
 
             var jumpControl = ((HareJumpControl) this.jumpControl);

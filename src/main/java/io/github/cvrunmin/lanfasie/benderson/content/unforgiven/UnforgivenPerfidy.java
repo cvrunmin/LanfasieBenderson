@@ -24,7 +24,7 @@ public class UnforgivenPerfidy extends Monster {
     }
 
     public static AttributeSupplier createAttributes(){
-        return Monster.createMonsterAttributes().add(Attributes.MOVEMENT_SPEED, 0.25).build();
+        return Monster.createMonsterAttributes().add(Attributes.MAX_HEALTH, 20).add(Attributes.MOVEMENT_SPEED, 0.25).build();
     }
 
     @Override

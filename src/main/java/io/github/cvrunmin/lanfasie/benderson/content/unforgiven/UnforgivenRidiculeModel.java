@@ -54,7 +54,19 @@ public class UnforgivenRidiculeModel extends EntityModel<UnforgivenRidiculeRende
     @Override
     public void setupAnim(UnforgivenRidiculeRenderState state) {
         super.setupAnim(state);
-        float angle = state.ageInTicks * (float) Math.PI * -0.1F;
+        float angle;
+        if(state.isCharging){
+            this.branchAnimator.xRot = (float) (Math.PI * 0.5);
+            angle = state.ageInTicks * (float) Math.PI * -0.25F;
+            subBranches[0].xRot = (float) -(Math.PI * 45 / 180f);
+            subBranches[1].xRot = (float) -(Math.PI * 45 / 180f);
+            subBranches[2].xRot = (float) -(Math.PI * 45 / 180f);
+        }else{
+            angle = state.ageInTicks * (float) Math.PI * -0.1F;
+            subBranches[0].xRot = (float) -(Math.PI * 70.5 / 180f);
+            subBranches[1].xRot = (float) -(Math.PI * 70.5 / 180f);
+            subBranches[2].xRot = (float) -(Math.PI * 70.5 / 180f);
+        }
         subBranches[0].yRot = angle;
         subBranches[1].yRot = (float) -(Math.PI * 120 / 180f) + angle;
         subBranches[2].yRot = (float) (Math.PI * 120 / 180f) + angle;

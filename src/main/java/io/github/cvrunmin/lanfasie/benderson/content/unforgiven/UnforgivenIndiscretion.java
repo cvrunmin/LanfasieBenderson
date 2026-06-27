@@ -56,7 +56,6 @@ public class UnforgivenIndiscretion extends Monster {
 
     @Override
     public void setTarget(@Nullable LivingEntity target) {
-        this.setBroadcasting(target != null);
         super.setTarget(target);
     }
 
@@ -85,6 +84,12 @@ public class UnforgivenIndiscretion extends Monster {
         @Override
         public void start() {
             tick = 0;
+            guy.setBroadcasting(true);
+        }
+
+        @Override
+        public void stop() {
+            guy.setBroadcasting(false);
         }
 
         @Override

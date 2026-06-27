@@ -22,4 +22,10 @@ public class UnforgivenRidiculeRenderer extends MobRenderer<UnforgivenRidicule, 
     public UnforgivenRidiculeRenderState createRenderState() {
         return new UnforgivenRidiculeRenderState();
     }
+
+    @Override
+    public void extractRenderState(UnforgivenRidicule entity, UnforgivenRidiculeRenderState state, float partialTicks) {
+        super.extractRenderState(entity, state, partialTicks);
+        state.isCharging = entity.isCharged();
+    }
 }
