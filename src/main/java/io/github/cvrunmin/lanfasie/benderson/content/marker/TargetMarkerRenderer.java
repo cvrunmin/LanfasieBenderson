@@ -164,21 +164,21 @@ public class TargetMarkerRenderer extends EntityRenderer<TargetMarker, TargetMar
             innerStack.rotateAround(new Quaternionf().rotateY((float) Math.toRadians(-camera.yRot)), 0, 0, 0);
             innerStack.translate(0, state.overheadOffset + 0.5f, 0);
             pose = innerStack.last();
-            buffer.addVertex(pose, -0.5f, 0.4f, 0).setUv(0.5f, 0).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setColor(1f, 1f, 1f, alpha).setNormal(0, 0, 1);
-            buffer.addVertex(pose, -0.5f, 0, 0).setUv(0.5f, LETHAL_ATTACK_ARROW_1_HEIGHT / 256f).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setColor(1f, 1f, 1f, alpha).setNormal(0, 0, 1);
-            buffer.addVertex(pose, 0.5f, 0, 0).setUv(0.5f + LETHAL_ATTACK_ARROW_1_WIDTH / 512f, LETHAL_ATTACK_ARROW_1_HEIGHT / 256f).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setColor(1f, 1f, 1f, alpha).setNormal(0, 0, 1);
-            buffer.addVertex(pose, 0.5f, 0.4f, 0).setUv(0.5f + LETHAL_ATTACK_ARROW_1_WIDTH / 512f, 0).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setColor(1f, 1f, 1f, alpha).setNormal(0, 0, 1);
+            buffer.addVertex(pose, -0.5f, 0.4f, 0).setUv(0.5f, 0).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setColor(1f, 1f, 1f, alpha).setNormal(pose, 0, 0, 1);
+            buffer.addVertex(pose, -0.5f, 0, 0).setUv(0.5f, LETHAL_ATTACK_ARROW_1_HEIGHT / 256f).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setColor(1f, 1f, 1f, alpha).setNormal(pose, 0, 0, 1);
+            buffer.addVertex(pose, 0.5f, 0, 0).setUv(0.5f + LETHAL_ATTACK_ARROW_1_WIDTH / 512f, LETHAL_ATTACK_ARROW_1_HEIGHT / 256f).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setColor(1f, 1f, 1f, alpha).setNormal(pose, 0, 0, 1);
+            buffer.addVertex(pose, 0.5f, 0.4f, 0).setUv(0.5f + LETHAL_ATTACK_ARROW_1_WIDTH / 512f, 0).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setColor(1f, 1f, 1f, alpha).setNormal(pose, 0, 0, 1);
 
             innerStack.translate(0, 0.2f + 0.2f * ((float) Math.cos(Math.PI * state.ageInTicks * 0.1) + 1), 0);
             pose = innerStack.last();
-            buffer.addVertex(pose, -0.25f, 0.4f, 0).setUv(0.5f, LETHAL_ATTACK_ARROW_1_HEIGHT / 256f).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setColor(1f, 1f, 1f, alpha).setNormal(0, 0, 1);
-            buffer.addVertex(pose, -0.25f, 0, 0).setUv(0.5f, (LETHAL_ATTACK_ARROW_1_HEIGHT + LETHAL_ATTACK_ARROW_2_HEIGHT) / 256f).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setColor(1f, 1f, 1f, alpha).setNormal(0, 0, 1);
-            buffer.addVertex(pose, 0.25f, 0, 0).setUv(0.5f + LETHAL_ATTACK_ARROW_2_WIDTH / 512f, (LETHAL_ATTACK_ARROW_1_HEIGHT + LETHAL_ATTACK_ARROW_2_HEIGHT) / 256f).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setColor(1f, 1f, 1f, alpha).setNormal(0, 0, 1);
-            buffer.addVertex(pose, 0.25f, 0.4f, 0).setUv(0.5f + LETHAL_ATTACK_ARROW_2_WIDTH / 512f, LETHAL_ATTACK_ARROW_1_HEIGHT / 256f).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setColor(1f, 1f, 1f, alpha).setNormal(0, 0, 1);
-            buffer.addVertex(pose, -0.25f, 0.7f, 0).setUv(0.5f, LETHAL_ATTACK_ARROW_1_HEIGHT / 256f).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setColor(1f, 1f, 1f, alpha).setNormal(0, 0, 1);
-            buffer.addVertex(pose, -0.25f, 0.3f, 0).setUv(0.5f, (LETHAL_ATTACK_ARROW_1_HEIGHT + LETHAL_ATTACK_ARROW_2_HEIGHT) / 256f).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setColor(1f, 1f, 1f, alpha).setNormal(0, 0, 1);
-            buffer.addVertex(pose, 0.25f, 0.3f, 0).setUv(0.5f + LETHAL_ATTACK_ARROW_2_WIDTH / 512f, (LETHAL_ATTACK_ARROW_1_HEIGHT + LETHAL_ATTACK_ARROW_2_HEIGHT) / 256f).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setColor(1f, 1f, 1f, alpha).setNormal(0, 0, 1);
-            buffer.addVertex(pose, 0.25f, 0.7f, 0).setUv(0.5f + LETHAL_ATTACK_ARROW_2_WIDTH / 512f, LETHAL_ATTACK_ARROW_1_HEIGHT / 256f).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setColor(1f, 1f, 1f, alpha).setNormal(0, 0, 1);
+            buffer.addVertex(pose, -0.25f, 0.4f, 0).setUv(0.5f, LETHAL_ATTACK_ARROW_1_HEIGHT / 256f).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setColor(1f, 1f, 1f, alpha).setNormal(pose, 0, 0, 1);
+            buffer.addVertex(pose, -0.25f, 0, 0).setUv(0.5f, (LETHAL_ATTACK_ARROW_1_HEIGHT + LETHAL_ATTACK_ARROW_2_HEIGHT) / 256f).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setColor(1f, 1f, 1f, alpha).setNormal(pose, 0, 0, 1);
+            buffer.addVertex(pose, 0.25f, 0, 0).setUv(0.5f + LETHAL_ATTACK_ARROW_2_WIDTH / 512f, (LETHAL_ATTACK_ARROW_1_HEIGHT + LETHAL_ATTACK_ARROW_2_HEIGHT) / 256f).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setColor(1f, 1f, 1f, alpha).setNormal(pose, 0, 0, 1);
+            buffer.addVertex(pose, 0.25f, 0.4f, 0).setUv(0.5f + LETHAL_ATTACK_ARROW_2_WIDTH / 512f, LETHAL_ATTACK_ARROW_1_HEIGHT / 256f).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setColor(1f, 1f, 1f, alpha).setNormal(pose, 0, 0, 1);
+            buffer.addVertex(pose, -0.25f, 0.7f, 0).setUv(0.5f, LETHAL_ATTACK_ARROW_1_HEIGHT / 256f).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setColor(1f, 1f, 1f, alpha).setNormal(pose, 0, 0, 1);
+            buffer.addVertex(pose, -0.25f, 0.3f, 0).setUv(0.5f, (LETHAL_ATTACK_ARROW_1_HEIGHT + LETHAL_ATTACK_ARROW_2_HEIGHT) / 256f).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setColor(1f, 1f, 1f, alpha).setNormal(pose, 0, 0, 1);
+            buffer.addVertex(pose, 0.25f, 0.3f, 0).setUv(0.5f + LETHAL_ATTACK_ARROW_2_WIDTH / 512f, (LETHAL_ATTACK_ARROW_1_HEIGHT + LETHAL_ATTACK_ARROW_2_HEIGHT) / 256f).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setColor(1f, 1f, 1f, alpha).setNormal(pose, 0, 0, 1);
+            buffer.addVertex(pose, 0.25f, 0.7f, 0).setUv(0.5f + LETHAL_ATTACK_ARROW_2_WIDTH / 512f, LETHAL_ATTACK_ARROW_1_HEIGHT / 256f).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setColor(1f, 1f, 1f, alpha).setNormal(pose, 0, 0, 1);
             innerStack.popPose();
         });
     }
@@ -405,21 +405,21 @@ public class TargetMarkerRenderer extends EntityRenderer<TargetMarker, TargetMar
             innerStack.rotateAround(new Quaternionf().rotateY((float) Math.toRadians(-camera.yRot)), 0, 0, 0);
             innerStack.translate(0, state.overheadOffset + 0.5f, 0);
             var pose = innerStack.last();
-            buffer.addVertex(pose, -0.5f, 0.4f, 0).setUv(0.5f, 0).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setColor(1f, 1f, 1f, alpha).setNormal(0, 0, 1);
-            buffer.addVertex(pose, -0.5f, 0, 0).setUv(0.5f, LETHAL_ATTACK_ARROW_1_HEIGHT / 256f).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setColor(1f, 1f, 1f, alpha).setNormal(0, 0, 1);
-            buffer.addVertex(pose, 0.5f, 0, 0).setUv(0.5f + LETHAL_ATTACK_ARROW_1_WIDTH / 512f, LETHAL_ATTACK_ARROW_1_HEIGHT / 256f).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setColor(1f, 1f, 1f, alpha).setNormal(0, 0, 1);
-            buffer.addVertex(pose, 0.5f, 0.4f, 0).setUv(0.5f + LETHAL_ATTACK_ARROW_1_WIDTH / 512f, 0).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setColor(1f, 1f, 1f, alpha).setNormal(0, 0, 1);
+            buffer.addVertex(pose, -0.5f, 0.4f, 0).setUv(0.5f, 0).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setColor(1f, 1f, 1f, alpha).setNormal(pose, 0, 0, 1);
+            buffer.addVertex(pose, -0.5f, 0, 0).setUv(0.5f, LETHAL_ATTACK_ARROW_1_HEIGHT / 256f).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setColor(1f, 1f, 1f, alpha).setNormal(pose, 0, 0, 1);
+            buffer.addVertex(pose, 0.5f, 0, 0).setUv(0.5f + LETHAL_ATTACK_ARROW_1_WIDTH / 512f, LETHAL_ATTACK_ARROW_1_HEIGHT / 256f).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setColor(1f, 1f, 1f, alpha).setNormal(pose, 0, 0, 1);
+            buffer.addVertex(pose, 0.5f, 0.4f, 0).setUv(0.5f + LETHAL_ATTACK_ARROW_1_WIDTH / 512f, 0).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setColor(1f, 1f, 1f, alpha).setNormal(pose, 0, 0, 1);
 
             innerStack.translate(0, 0.2f + 0.2f * ((float) Math.cos(Math.PI * state.ageInTicks * 0.1) + 1), 0);
             pose = innerStack.last();
-            buffer.addVertex(pose, -0.25f, 0.4f, 0).setUv(0.5f, LETHAL_ATTACK_ARROW_1_HEIGHT / 256f).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setColor(1f, 1f, 1f, alpha).setNormal(0, 0, 1);
-            buffer.addVertex(pose, -0.25f, 0, 0).setUv(0.5f, (LETHAL_ATTACK_ARROW_1_HEIGHT + LETHAL_ATTACK_ARROW_2_HEIGHT) / 256f).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setColor(1f, 1f, 1f, alpha).setNormal(0, 0, 1);
-            buffer.addVertex(pose, 0.25f, 0, 0).setUv(0.5f + LETHAL_ATTACK_ARROW_2_WIDTH / 512f, (LETHAL_ATTACK_ARROW_1_HEIGHT + LETHAL_ATTACK_ARROW_2_HEIGHT) / 256f).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setColor(1f, 1f, 1f, alpha).setNormal(0, 0, 1);
-            buffer.addVertex(pose, 0.25f, 0.4f, 0).setUv(0.5f + LETHAL_ATTACK_ARROW_2_WIDTH / 512f, LETHAL_ATTACK_ARROW_1_HEIGHT / 256f).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setColor(1f, 1f, 1f, alpha).setNormal(0, 0, 1);
-            buffer.addVertex(pose, -0.25f, 0.7f, 0).setUv(0.5f, LETHAL_ATTACK_ARROW_1_HEIGHT / 256f).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setColor(1f, 1f, 1f, alpha).setNormal(0, 0, 1);
-            buffer.addVertex(pose, -0.25f, 0.3f, 0).setUv(0.5f, (LETHAL_ATTACK_ARROW_1_HEIGHT + LETHAL_ATTACK_ARROW_2_HEIGHT) / 256f).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setColor(1f, 1f, 1f, alpha).setNormal(0, 0, 1);
-            buffer.addVertex(pose, 0.25f, 0.3f, 0).setUv(0.5f + LETHAL_ATTACK_ARROW_2_WIDTH / 512f, (LETHAL_ATTACK_ARROW_1_HEIGHT + LETHAL_ATTACK_ARROW_2_HEIGHT) / 256f).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setColor(1f, 1f, 1f, alpha).setNormal(0, 0, 1);
-            buffer.addVertex(pose, 0.25f, 0.7f, 0).setUv(0.5f + LETHAL_ATTACK_ARROW_2_WIDTH / 512f, LETHAL_ATTACK_ARROW_1_HEIGHT / 256f).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setColor(1f, 1f, 1f, alpha).setNormal(0, 0, 1);
+            buffer.addVertex(pose, -0.25f, 0.4f, 0).setUv(0.5f, LETHAL_ATTACK_ARROW_1_HEIGHT / 256f).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setColor(1f, 1f, 1f, alpha).setNormal(pose, 0, 0, 1);
+            buffer.addVertex(pose, -0.25f, 0, 0).setUv(0.5f, (LETHAL_ATTACK_ARROW_1_HEIGHT + LETHAL_ATTACK_ARROW_2_HEIGHT) / 256f).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setColor(1f, 1f, 1f, alpha).setNormal(pose, 0, 0, 1);
+            buffer.addVertex(pose, 0.25f, 0, 0).setUv(0.5f + LETHAL_ATTACK_ARROW_2_WIDTH / 512f, (LETHAL_ATTACK_ARROW_1_HEIGHT + LETHAL_ATTACK_ARROW_2_HEIGHT) / 256f).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setColor(1f, 1f, 1f, alpha).setNormal(pose, 0, 0, 1);
+            buffer.addVertex(pose, 0.25f, 0.4f, 0).setUv(0.5f + LETHAL_ATTACK_ARROW_2_WIDTH / 512f, LETHAL_ATTACK_ARROW_1_HEIGHT / 256f).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setColor(1f, 1f, 1f, alpha).setNormal(pose, 0, 0, 1);
+            buffer.addVertex(pose, -0.25f, 0.7f, 0).setUv(0.5f, LETHAL_ATTACK_ARROW_1_HEIGHT / 256f).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setColor(1f, 1f, 1f, alpha).setNormal(pose, 0, 0, 1);
+            buffer.addVertex(pose, -0.25f, 0.3f, 0).setUv(0.5f, (LETHAL_ATTACK_ARROW_1_HEIGHT + LETHAL_ATTACK_ARROW_2_HEIGHT) / 256f).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setColor(1f, 1f, 1f, alpha).setNormal(pose, 0, 0, 1);
+            buffer.addVertex(pose, 0.25f, 0.3f, 0).setUv(0.5f + LETHAL_ATTACK_ARROW_2_WIDTH / 512f, (LETHAL_ATTACK_ARROW_1_HEIGHT + LETHAL_ATTACK_ARROW_2_HEIGHT) / 256f).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setColor(1f, 1f, 1f, alpha).setNormal(pose, 0, 0, 1);
+            buffer.addVertex(pose, 0.25f, 0.7f, 0).setUv(0.5f + LETHAL_ATTACK_ARROW_2_WIDTH / 512f, LETHAL_ATTACK_ARROW_1_HEIGHT / 256f).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setColor(1f, 1f, 1f, alpha).setNormal(pose, 0, 0, 1);
             innerStack.popPose();
             var halfRange = 2.0f;
             for (int i1 = 0; i1 < 4; i1++) {
@@ -435,10 +435,10 @@ public class TargetMarkerRenderer extends EntityRenderer<TargetMarker, TargetMar
                     float deltaRadius = (float) (2.0 * (1 - (1 - Math.pow(1 - t2 / 20f, 5))));
                     float alpha3 = t2 < 15 ? 1 : (20 - t2) / 5;
                     float alpha4 = t2 < 10 ? t2 * 0.7f / 10 + 0.3f : 1;
-                    buffer.addVertex(pose, 0.75f + deltaRadius, 0, -0.625f).setUv(0.5f, 0).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setColor(alpha4, 1f, alpha4, alpha * alpha3).setNormal(0, 1, 0);
-                    buffer.addVertex(pose, 0 + deltaRadius, 0, -0.625f).setUv(0.5f, LETHAL_ATTACK_ARROW_1_HEIGHT / 256f).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setColor(alpha4, 1f, alpha4, alpha * alpha3).setNormal(0, 1, 0);
-                    buffer.addVertex(pose, 0 + deltaRadius, 0, 0.625f).setUv(0.5f + LETHAL_ATTACK_ARROW_1_WIDTH / 512f, LETHAL_ATTACK_ARROW_1_HEIGHT / 256f).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setColor(alpha4, 1f, alpha4, alpha * alpha3).setNormal(0, 1, 0);
-                    buffer.addVertex(pose, 0.75f + deltaRadius, 0.0f, 0.625f).setUv(0.5f + LETHAL_ATTACK_ARROW_1_WIDTH / 512f, 0).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setColor(alpha4, 1f, alpha4, alpha * alpha3).setNormal(0, 1, 0);
+                    buffer.addVertex(pose, 0.75f + deltaRadius, 0, -0.625f).setUv(0.5f, 0).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setColor(alpha4, 1f, alpha4, alpha * alpha3).setNormal(pose, 0, 1, 0);
+                    buffer.addVertex(pose, 0 + deltaRadius, 0, -0.625f).setUv(0.5f, LETHAL_ATTACK_ARROW_1_HEIGHT / 256f).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setColor(alpha4, 1f, alpha4, alpha * alpha3).setNormal(pose, 0, 1, 0);
+                    buffer.addVertex(pose, 0 + deltaRadius, 0, 0.625f).setUv(0.5f + LETHAL_ATTACK_ARROW_1_WIDTH / 512f, LETHAL_ATTACK_ARROW_1_HEIGHT / 256f).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setColor(alpha4, 1f, alpha4, alpha * alpha3).setNormal(pose, 0, 1, 0);
+                    buffer.addVertex(pose, 0.75f + deltaRadius, 0.0f, 0.625f).setUv(0.5f + LETHAL_ATTACK_ARROW_1_WIDTH / 512f, 0).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setColor(alpha4, 1f, alpha4, alpha * alpha3).setNormal(pose, 0, 1, 0);
                 }
                 innerStack.popPose();
             }
@@ -453,21 +453,21 @@ public class TargetMarkerRenderer extends EntityRenderer<TargetMarker, TargetMar
             innerStack.rotateAround(new Quaternionf().rotateY((float) Math.toRadians(-camera.yRot)), 0, 0, 0);
             innerStack.translate(0, state.overheadOffset + 0.5f, 0);
             var pose = innerStack.last();
-            buffer.addVertex(pose, -0.5f, 0.4f, 0).setUv(0.5f, 0).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setColor(1f, 1f, 1f, alpha).setNormal(0, 0, 1);
-            buffer.addVertex(pose, -0.5f, 0, 0).setUv(0.5f, LETHAL_ATTACK_ARROW_1_HEIGHT / 256f).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setColor(1f, 1f, 1f, alpha).setNormal(0, 0, 1);
-            buffer.addVertex(pose, 0.5f, 0, 0).setUv(0.5f + LETHAL_ATTACK_ARROW_1_WIDTH / 512f, LETHAL_ATTACK_ARROW_1_HEIGHT / 256f).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setColor(1f, 1f, 1f, alpha).setNormal(0, 0, 1);
-            buffer.addVertex(pose, 0.5f, 0.4f, 0).setUv(0.5f + LETHAL_ATTACK_ARROW_1_WIDTH / 512f, 0).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setColor(1f, 1f, 1f, alpha).setNormal(0, 0, 1);
+            buffer.addVertex(pose, -0.5f, 0.4f, 0).setUv(0.5f, 0).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setColor(1f, 1f, 1f, alpha).setNormal(pose, 0, 0, 1);
+            buffer.addVertex(pose, -0.5f, 0, 0).setUv(0.5f, LETHAL_ATTACK_ARROW_1_HEIGHT / 256f).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setColor(1f, 1f, 1f, alpha).setNormal(pose, 0, 0, 1);
+            buffer.addVertex(pose, 0.5f, 0, 0).setUv(0.5f + LETHAL_ATTACK_ARROW_1_WIDTH / 512f, LETHAL_ATTACK_ARROW_1_HEIGHT / 256f).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setColor(1f, 1f, 1f, alpha).setNormal(pose, 0, 0, 1);
+            buffer.addVertex(pose, 0.5f, 0.4f, 0).setUv(0.5f + LETHAL_ATTACK_ARROW_1_WIDTH / 512f, 0).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setColor(1f, 1f, 1f, alpha).setNormal(pose, 0, 0, 1);
 
             innerStack.translate(0, 0.2f + 0.2f * ((float) Math.cos(Math.PI * state.ageInTicks * 0.1) + 1), 0);
             pose = innerStack.last();
-            buffer.addVertex(pose, -0.25f, 0.4f, 0).setUv(0.5f, LETHAL_ATTACK_ARROW_1_HEIGHT / 256f).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setColor(1f, 1f, 1f, alpha).setNormal(0, 0, 1);
-            buffer.addVertex(pose, -0.25f, 0, 0).setUv(0.5f, (LETHAL_ATTACK_ARROW_1_HEIGHT + LETHAL_ATTACK_ARROW_2_HEIGHT) / 256f).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setColor(1f, 1f, 1f, alpha).setNormal(0, 0, 1);
-            buffer.addVertex(pose, 0.25f, 0, 0).setUv(0.5f + LETHAL_ATTACK_ARROW_2_WIDTH / 512f, (LETHAL_ATTACK_ARROW_1_HEIGHT + LETHAL_ATTACK_ARROW_2_HEIGHT) / 256f).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setColor(1f, 1f, 1f, alpha).setNormal(0, 0, 1);
-            buffer.addVertex(pose, 0.25f, 0.4f, 0).setUv(0.5f + LETHAL_ATTACK_ARROW_2_WIDTH / 512f, LETHAL_ATTACK_ARROW_1_HEIGHT / 256f).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setColor(1f, 1f, 1f, alpha).setNormal(0, 0, 1);
-            buffer.addVertex(pose, -0.25f, 0.7f, 0).setUv(0.5f, LETHAL_ATTACK_ARROW_1_HEIGHT / 256f).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setColor(1f, 1f, 1f, alpha).setNormal(0, 0, 1);
-            buffer.addVertex(pose, -0.25f, 0.3f, 0).setUv(0.5f, (LETHAL_ATTACK_ARROW_1_HEIGHT + LETHAL_ATTACK_ARROW_2_HEIGHT) / 256f).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setColor(1f, 1f, 1f, alpha).setNormal(0, 0, 1);
-            buffer.addVertex(pose, 0.25f, 0.3f, 0).setUv(0.5f + LETHAL_ATTACK_ARROW_2_WIDTH / 512f, (LETHAL_ATTACK_ARROW_1_HEIGHT + LETHAL_ATTACK_ARROW_2_HEIGHT) / 256f).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setColor(1f, 1f, 1f, alpha).setNormal(0, 0, 1);
-            buffer.addVertex(pose, 0.25f, 0.7f, 0).setUv(0.5f + LETHAL_ATTACK_ARROW_2_WIDTH / 512f, LETHAL_ATTACK_ARROW_1_HEIGHT / 256f).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setColor(1f, 1f, 1f, alpha).setNormal(0, 0, 1);
+            buffer.addVertex(pose, -0.25f, 0.4f, 0).setUv(0.5f, LETHAL_ATTACK_ARROW_1_HEIGHT / 256f).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setColor(1f, 1f, 1f, alpha).setNormal(pose, 0, 0, 1);
+            buffer.addVertex(pose, -0.25f, 0, 0).setUv(0.5f, (LETHAL_ATTACK_ARROW_1_HEIGHT + LETHAL_ATTACK_ARROW_2_HEIGHT) / 256f).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setColor(1f, 1f, 1f, alpha).setNormal(pose, 0, 0, 1);
+            buffer.addVertex(pose, 0.25f, 0, 0).setUv(0.5f + LETHAL_ATTACK_ARROW_2_WIDTH / 512f, (LETHAL_ATTACK_ARROW_1_HEIGHT + LETHAL_ATTACK_ARROW_2_HEIGHT) / 256f).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setColor(1f, 1f, 1f, alpha).setNormal(pose, 0, 0, 1);
+            buffer.addVertex(pose, 0.25f, 0.4f, 0).setUv(0.5f + LETHAL_ATTACK_ARROW_2_WIDTH / 512f, LETHAL_ATTACK_ARROW_1_HEIGHT / 256f).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setColor(1f, 1f, 1f, alpha).setNormal(pose, 0, 0, 1);
+            buffer.addVertex(pose, -0.25f, 0.7f, 0).setUv(0.5f, LETHAL_ATTACK_ARROW_1_HEIGHT / 256f).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setColor(1f, 1f, 1f, alpha).setNormal(pose, 0, 0, 1);
+            buffer.addVertex(pose, -0.25f, 0.3f, 0).setUv(0.5f, (LETHAL_ATTACK_ARROW_1_HEIGHT + LETHAL_ATTACK_ARROW_2_HEIGHT) / 256f).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setColor(1f, 1f, 1f, alpha).setNormal(pose, 0, 0, 1);
+            buffer.addVertex(pose, 0.25f, 0.3f, 0).setUv(0.5f + LETHAL_ATTACK_ARROW_2_WIDTH / 512f, (LETHAL_ATTACK_ARROW_1_HEIGHT + LETHAL_ATTACK_ARROW_2_HEIGHT) / 256f).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setColor(1f, 1f, 1f, alpha).setNormal(pose, 0, 0, 1);
+            buffer.addVertex(pose, 0.25f, 0.7f, 0).setUv(0.5f + LETHAL_ATTACK_ARROW_2_WIDTH / 512f, LETHAL_ATTACK_ARROW_1_HEIGHT / 256f).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setColor(1f, 1f, 1f, alpha).setNormal(pose, 0, 0, 1);
             innerStack.popPose();
 
             var halfRange = state.range * 0.5f;
@@ -484,10 +484,10 @@ public class TargetMarkerRenderer extends EntityRenderer<TargetMarker, TargetMar
                     float deltaRadius = (float) (2.0 * (1 - (1 - Math.pow(1 - t2 / 20f, 5))));
                     float alpha3 = t2 < 15 ? 1 : (20 - t2) / 5;
                     float alpha4 = t2 < 10 ? t2 * 0.7f / 10 + 0.3f : 1;
-                    buffer.addVertex(pose, 0.75f + deltaRadius, 0, -0.625f).setUv(0.5f, 0).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setColor(alpha4, 1f, alpha4, alpha * alpha3).setNormal(0, 1, 0);
-                    buffer.addVertex(pose, 0 + deltaRadius, 0, -0.625f).setUv(0.5f, LETHAL_ATTACK_ARROW_1_HEIGHT / 256f).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setColor(alpha4, 1f, alpha4, alpha * alpha3).setNormal(0, 1, 0);
-                    buffer.addVertex(pose, 0 + deltaRadius, 0, 0.625f).setUv(0.5f + LETHAL_ATTACK_ARROW_1_WIDTH / 512f, LETHAL_ATTACK_ARROW_1_HEIGHT / 256f).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setColor(alpha4, 1f, alpha4, alpha * alpha3).setNormal(0, 1, 0);
-                    buffer.addVertex(pose, 0.75f + deltaRadius, 0.0f, 0.625f).setUv(0.5f + LETHAL_ATTACK_ARROW_1_WIDTH / 512f, 0).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setColor(alpha4, 1f, alpha4, alpha * alpha3).setNormal(0, 1, 0);
+                    buffer.addVertex(pose, 0.75f + deltaRadius, 0, -0.625f).setUv(0.5f, 0).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setColor(alpha4, 1f, alpha4, alpha * alpha3).setNormal(pose, 0, 1, 0);
+                    buffer.addVertex(pose, 0 + deltaRadius, 0, -0.625f).setUv(0.5f, LETHAL_ATTACK_ARROW_1_HEIGHT / 256f).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setColor(alpha4, 1f, alpha4, alpha * alpha3).setNormal(pose, 0, 1, 0);
+                    buffer.addVertex(pose, 0 + deltaRadius, 0, 0.625f).setUv(0.5f + LETHAL_ATTACK_ARROW_1_WIDTH / 512f, LETHAL_ATTACK_ARROW_1_HEIGHT / 256f).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setColor(alpha4, 1f, alpha4, alpha * alpha3).setNormal(pose, 0, 1, 0);
+                    buffer.addVertex(pose, 0.75f + deltaRadius, 0.0f, 0.625f).setUv(0.5f + LETHAL_ATTACK_ARROW_1_WIDTH / 512f, 0).setLight(LightCoordsUtil.FULL_BRIGHT).setOverlay(OverlayTexture.NO_OVERLAY).setColor(alpha4, 1f, alpha4, alpha * alpha3).setNormal(pose, 0, 1, 0);
                 }
                 innerStack.popPose();
             }

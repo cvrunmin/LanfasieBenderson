@@ -29,9 +29,12 @@ public class AllMobEffects {
 
     public static final DeferredHolder<MobEffect, SummerSeptetMobEffect> SUMMER_SEPTET = MOB_EFFECT.register("summer_septet", () -> new SummerSeptetMobEffect(MobEffectCategory.NEUTRAL));
     public static final DeferredHolder<MobEffect, MundaneTrioMobEffect> MUNDANE_TRIO = MOB_EFFECT.register("mundane_trio", () -> new MundaneTrioMobEffect(MobEffectCategory.NEUTRAL));
-    public static final DeferredHolder<MobEffect, MundaneTrioMobEffect.MundaneTrioBigOrangeMobEffect> OPENING_MINUET = MOB_EFFECT.register("opening_minuet", () -> new MundaneTrioMobEffect.MundaneTrioBigOrangeMobEffect(MobEffectCategory.BENEFICIAL));
-    public static final DeferredHolder<MobEffect, MundaneTrioMobEffect.MundaneTrioLittleOrangeMobEffect> TWIN_BALLAD = MOB_EFFECT.register("twin_ballad", () -> new MundaneTrioMobEffect.MundaneTrioLittleOrangeMobEffect(MobEffectCategory.BENEFICIAL));
-    public static final DeferredHolder<MobEffect, MundaneTrioMobEffect.MundaneTrioPentaMobEffect> BELOVED_PAEAN = MOB_EFFECT.register("beloved_paean", () -> new MundaneTrioMobEffect.MundaneTrioPentaMobEffect(MobEffectCategory.BENEFICIAL));
+    public static final DeferredHolder<MobEffect, MundaneTrioMobEffect.MundaneTrioBigOrangeMobEffect> OPENING_MINUET = MOB_EFFECT.register("opening_minuet", () ->
+            ((MundaneTrioMobEffect.MundaneTrioBigOrangeMobEffect) new MundaneTrioMobEffect.MundaneTrioBigOrangeMobEffect(MobEffectCategory.BENEFICIAL).withSoundOnAdded(AllSoundEvents.OPENING_MINUET_SFX.get())));
+    public static final DeferredHolder<MobEffect, MundaneTrioMobEffect.MundaneTrioLittleOrangeMobEffect> TWIN_BALLAD = MOB_EFFECT.register("twin_ballad", () ->
+            ((MundaneTrioMobEffect.MundaneTrioLittleOrangeMobEffect) new MundaneTrioMobEffect.MundaneTrioLittleOrangeMobEffect(MobEffectCategory.BENEFICIAL).withSoundOnAdded(AllSoundEvents.TWIN_BALLAD_SFX.get())));
+    public static final DeferredHolder<MobEffect, MundaneTrioMobEffect.MundaneTrioPentaMobEffect> BELOVED_PAEAN = MOB_EFFECT.register("beloved_paean", () ->
+            ((MundaneTrioMobEffect.MundaneTrioPentaMobEffect) new MundaneTrioMobEffect.MundaneTrioPentaMobEffect(MobEffectCategory.BENEFICIAL).withSoundOnAdded(AllSoundEvents.BELOVED_PAEAN_SFX.get())));
 
     public static void register(IEventBus modBus){
         MOB_EFFECT.register(modBus);

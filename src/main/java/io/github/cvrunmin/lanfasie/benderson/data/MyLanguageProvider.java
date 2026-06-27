@@ -58,6 +58,9 @@ public class MyLanguageProvider extends LanguageProvider {
         this.add("subtitles.lanfasie_benderson.lethal_attack", "Omen of lethal attack");
         this.add("subtitles.lanfasie_benderson.stack_attack", "Omen of stack attack");
         this.add("subtitles.lanfasie_benderson.enemy_sweep", "Sweeping attack");
+        this.add("subtitles.lanfasie_benderson.opening_minuet", "Opening Minuet");
+        this.add("subtitles.lanfasie_benderson.twin_ballad", "Twin Ballad");
+        this.add("subtitles.lanfasie_benderson.beloved_paean", "Beloved Paean");
         this.addItem(AllItems.AGGRO_UP_ICON, "Provoking");
         this.addEffect(AllMobEffects.AGGRO_UP, "Provoking");
         this.addEffect(AllMobEffects.VULNERABILITY_UP, "Vulnerability Up");

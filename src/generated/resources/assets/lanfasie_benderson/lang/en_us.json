@@ -72,8 +72,11 @@
   "item.lanfasie_benderson.unforgiven_spoiling_spawn_egg": "Unforgiven Spoiling Spawn Egg",
   "itemGroup.lanfasie_benderson": "Lanfasie: Benderson",
   "misc.lanfasie_benderson.projected_suffix": "«Projected»",
+  "subtitles.lanfasie_benderson.beloved_paean": "Beloved Paean",
   "subtitles.lanfasie_benderson.enemy_sweep": "Sweeping attack",
   "subtitles.lanfasie_benderson.lethal_attack": "Omen of lethal attack",
+  "subtitles.lanfasie_benderson.opening_minuet": "Opening Minuet",
   "subtitles.lanfasie_benderson.stack_attack": "Omen of stack attack",
+  "subtitles.lanfasie_benderson.twin_ballad": "Twin Ballad",
   "text.lanfasie_benderson.enmity_bar.aggro": "A"
 }
