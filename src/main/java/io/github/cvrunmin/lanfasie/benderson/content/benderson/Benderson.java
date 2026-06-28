@@ -48,6 +48,7 @@ import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.control.FlyingMoveControl;
+import net.minecraft.world.entity.ai.control.MoveControl;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.ai.navigation.FlyingPathNavigation;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
@@ -122,7 +123,7 @@ public class Benderson extends Monster implements GeoEntity, BendersonStatesGett
     public Benderson(EntityType<? extends Benderson> type, Level level) {
         super(type, level);
         this.xpReward = 2000;
-        this.moveControl = new FlyingMoveControl(this, 180, true);
+        this.moveControl = new BendersonMoveControl(this, 180, true);
         transitioner = new PhaseStateTransitioner(this);
         transitioner.addPhaseStateInstance("idle", idlePhaseState)
                 .addPhaseStateInstance("arena_entering", arenaEnteringPhaseState)
@@ -1119,6 +1120,63 @@ public class Benderson extends Monster implements GeoEntity, BendersonStatesGett
 
         public boolean isTransition() {
             return isTransition;
+        }
+    }
+
+    public static class BendersonMoveControl extends FlyingMoveControl{
+
+        private float maxTurn;
+        private boolean hoversInPlace;
+
+        public BendersonMoveControl(Mob mob, int maxTurn, boolean hoversInPlace) {
+            super(mob, maxTurn, hoversInPlace);
+            this.maxTurn = maxTurn;
+            this.hoversInPlace = hoversInPlace;
+        }
+
+        @Override
+        public void tick() {
+            if (this.operation == MoveControl.Operation.MOVE_TO) {
+                this.operation = MoveControl.Operation.WAIT;
+                this.mob.setNoGravity(true);
+                double xd = this.wantedX - this.mob.getX();
+                double yd = this.wantedY - this.mob.getY();
+                double zd = this.wantedZ - this.mob.getZ();
+                double dd = xd * xd + yd * yd + zd * zd;
+                if (dd < 2.5000003E-7F) {
+                    this.mob.setYya(0.0F);
+                    this.mob.setZza(0.0F);
+                    return;
+                }
+
+                float yRotD = (float)(Mth.atan2(zd, xd) * 180.0F / (float)Math.PI) - 90.0F;
+                this.mob.setYRot(this.rotlerp(this.mob.getYRot(), yRotD, 90.0F));
+                float speed;
+                if (this.mob.onGround()) {
+                    speed = (float)(this.speedModifier * this.mob.getAttributeValue(Attributes.MOVEMENT_SPEED));
+                } else {
+                    speed = (float)(this.speedModifier * this.mob.getAttributeValue(Attributes.FLYING_SPEED));
+                }
+
+                this.mob.setSpeed(speed);
+                double sd = Math.sqrt(xd * xd + zd * zd);
+                if (Math.abs(yd) > 1.0E-5F || Math.abs(sd) > 1.0E-5F) {
+                    float xRotD = (float)(-(Mth.atan2(yd, sd) * 180.0F / (float)Math.PI));
+                    this.mob.setXRot(this.rotlerp(this.mob.getXRot(), xRotD, this.maxTurn));
+                    if(Math.abs(yd) <= 1e-5f){
+                        this.mob.setYya(0.0f);
+                    }else{
+                        this.mob.setYya(yd > 0.0 ? speed : -speed);
+                    }
+                }
+            } else {
+                if (!this.hoversInPlace) {
+                    this.mob.setNoGravity(false);
+                }
+
+                this.mob.setYya(0.0F);
+                this.mob.setZza(0.0F);
+            }
         }
     }
 }
