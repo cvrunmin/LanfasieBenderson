@@ -2,6 +2,12 @@ package io.github.cvrunmin.lanfasie.benderson.content.benderson;
 
 import com.geckolib.animatable.GeoAnimatable;
 import com.geckolib.animatable.manager.AnimatableManager;
+import com.geckolib.cache.model.BakedGeoModel;
+import com.geckolib.cache.model.GeoBone;
+import com.geckolib.cache.model.GeoQuad;
+import com.geckolib.cache.model.GeoVertex;
+import com.geckolib.cache.model.cuboid.CuboidGeoBone;
+import com.geckolib.cache.model.cuboid.GeoCube;
 import com.geckolib.constant.DataTickets;
 import com.geckolib.renderer.GeoEntityRenderer;
 import com.geckolib.renderer.base.BoneSnapshots;
@@ -10,9 +16,7 @@ import com.geckolib.renderer.base.RenderPassInfo;
 import com.geckolib.util.RenderUtil;
 import com.mojang.blaze3d.pipeline.DepthStencilState;
 import com.mojang.blaze3d.pipeline.RenderPipeline;
-import com.mojang.blaze3d.vertex.DefaultVertexFormat;
-import com.mojang.blaze3d.vertex.QuadInstance;
-import com.mojang.blaze3d.vertex.VertexFormat;
+import com.mojang.blaze3d.vertex.*;
 import com.mojang.math.Axis;
 import io.github.cvrunmin.lanfasie.benderson.LanfasieBenderson;
 import io.github.cvrunmin.lanfasie.benderson.content.anticalabrum.Anticalabrum;
@@ -21,6 +25,7 @@ import io.github.cvrunmin.lanfasie.benderson.content.benderson.phases.*;
 import io.github.cvrunmin.lanfasie.benderson.index.AllItems;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.FaceInfo;
+import net.minecraft.client.renderer.OrderedSubmitNodeCollector;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.blockentity.AbstractEndPortalRenderer;
@@ -39,13 +44,11 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.phys.AABB;
-import org.jetbrains.annotations.ApiStatus;
-import org.joml.Quaternionf;
-import org.joml.Vector3f;
+import org.joml.*;
 import org.jspecify.annotations.Nullable;
 
-import java.util.Objects;
-import java.util.Optional;
+import java.lang.Math;
+import java.util.*;
 
 public class BendersonRenderer<T extends LivingEntity & GeoAnimatable & BendersonStatesGetter, R extends LivingEntityRenderState & GeoRenderState> extends GeoEntityRenderer<T, R> {
 
@@ -259,29 +262,24 @@ public class BendersonRenderer<T extends LivingEntity & GeoAnimatable & Benderso
             var tSec = performController.getCurrentTimelineTime();
             if(tSec < 8){
                 float gateOpenScale;
-                float gateOpenZScale;
                 if(tSec < 1){
                     gateOpenScale = (float) (1 - Math.pow(1 - tSec, 3));
-                    gateOpenZScale = 1;
                 }
                 else if(tSec >= 7){
                     gateOpenScale = 1 - Mth.clamp((float) (Math.pow((tSec - 7) / 0.5, 3)), 0, 1);
-                    gateOpenZScale = 1 - Mth.clamp((float) (Math.pow((tSec - 7) / 0.5, 3)), 0, 1);
                 }
                 else{
                     gateOpenScale = 1;
-                    gateOpenZScale = 1;
                 }
                 var poseStack = renderPassInfo.poseStack();
                 this.hackStateEnter(1);
                 poseStack.pushPose();
-                var vfrom = new Vector3f(-24, -10 * gateOpenScale, -5 * gateOpenZScale);
+                var vfrom = new Vector3f(-24, -10 * gateOpenScale, 0);
                 var vto = new Vector3f(24, 10 * gateOpenScale, 0);
                 submitNodeCollector.submitCustomGeometry(poseStack, PORTAL, (inPose, buffer) -> {
-                    for (FaceInfo faceInfo : FaceInfo.values()) {
-                        for (int i = 0; i < 4; i++) {
-                            buffer.addVertex(inPose, faceInfo.getVertexInfo(i).select(vfrom, vto));
-                        }
+                    var faceInfo = FaceInfo.SOUTH;
+                    for (int i = 0; i < 4; i++) {
+                        buffer.addVertex(inPose, faceInfo.getVertexInfo(i).select(vfrom, vto));
                     }
                 });
                 poseStack.popPose();
@@ -324,5 +322,188 @@ public class BendersonRenderer<T extends LivingEntity & GeoAnimatable & Benderso
 
     private void hackStateLeave(){
         // stub for iris compat mixin
+    }
+
+    @Override
+    public void preRenderPass(RenderPassInfo<R> renderPassInfo, SubmitNodeCollector renderTasks) {
+        super.preRenderPass(renderPassInfo, renderTasks);
+        renderPassInfo.renderState().addGeckolibData(BendersonDataTickets.PRE_RENDER_POSE, renderPassInfo.poseStack().last().copy());
+    }
+
+    @Override
+    public void submitRenderTasks(RenderPassInfo<R> renderPassInfo, OrderedSubmitNodeCollector renderTasks, @Nullable RenderType renderType) {
+        if (renderPassInfo.getGeckolibData(BendersonDataTickets.BODY_STATE) == Benderson.BodyState.ENTRANCE) {
+            if (renderType == null)
+                return;
+
+            final int packedLight = renderPassInfo.packedLight();
+            final int packedOverlay = renderPassInfo.packedOverlay();
+            final int renderColor = renderPassInfo.renderColor();
+            final BakedGeoModel model = renderPassInfo.model();
+
+            if (model.isMissingno()) {
+                submitMissingModelRender(renderPassInfo, renderTasks);
+
+                return;
+            }
+
+            renderTasks.submitCustomGeometry(renderPassInfo.poseStack(), renderType, (pose, vertexConsumer) -> {
+                final PoseStack poseStack = renderPassInfo.poseStack();
+
+                poseStack.pushPose();
+                poseStack.last().set(pose);
+                final float clippedZ = Optional.ofNullable(renderPassInfo.renderState().getGeckolibData(BendersonDataTickets.PRE_RENDER_POSE))
+                        .map(PoseStack.Pose::pose)
+                        .map(mat -> mat.transform(new Vector4f(0, 0, 0, 1)).z)
+                        .orElse(0.0f);
+                renderPassInfo.renderPosed(() -> {
+                    BakedGeoModel model1 = renderPassInfo.model();
+                    for (GeoBone bone : model1.topLevelBones()) {
+                        try{
+                            renderBones(bone, clippedZ, renderPassInfo, poseStack, vertexConsumer, packedLight, packedOverlay, renderColor);
+                        }catch (Exception e){
+                            bone.positionAndRender(renderPassInfo, vertexConsumer, packedLight, packedOverlay, renderColor);
+                        }
+                    }
+                });
+                poseStack.popPose();
+            });
+        }else{
+            super.submitRenderTasks(renderPassInfo, renderTasks, renderType);
+        }
+    }
+
+    private static <R extends LivingEntityRenderState & GeoRenderState> void renderBones(GeoBone bone, float clippingZ, RenderPassInfo<R> renderPassInfo, PoseStack poseStack, VertexConsumer vertexConsumer, int packedLight, int packedOverlay, int renderColor){
+        poseStack.pushPose();
+        RenderUtil.prepMatrixForBoneAndUpdateListeners(poseStack, bone, renderPassInfo);
+        if(bone instanceof CuboidGeoBone cuboidGeoBone){
+            if ((cuboidGeoBone.frameSnapshot == null || !cuboidGeoBone.frameSnapshot.isHidden())) {
+                for (GeoCube cube : cuboidGeoBone.cubes) {
+                    poseStack.pushPose();
+                    // clone from geoCube#render
+                    cube.translateToPivotPoint(poseStack);
+                    cube.rotate(poseStack);
+                    cube.translateAwayFromPivotPoint(poseStack);
+
+                    Matrix3f normalisedPoseState = poseStack.last().normal();
+                    Matrix4f poseState = new Matrix4f(poseStack.last().pose());
+
+                    for (GeoQuad quad : cube.quads()) {
+                        if (quad == null)
+                            continue;
+
+                        Vector3f normal = normalisedPoseState.transform(quad.normalVec());
+
+                        RenderUtil.fixInvertedFlatCube(cube, normal);
+                        List<GeoVertex> vertices = new ArrayList<>(4);
+                        for (GeoVertex geoVertex : quad.vertices()) {
+                            Vector4f vector4f = poseState.transform(new Vector4f(geoVertex.posX(), geoVertex.posY(), geoVertex.posZ(), 1));
+                            vertices.add(new GeoVertex(vector4f.x, vector4f.y, vector4f.z, geoVertex.texU(), geoVertex.texV()));
+                        }
+
+                        vertices = clipQuad(vertices, clippingZ);
+
+                        for (GeoVertex vertex : vertices) {
+                            vertexConsumer.addVertex(vertex.posX(), vertex.posY(), vertex.posZ(), renderColor, vertex.texU(),
+                                    vertex.texV(), packedOverlay, packedLight, normal.x(), normal.y(), normal.z());
+                        }
+                    }
+                    poseStack.popPose();
+                }
+            }
+        }else{
+            bone.render(renderPassInfo, poseStack, vertexConsumer, packedLight, packedOverlay, renderColor);
+        }
+        if (bone.frameSnapshot == null || !bone.frameSnapshot.areChildrenHidden()) {
+            for (GeoBone child : bone.children()) {
+                renderBones(child, clippingZ, renderPassInfo, poseStack, vertexConsumer, packedLight, packedOverlay, renderColor);
+            }
+        }
+        poseStack.popPose();
+    }
+
+    private static List<GeoVertex> clipQuad(List<GeoVertex> vertices, float clippingZ){
+        if(vertices.size() != 4) return vertices; // not valid, but fail soft
+        var inClipList = new ArrayList<Integer>(4);
+        for (int i = 0; i < vertices.size(); i++) {
+            GeoVertex vertex = vertices.get(i);
+            if (vertex.posZ() >= clippingZ) {
+                inClipList.add(i);
+            }
+        }
+        var inClipAmount = inClipList.size();
+        if(inClipAmount == 4){
+            return vertices;
+        }
+        List<GeoVertex> newVertices = new ArrayList<>();
+        if(inClipAmount == 1){
+            var inClipVertexIndex = inClipList.getFirst();
+            var prevVertex = vertices.get((inClipVertexIndex - 1 + vertices.size()) % vertices.size());
+            var curVertex = vertices.get(inClipVertexIndex);
+            var nextVertex = vertices.get((inClipVertexIndex + 1) % vertices.size());
+            var prevVertexLerp = lerp(prevVertex, curVertex, 1f / (1f - ((curVertex.posZ() - clippingZ) / (prevVertex.posZ() - clippingZ))));
+            var nextVertexLerp = lerp(curVertex, nextVertex, 1f / (1f - ((nextVertex.posZ() - clippingZ) / (curVertex.posZ() - clippingZ))));
+            var prevNextVertexLerp = lerp(prevVertexLerp, nextVertexLerp, 0.5f);
+            newVertices.add(prevVertexLerp);
+            newVertices.add(curVertex);
+            newVertices.add(nextVertexLerp);
+            newVertices.add(prevNextVertexLerp);
+        }
+        else if(inClipAmount == 2){
+            var inClipIdx1 = inClipList.getFirst();
+            var inClipIdx2 = inClipList.getLast();
+            if((inClipIdx1 + 1) % vertices.size() == inClipIdx2 || (inClipIdx2 + 1) % vertices.size() == inClipIdx1){
+                // case consecutive
+                var prevVertex = vertices.get((inClipIdx1 - 1 + vertices.size()) % vertices.size());
+                var curVertex = vertices.get(inClipIdx1);
+                var nextVertex = vertices.get(inClipIdx2);
+                var nextNextVertex = vertices.get((inClipIdx2 + 1) % vertices.size());
+                var prevVertexLerp = lerp(prevVertex, curVertex, 1f / (1f - ((curVertex.posZ() - clippingZ) / (prevVertex.posZ() - clippingZ))));
+                var nextVertexLerp = lerp(nextVertex, nextNextVertex, 1f / (1f - ((nextNextVertex.posZ() - clippingZ) / (nextVertex.posZ() - clippingZ))));
+                newVertices.add(prevVertexLerp);
+                newVertices.add(curVertex);
+                newVertices.add(nextVertex);
+                newVertices.add(nextVertexLerp);
+            }else{
+                // strange case. Skip it for now
+                newVertices.addAll(vertices);
+            }
+        } else if(inClipAmount == 3){
+            int outClip = -1;
+            for (int i = 0; i < 4; i++) {
+                if(!inClipList.contains(i)) {
+                    outClip = i;
+                    break;
+                }
+            }
+            if(outClip != -1){
+                var prevVertex = vertices.get((outClip - 1 + vertices.size()) % vertices.size());
+                var curOutVertex = vertices.get(outClip);
+                var nextVertex = vertices.get((outClip + 1) % vertices.size());
+                var nextNextVertex = vertices.get((outClip + 2) % vertices.size());
+                var prevVertexLerp = lerp(prevVertex, curOutVertex, 1f / (1f - ((curOutVertex.posZ() - clippingZ) / (prevVertex.posZ() - clippingZ))));
+                var nextVertexLerp = lerp(curOutVertex, nextVertex, 1f / (1f - ((nextVertex.posZ() - clippingZ) / (curOutVertex.posZ() - clippingZ))));
+                var prevNextVertexLerp = lerp(prevVertexLerp, nextVertexLerp, 0.5f);
+                newVertices.add(prevVertexLerp);
+                newVertices.add(prevNextVertexLerp);
+                newVertices.add(nextNextVertex);
+                newVertices.add(prevVertex);
+                newVertices.add(prevNextVertexLerp);
+                newVertices.add(nextVertexLerp);
+                newVertices.add(nextVertex);
+                newVertices.add(nextNextVertex);
+            }
+        }
+        return newVertices;
+    }
+
+    private static GeoVertex lerp(GeoVertex a, GeoVertex b, float t){
+        return new GeoVertex(
+                a.posX() + t * (b.posX() - a.posX()),
+                a.posY() + t * (b.posY() - a.posY()),
+                a.posZ() + t * (b.posZ() - a.posZ()),
+                a.texU() + t * (b.texU() - a.texU()),
+                a.texV() + t * (b.texV() - a.texV())
+        );
     }
 }

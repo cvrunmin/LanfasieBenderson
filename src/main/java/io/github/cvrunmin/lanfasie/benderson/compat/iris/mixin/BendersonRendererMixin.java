@@ -68,20 +68,19 @@ public class BendersonRendererMixin {
             ci.cancel();
             float progress = SystemTimeUniforms.TIMER.getFrameTimeCounter() * 0.01F % 1.0F;
 
-            for (Direction direction : Direction.values()) {
-                float nx = direction.getStepX();
-                float ny = direction.getStepY();
-                float nz = direction.getStepZ();
-                var faceInfo = FaceInfo.fromFacing(direction);
-                for (int i = 0; i < 4; i++) {
-                    var faceVertex = faceInfo.getVertexInfo(i).select(vfrom, vto);
-                    buffer.addVertex(inPose, faceVertex.x(), faceVertex.y(), faceVertex.z())
-                            .setColor(0.075F, 0.15F, 0.2F, 1.0F)
-                            .setUv(0.0F + (i >= 2 ? 0.2f : 0) + progress, 0.0F + (i == 1 || i == 2 ? 0.2f : 0) + progress)
-                            .setOverlay(overlay)
-                            .setLight(light)
-                            .setNormal(inPose, nx, ny, nz);
-                }
+            Direction direction = Direction.SOUTH;
+            float nx = direction.getStepX();
+            float ny = direction.getStepY();
+            float nz = direction.getStepZ();
+            var faceInfo = FaceInfo.fromFacing(direction);
+            for (int i = 0; i < 4; i++) {
+                var faceVertex = faceInfo.getVertexInfo(i).select(vfrom, vto);
+                buffer.addVertex(inPose, faceVertex.x(), faceVertex.y(), faceVertex.z())
+                        .setColor(0.075F, 0.15F, 0.2F, 1.0F)
+                        .setUv(0.0F + (i >= 2 ? 0.2f : 0) + progress, 0.0F + (i == 1 || i == 2 ? 0.2f : 0) + progress)
+                        .setOverlay(overlay)
+                        .setLight(light)
+                        .setNormal(inPose, nx, ny, nz);
             }
         }
     }
