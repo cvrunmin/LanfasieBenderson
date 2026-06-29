@@ -17,6 +17,8 @@
     "requireAnnotations": true
   },
   "client": [
+    "ChannelHandleAccessor",
+    "ChannelMixin",
     "ItemLayerRenderStateAccessor",
     "ItemModelGeneratorInvoker",
     "ItemStackRenderStateAccessor",
