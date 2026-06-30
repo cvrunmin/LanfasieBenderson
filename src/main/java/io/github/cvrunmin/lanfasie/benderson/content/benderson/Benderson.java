@@ -701,12 +701,11 @@ public class Benderson extends Monster implements GeoEntity, BendersonStatesGett
         }
         if(!level().isClientSide()) {
             this.bossEvent.setProgress(0);
-            for (UUID uuid : enmityList.keySet()) {
-                if (level().getEntity(uuid) instanceof LivingEntity livingEntity) {
-                    if(livingEntity.hasEffect(AllMobEffects.VULNERABILITY_UP)){
-                        MobEffectRemovalProtector.grantAndRemove(livingEntity, AllMobEffects.VULNERABILITY_UP);
-                    }
+            for (LivingEntity livingEntity : level().getEntitiesOfClass(LivingEntity.class, getCombatArena())) {
+                if(livingEntity.hasEffect(AllMobEffects.VULNERABILITY_UP)){
+                    MobEffectRemovalProtector.grantAndRemove(livingEntity, AllMobEffects.VULNERABILITY_UP);
                 }
+
             }
         }
         super.die(source);
