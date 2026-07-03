@@ -44,5 +44,10 @@ public class MyEntityTypeTagsProvider extends KeyTagProvider<EntityType<?>> {
                 AllEntityTypes.MUNDANE_PRAISER_WHITE_MAGE.getKey(),
                 AllEntityTypes.MUNDANE_PRAISER_RED_MAGE.getKey()
                 );
+        tag(AllTags.SIN_BEARER).add(AllEntityTypes.UNFORGIVEN_INDISCRETION.getKey(),
+                AllEntityTypes.UNFORGIVEN_COWARDICE.getKey(),
+                AllEntityTypes.UNFORGIVEN_PERFIDY.getKey(),
+                AllEntityTypes.UNFORGIVEN_RIDICULE.getKey(),
+                AllEntityTypes.UNFORGIVEN_SPOILING.getKey());
     }
 }

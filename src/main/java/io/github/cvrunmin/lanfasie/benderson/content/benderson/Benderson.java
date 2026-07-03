@@ -866,6 +866,19 @@ public class Benderson extends Monster implements GeoEntity, BendersonStatesGett
         }).filter(Objects::nonNull).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
+    public Optional<Player> getNonAggressiveRandomPlayer(){
+        var arena = getCombatArena();
+        var sortedPlayerArray = enmityList.entrySet().stream().map(entry -> {
+            var entity = this.level().getEntity(entry.getKey());
+            if(!(entity instanceof Player player)) return null;
+            if(!player.canBeSeenByAnyone()) return null;
+            return arena.contains(player.position()) ? Map.entry(player, entry.getValue()) : null;
+        }).filter(Objects::nonNull).sorted(Map.Entry.<Player, Float>comparingByValue().reversed()).map(Map.Entry::getKey).toArray(Player[]::new);
+        if(sortedPlayerArray.length == 0) return Optional.empty();
+        if(sortedPlayerArray.length == 1) return Optional.of(sortedPlayerArray[0]);
+        return Optional.of(sortedPlayerArray[random.nextInt(1, sortedPlayerArray.length)]);
+    }
+
     private HashMap<UUID, Float> getEnmityMapForSyncing(){
         var arena = getCombatArena();
         return this.enmityList.entrySet().stream().filter(entry -> {

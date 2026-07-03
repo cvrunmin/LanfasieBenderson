@@ -42,9 +42,10 @@ public class CircleStackAttackPhaseState implements IPhaseState{
     @Override
     public void start() {
         if(this.owner.level().isClientSide()) return;
-        if(this.owner.getTarget() != null){
+        var targetPlayer = this.owner.getNonAggressiveRandomPlayer();
+        if(targetPlayer.isPresent()){
+            currentTarget = targetPlayer.get();
             this.requiredPlayerToStack = this.owner.getActualEnmityMap().size();
-            currentTarget = this.owner.getTarget();
             var marker = new TargetMarker(this.owner.level(), this.currentTarget,
                     TargetMarker.MarkerArgs.simple(TargetMarker.MarkerType.CIRCLE_STACK, this.diameter, 110));
             this.trackingMarker = marker;
@@ -114,7 +115,7 @@ public class CircleStackAttackPhaseState implements IPhaseState{
 
     @Override
     public boolean canUse() {
-        return cooldownTick <= 0 && this.owner.getTarget() != null && !this.owner.isInGlobalCooldown();
+        return cooldownTick <= 0 && !this.owner.isInGlobalCooldown() && this.owner.getTarget() != null;
     }
 
     @Override

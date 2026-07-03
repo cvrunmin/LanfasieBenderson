@@ -1,10 +1,7 @@
 package io.github.cvrunmin.lanfasie.benderson.data;
 
 import io.github.cvrunmin.lanfasie.benderson.LanfasieBenderson;
-import io.github.cvrunmin.lanfasie.benderson.index.AllBlocks;
-import io.github.cvrunmin.lanfasie.benderson.index.AllEntityTypes;
-import io.github.cvrunmin.lanfasie.benderson.index.AllItems;
-import io.github.cvrunmin.lanfasie.benderson.index.AllMobEffects;
+import io.github.cvrunmin.lanfasie.benderson.index.*;
 import net.minecraft.data.PackOutput;
 import net.neoforged.neoforge.common.data.LanguageProvider;
 
@@ -95,5 +92,8 @@ public class MyLanguageProvider extends LanguageProvider {
         this.add("config.lanfasie_benderson.benderson_pre_ecliptic_pile_damage_multiplier", "Benderson Pre-Ecliptic Pile Damage Multiplier");
         this.add("config.lanfasie_benderson.benderson_cat_smashing_attack_damage_multiplier", "Benderson Cat Smashing Attack Damage Multiplier");
         this.add("config.lanfasie_benderson.benderson_fireball_meteor_attack_damage_multiplier", "Benderson Fireball Meteor Attack Damage Multiplier");
+        this.add(AllTags.IMMUNE_BENDERSON_WIPE_ARENA, "Immune to Benderson Wipe Arena Attack");
+        this.add(AllTags.IGNORE_UNFORGIVEN_INDISCRETION_BROADCAST, "Ignore Broadcasting of Unforgiven Indiscretion");
+        this.add(AllTags.SIN_BEARER, "Sin Bearer");
     }
 }

@@ -78,5 +78,8 @@
   "subtitles.lanfasie_benderson.opening_minuet": "開場的小步舞曲",
   "subtitles.lanfasie_benderson.stack_attack": "可分攤攻擊的預兆",
   "subtitles.lanfasie_benderson.twin_ballad": "孿生的敘事謠",
+  "tag.entity_type.lanfasie_benderson.ignore_unforgiven_indiscretion_broadcast": "無視來自不獲寬恕的失言的廣播",
+  "tag.entity_type.lanfasie_benderson.immune_benderson_wipe_arena": "免疫本德森清掃場地攻擊",
+  "tag.entity_type.lanfasie_benderson.sin_bearer": "負罪靈",
   "text.lanfasie_benderson.enmity_bar.aggro": "A"
 }

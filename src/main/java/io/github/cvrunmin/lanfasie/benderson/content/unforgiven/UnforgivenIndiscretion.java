@@ -1,6 +1,7 @@
 package io.github.cvrunmin.lanfasie.benderson.content.unforgiven;
 
 import io.github.cvrunmin.lanfasie.benderson.index.AllEntityTypes;
+import io.github.cvrunmin.lanfasie.benderson.index.AllTags;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
@@ -101,6 +102,7 @@ public class UnforgivenIndiscretion extends Monster {
 
                 var nearby = this.guy.level().getEntitiesOfClass(Mob.class, searchAabb, EntitySelector.NO_SPECTATORS);
                 for (Mob entity : nearby) {
+                    if(entity.is(AllTags.IGNORE_UNFORGIVEN_INDISCRETION_BROADCAST)) continue;
                     if(entity.getTarget() == null && (entity instanceof Enemy || entity instanceof NeutralMob)){
                         entity.setTarget(target);
                     }

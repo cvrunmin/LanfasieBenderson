@@ -66,7 +66,7 @@
   "item.lanfasie_benderson.sword_of_dawnwaiter": "晨曦等待者之劍",
   "item.lanfasie_benderson.sword_of_dawnwaiter_tainted": "生鏽嘅晨曦等待者之劍",
   "item.lanfasie_benderson.unforgiven_cowardice_spawn_egg": "不獲寬恕的怯弱生成蛋",
-  "item.lanfasie_benderson.unforgiven_indiscretion_spawn_egg": "不獲寬恕的失言生怪成蛋",
+  "item.lanfasie_benderson.unforgiven_indiscretion_spawn_egg": "不獲寬恕的失言生成蛋",
   "item.lanfasie_benderson.unforgiven_perfidy_spawn_egg": "不獲寬恕的背義生成蛋",
   "item.lanfasie_benderson.unforgiven_ridicule_spawn_egg": "不獲寬恕的嘲弄生成蛋",
   "item.lanfasie_benderson.unforgiven_spoiling_spawn_egg": "不獲寬恕的溺愛生成蛋",
@@ -78,5 +78,8 @@
   "subtitles.lanfasie_benderson.opening_minuet": "開場的小步舞曲",
   "subtitles.lanfasie_benderson.stack_attack": "可分攤攻擊嘅預兆",
   "subtitles.lanfasie_benderson.twin_ballad": "孿生的敘事謠",
+  "tag.entity_type.lanfasie_benderson.ignore_unforgiven_indiscretion_broadcast": "無視來自不獲寬恕的失言的廣播",
+  "tag.entity_type.lanfasie_benderson.immune_benderson_wipe_arena": "免疫邦達臣清掃場地攻擊",
+  "tag.entity_type.lanfasie_benderson.sin_bearer": "負罪靈",
   "text.lanfasie_benderson.enmity_bar.aggro": "A"
 }

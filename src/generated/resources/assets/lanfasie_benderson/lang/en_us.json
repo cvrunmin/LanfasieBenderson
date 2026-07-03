@@ -78,5 +78,8 @@
   "subtitles.lanfasie_benderson.opening_minuet": "Opening Minuet",
   "subtitles.lanfasie_benderson.stack_attack": "Omen of stack attack",
   "subtitles.lanfasie_benderson.twin_ballad": "Twin Ballad",
+  "tag.entity_type.lanfasie_benderson.ignore_unforgiven_indiscretion_broadcast": "Ignore Broadcasting of Unforgiven Indiscretion",
+  "tag.entity_type.lanfasie_benderson.immune_benderson_wipe_arena": "Immune to Benderson Wipe Arena Attack",
+  "tag.entity_type.lanfasie_benderson.sin_bearer": "Sin Bearer",
   "text.lanfasie_benderson.enmity_bar.aggro": "A"
 }
