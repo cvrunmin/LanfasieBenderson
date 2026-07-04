@@ -177,27 +177,30 @@ public class BendersonRenderer<T extends LivingEntity & GeoAnimatable & Benderso
                     var model = Minecraft.getInstance().getModelManager().getStandaloneModel(AnticalabrumModel.MODEL_KEY);
                     if (model != null) {
                         var alphaT = Mth.clamp((tSec) / 0.25f, 0, 1);
-                        var rotT = Mth.clamp((tSec - 0.25f) / 0.25f, 0, 1);
-                        var flyT = Mth.clamp((tSec - 0.5f) / 0.5f, 0, 1);
-                        var quadInstance = new QuadInstance();
-                        var poseStack = renderPassInfo.poseStack();
-                        poseStack.pushPose();
-                        float rotationYaw = renderPassInfo.renderState().getOrDefaultGeckolibData(DataTickets.ENTITY_BODY_YAW, 0f);
-                        poseStack.mulPose(Axis.YP.rotationDegrees(180f - rotationYaw));
-                        poseStack.translate(0, 10 * Math.pow(flyT, 3), 0);
-                        poseStack.translate(renderPassInfo.renderState().boundingBoxWidth * 0, renderPassInfo.renderState().boundingBoxHeight * 0.3333333f, renderPassInfo.renderState().boundingBoxWidth * 1f);
-                        poseStack.rotateAround(new Quaternionf().rotationZ((float) (-Math.PI * (1 - Math.pow(1 - rotT, 3)))), 0, 1, 0);
-                        poseStack.mulPose(new Quaternionf().rotationZ((float) (-Math.PI * 0.5)));
-                        var quads = model.getQuadsByState(Anticalabrum.AnticalabrumType.EMPTY);
-                        submitNodeCollector.submitCustomGeometry(poseStack, RenderTypes.entityTranslucent(AnticalabrumModel.ANTICALABRUM_TEXTURE), (inPose, builder) -> {
-                            quadInstance.setLightCoords(LightCoordsUtil.FULL_BRIGHT);
-                            quadInstance.setOverlayCoords(OverlayTexture.NO_OVERLAY);
-                            quadInstance.setColor(ARGB.colorFromFloat((float) (1 - Math.pow(1 - alphaT, 3)), 1, 1, 1));
-                            for (BakedQuad quad : quads) {
-                                builder.putBakedQuad(inPose, quad, quadInstance);
-                            }
-                        });
-                        poseStack.popPose();
+                        float alpha = (float) (1 - Math.pow(1 - alphaT, 3));
+                        if(alpha >= 0.1){
+                            var rotT = Mth.clamp((tSec - 0.25f) / 0.25f, 0, 1);
+                            var flyT = Mth.clamp((tSec - 0.5f) / 0.5f, 0, 1);
+                            var quadInstance = new QuadInstance();
+                            var poseStack = renderPassInfo.poseStack();
+                            poseStack.pushPose();
+                            float rotationYaw = renderPassInfo.renderState().getOrDefaultGeckolibData(DataTickets.ENTITY_BODY_YAW, 0f);
+                            poseStack.mulPose(Axis.YP.rotationDegrees(180f - rotationYaw));
+                            poseStack.translate(0, 10 * Math.pow(flyT, 3), 0);
+                            poseStack.translate(renderPassInfo.renderState().boundingBoxWidth * 0, renderPassInfo.renderState().boundingBoxHeight * 0.3333333f, renderPassInfo.renderState().boundingBoxWidth * 1f);
+                            poseStack.rotateAround(new Quaternionf().rotationZ((float) (-Math.PI * (1 - Math.pow(1 - rotT, 3)))), 0, 1, 0);
+                            poseStack.mulPose(new Quaternionf().rotationZ((float) (-Math.PI * 0.5)));
+                            var quads = model.getQuadsByState(Anticalabrum.AnticalabrumType.EMPTY);
+                            submitNodeCollector.submitCustomGeometry(poseStack, RenderTypes.entityTranslucent(AnticalabrumModel.ANTICALABRUM_TEXTURE), (inPose, builder) -> {
+                                quadInstance.setLightCoords(LightCoordsUtil.FULL_BRIGHT);
+                                quadInstance.setOverlayCoords(OverlayTexture.NO_OVERLAY);
+                                quadInstance.setColor(ARGB.colorFromFloat(alpha, 1, 1, 1));
+                                for (BakedQuad quad : quads) {
+                                    builder.putBakedQuad(inPose, quad, quadInstance);
+                                }
+                            });
+                            poseStack.popPose();
+                        }
                     }
                 }
             } else if (bodyState == Benderson.BodyState.UNFORGIVEN &&

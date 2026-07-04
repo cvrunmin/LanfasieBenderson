@@ -59,7 +59,6 @@ public class CircleAoeSelfPhaseState implements IPhaseState{
 
     @Override
     public boolean tick() {
-        if(trackingMarker == null || trackingMarker.isRemoved()) return false;
         currentTick--;
         int pastTicks = maxTicks - currentTick;
         if(pastTicks == 20){

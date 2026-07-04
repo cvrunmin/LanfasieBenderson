@@ -219,7 +219,12 @@ public class TargetMarker extends Entity implements IEntityWithComplexSpawn, Own
         if (this.getTargetType() == TargetType.ENTITY) {
             if (this.targetEntity != null) {
                 this.setPos(this.targetEntity.position());
-                this.setDeltaMovement(this.targetEntity.getDeltaMovement());
+                if(!targetEntity.isAlive()){
+                    this.setTargetType(TargetType.POS);
+                    this.setDeltaMovement(Vec3.ZERO);
+                }else {
+                    this.setDeltaMovement(this.targetEntity.getDeltaMovement());
+                }
             }else if (this.delayedTargetEntityUuid != null){
                 var entity = level().getEntity(delayedTargetEntityUuid);
                 if(entity instanceof LivingEntity livingEntity){

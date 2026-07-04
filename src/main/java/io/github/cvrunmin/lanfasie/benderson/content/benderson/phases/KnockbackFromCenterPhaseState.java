@@ -50,7 +50,6 @@ public class KnockbackFromCenterPhaseState implements IPhaseState{
 
     @Override
     public boolean tick() {
-        if(maxTicks - currentTick > 20 && (trackingMarker == null || trackingMarker.isRemoved())) return false;
         currentTick--;
         int pastTicks = maxTicks - currentTick;
         if(pastTicks == 20){
@@ -84,7 +83,10 @@ public class KnockbackFromCenterPhaseState implements IPhaseState{
                         acceptingTarget.hurtServer(((ServerLevel) this.owner.level()),
                                 this.owner.damageSources().source(AllDamageTypes.BOSS_ABILITY_ATTACK, this.owner),
                                 damage);
+                        var oldOnGround = acceptingTarget.onGround();
+                        acceptingTarget.setOnGround(false);
                         acceptingTarget.knockback(this.owner.getArenaRadius() * knockbackMultiplier * 0.5, dir.x, dir.z);
+                        acceptingTarget.setOnGround(oldOnGround);
                     }
                 }
             }

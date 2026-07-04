@@ -102,12 +102,17 @@ public class EclipticMeteorState implements IPhaseState{
                     }
                 }
             } else if (pastTicks == 245) {
-                BlockPos.betweenClosedStream(this.owner.getCombatArena().setMinY(arenaCenter.y))
-                        .filter(pos -> this.owner.level().getBlockState(pos).is(AllBlocks.DEEP_LATENT_BLOCK))
-                        .forEach(pos -> this.owner.level().destroyBlock(pos, true, this.owner));
+                cleanupPile();
             }
         }
         return true;
+    }
+
+    public void cleanupPile(){
+        Vec3 arenaCenter = this.owner.getCombatArenaCenterVec3();
+        BlockPos.betweenClosedStream(this.owner.getCombatArena().setMinY(arenaCenter.y))
+                .filter(pos -> this.owner.level().getBlockState(pos).is(AllBlocks.DEEP_LATENT_BLOCK))
+                .forEach(pos -> this.owner.level().destroyBlock(pos, true, this.owner));
     }
 
     @Override

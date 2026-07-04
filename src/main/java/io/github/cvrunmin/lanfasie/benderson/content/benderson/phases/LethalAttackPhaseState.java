@@ -49,7 +49,7 @@ public class LethalAttackPhaseState implements IPhaseState{
     @Override
     public boolean tick() {
         if(this.currentTarget == null) return false;
-        if(trackingMarker == null || trackingMarker.isRemoved()) return false;
+        if(!this.currentTarget.isAlive()) return false;
         currentTick--;
         if(maxTicks - currentTick == 5){
             this.owner.setAnimateState(ANIMATE_STATE_LETHAL_ATTACK_LOOP);

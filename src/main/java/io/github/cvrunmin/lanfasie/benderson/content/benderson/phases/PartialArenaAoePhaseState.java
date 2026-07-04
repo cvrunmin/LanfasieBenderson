@@ -66,7 +66,6 @@ public class PartialArenaAoePhaseState implements IPhaseState{
             }
             return true;
         }
-        if(trackingMarker == null || trackingMarker.isRemoved()) return false;
         currentTick--;
         int pastTicks = maxTicks - currentTick;
         if(pastTicks == 5){

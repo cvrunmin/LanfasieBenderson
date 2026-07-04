@@ -45,7 +45,7 @@ public class CircleStackAttackPhaseState implements IPhaseState{
         var targetPlayer = this.owner.getNonAggressiveRandomPlayer();
         if(targetPlayer.isPresent()){
             currentTarget = targetPlayer.get();
-            this.requiredPlayerToStack = this.owner.getActualEnmityMap().size();
+            this.requiredPlayerToStack = Math.max(1, this.owner.getActualEnmityMap().size());
             var marker = new TargetMarker(this.owner.level(), this.currentTarget,
                     TargetMarker.MarkerArgs.simple(TargetMarker.MarkerType.CIRCLE_STACK, this.diameter, 110));
             this.trackingMarker = marker;
@@ -59,7 +59,6 @@ public class CircleStackAttackPhaseState implements IPhaseState{
     @Override
     public boolean tick() {
         if(this.currentTarget == null || this.currentTarget.isDeadOrDying()) return false;
-        if(trackingMarker == null || trackingMarker.isRemoved()) return false;
         currentTick--;
         if(maxTicks - currentTick == 5){
             this.owner.setAnimateState(ANIMATE_STATE_CIRCLE_STACK_ATTACK_LOOP);
