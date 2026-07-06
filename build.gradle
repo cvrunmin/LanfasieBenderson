@@ -177,6 +177,7 @@ dependencies {
     implementation "maven.modrinth:iris:1.10.9+26.1-neoforge"
     localRuntime "net.caffeinemc:sodium-neoforge-mod:0.8.12+mc26.1.2"
     localRuntime "net.caffeinemc:sodium-neoforge:0.8.12+mc26.1.2"
+//    localRuntime "local:replaymod:26.1-2.6.26-0.0.2:all"
 
     implementation 'io.lettuce:lettuce-core:6.2.3.RELEASE'
 }

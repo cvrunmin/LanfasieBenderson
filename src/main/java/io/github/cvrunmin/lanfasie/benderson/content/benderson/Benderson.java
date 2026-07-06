@@ -90,13 +90,13 @@ public class Benderson extends Monster implements GeoEntity, BendersonStatesGett
     private ArenaEnteringPhaseState arenaEnteringPhaseState = new ArenaEnteringPhaseState(this);
     private NormalAttackPhaseState normalAttackPhaseState = new NormalAttackPhaseState(this);
     private LethalAttackPhaseState lethalAttackPhaseState = new LethalAttackPhaseState(this);
-    private CircleAoeSelfPhaseState circleAoeSelfPhaseState = new CircleAoeSelfPhaseState(this, 10, ServerConfig.BENDERSON_CIRCLE_AOE_SELF_ATTACK_DAMAGE_MULTIPLIER.get().floatValue());
-    private CircleStackAttackPhaseState circleStackAttackPhaseState = new CircleStackAttackPhaseState(this, ServerConfig.BENDERSON_CIRCLE_STACK_ATTACK_DAMAGE_MULTIPLIER.get().floatValue());
-    private PartialArenaAoePhaseState threeforthAreanAoePhaseState = new PartialArenaAoePhaseState(this, ServerConfig.BENDERSON_SWEEP_PARTIAL_ARENA_DAMAGE_MULTIPLIER.get().floatValue());
+    private CircleAoeSelfPhaseState circleAoeSelfPhaseState;
+    private CircleStackAttackPhaseState circleStackAttackPhaseState;
+    private PartialArenaAoePhaseState threeforthAreanAoePhaseState;
     private SummonAnticalabrumPhaseState summonAnticalabrumPhaseState = new SummonAnticalabrumPhaseState(this);
     private ElevateToExtremeState elevateToExtremeState = new ElevateToExtremeState(this);
-    private KnockbackFromCenterPhaseState knockbackFromCenterPhaseState = new KnockbackFromCenterPhaseState(this, 0.75, ServerConfig.BENDERSON_CENTER_KNOCKBACKING_DAMAGE_MULTIPLIER.get().floatValue());
-    private PreEclipticMeteorState summonBlockPilePhaseState = new PreEclipticMeteorState(this, ServerConfig.BENDERSON_PRE_ECLIPTIC_PILE_DAMAGE_MULTIPLIER.get().floatValue());
+    private KnockbackFromCenterPhaseState knockbackFromCenterPhaseState;
+    private PreEclipticMeteorState summonBlockPilePhaseState;
     private EclipticMeteorState eclipticMeteorState = new EclipticMeteorState(this);
     private int globalCooldown;
     private PhaseStateTransitioner transitioner;
@@ -124,6 +124,29 @@ public class Benderson extends Monster implements GeoEntity, BendersonStatesGett
         this.xpReward = 2000;
         this.moveControl = new BendersonMoveControl(this, 180, true);
         transitioner = new PhaseStateTransitioner(this);
+        float circleAoeAttackDamage;
+        float circleStackAttackDamage;
+        float sweepPartialArenaDamage;
+        float centerKnockbackDamage;
+        float preEclipticPileDamage;
+        try {
+            circleAoeAttackDamage = ServerConfig.BENDERSON_CIRCLE_AOE_SELF_ATTACK_DAMAGE_MULTIPLIER.get().floatValue();
+            circleStackAttackDamage = ServerConfig.BENDERSON_CIRCLE_STACK_ATTACK_DAMAGE_MULTIPLIER.get().floatValue();
+            sweepPartialArenaDamage = ServerConfig.BENDERSON_SWEEP_PARTIAL_ARENA_DAMAGE_MULTIPLIER.get().floatValue();
+            centerKnockbackDamage = ServerConfig.BENDERSON_CENTER_KNOCKBACKING_DAMAGE_MULTIPLIER.get().floatValue();
+            preEclipticPileDamage = ServerConfig.BENDERSON_PRE_ECLIPTIC_PILE_DAMAGE_MULTIPLIER.get().floatValue();
+        } catch (IllegalStateException e) {
+            circleAoeAttackDamage = 22;
+            circleStackAttackDamage = 20;
+            sweepPartialArenaDamage = 22;
+            centerKnockbackDamage = 2;
+            preEclipticPileDamage = 10;
+        }
+        circleAoeSelfPhaseState = new CircleAoeSelfPhaseState(this, 10, circleAoeAttackDamage);
+        circleStackAttackPhaseState = new CircleStackAttackPhaseState(this, circleStackAttackDamage);
+        threeforthAreanAoePhaseState = new PartialArenaAoePhaseState(this, sweepPartialArenaDamage);
+        knockbackFromCenterPhaseState = new KnockbackFromCenterPhaseState(this, 0.75, centerKnockbackDamage);
+        summonBlockPilePhaseState = new PreEclipticMeteorState(this, preEclipticPileDamage);
         transitioner.addPhaseStateInstance("idle", idlePhaseState)
                 .addPhaseStateInstance("arena_entering", arenaEnteringPhaseState)
                 .addPhaseStateInstance("attack", normalAttackPhaseState)

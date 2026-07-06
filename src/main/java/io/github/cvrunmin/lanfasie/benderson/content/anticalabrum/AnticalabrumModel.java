@@ -62,8 +62,7 @@ public class AnticalabrumModel {
                 var builder = new QuadCollection.Builder();
                 var map = new HashMap<Anticalabrum.AnticalabrumType, Tuple<BakedQuad, BakedQuad>>();
                 var resourceManager = Minecraft.getInstance().getResourceManager();
-                try {
-                    var texture = TextureContents.load(resourceManager, ANTICALABRUM_TEXTURE_ALPHA);
+                try (var texture = TextureContents.load(resourceManager, ANTICALABRUM_TEXTURE_ALPHA)){
                     var vertexFrom = new Vector3f(-48, -7.5f, -0.5f);
                     var vertexTo = new Vector3f(16, 8.5f, 0.5f);
                     var uvFrom = new Vector2f(0, 0);
