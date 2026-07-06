@@ -7,7 +7,9 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.data.PackOutput;
 import net.minecraft.data.tags.KeyTagProvider;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.EntityTypeTags;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.EntityType;
 
 import java.util.concurrent.CompletableFuture;
@@ -49,5 +51,14 @@ public class MyEntityTypeTagsProvider extends KeyTagProvider<EntityType<?>> {
                 AllEntityTypes.UNFORGIVEN_PERFIDY.getKey(),
                 AllEntityTypes.UNFORGIVEN_RIDICULE.getKey(),
                 AllEntityTypes.UNFORGIVEN_SPOILING.getKey());
+        tag(TagKey.create(Registries.ENTITY_TYPE, Identifier.fromNamespaceAndPath("c", "capturing_not_supported")))
+                .add(AllEntityTypes.BENDERSON.getKey(),
+                        AllEntityTypes.DAWN.getKey(),
+                        AllEntityTypes.MUNDANE_PRAISER_BARD.getKey(),
+                        AllEntityTypes.MUNDANE_PRAISER_WHITE_MAGE.getKey(),
+                        AllEntityTypes.MUNDANE_PRAISER_RED_MAGE.getKey(),
+                        AllEntityTypes.PROJECTED_BENDERSON.getKey(),
+                        AllEntityTypes.LANFASIE.getKey()
+                );
     }
 }
