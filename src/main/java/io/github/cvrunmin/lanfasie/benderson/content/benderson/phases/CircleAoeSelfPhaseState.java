@@ -1,5 +1,6 @@
 package io.github.cvrunmin.lanfasie.benderson.content.benderson.phases;
 
+import io.github.cvrunmin.lanfasie.benderson.LanfasieBenderson;
 import io.github.cvrunmin.lanfasie.benderson.content.benderson.Benderson;
 import io.github.cvrunmin.lanfasie.benderson.content.marker.TargetMarker;
 import io.github.cvrunmin.lanfasie.benderson.index.AllDamageTypes;
@@ -51,7 +52,9 @@ public class CircleAoeSelfPhaseState implements IPhaseState{
         var marker = new TargetMarker(this.owner.level(), this.owner,
                 TargetMarker.MarkerArgs.simple(TargetMarker.MarkerType.CIRCLE_AOE, this.diameter, 110));
         this.trackingMarker = marker;
-        this.owner.level().addFreshEntity(marker);
+        if (!this.owner.level().addFreshEntity(marker)) {
+            LanfasieBenderson.LOGGER.warn("Self Circle Aoe Marker cannot be added into level. This can be caused by other mods cancelling the join level event");
+        }
         this.owner.lookAt(EntityAnchorArgument.Anchor.FEET, new Vec3(0, 0, 1).add(this.owner.position()));
         this.owner.setAnimateState(ANIMATE_STATE_CIRCLE_AOE_START);
         this.currentTick = this.maxTicks;

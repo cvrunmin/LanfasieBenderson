@@ -1,5 +1,6 @@
 package io.github.cvrunmin.lanfasie.benderson.content.benderson.phases;
 
+import io.github.cvrunmin.lanfasie.benderson.LanfasieBenderson;
 import io.github.cvrunmin.lanfasie.benderson.content.benderson.Benderson;
 import io.github.cvrunmin.lanfasie.benderson.content.marker.DelayedAttackMarker;
 import io.github.cvrunmin.lanfasie.benderson.content.marker.TargetMarker;
@@ -49,7 +50,9 @@ public class CircleStackAttackPhaseState implements IPhaseState{
             var marker = new TargetMarker(this.owner.level(), this.currentTarget,
                     TargetMarker.MarkerArgs.simple(TargetMarker.MarkerType.CIRCLE_STACK, this.diameter, 110));
             this.trackingMarker = marker;
-            this.owner.level().addFreshEntity(marker);
+            if (!this.owner.level().addFreshEntity(marker)) {
+                LanfasieBenderson.LOGGER.warn("Circle Stack Marker cannot be added into level. This can be caused by other mods cancelling the join level event");
+            }
             this.owner.lookAt(EntityAnchorArgument.Anchor.FEET, currentTarget.position());
             this.owner.setAnimateState(ANIMATE_STATE_CIRCLE_STACK_ATTACK_START);
             this.currentTick = this.maxTicks;

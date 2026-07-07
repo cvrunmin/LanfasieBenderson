@@ -148,14 +148,14 @@ public class PartialArenaAoePhaseState implements IPhaseState{
         this.currentTick = input.getIntOr("Tick", 0);
         this.cooldownTick = input.getIntOr("Cooldown", 0);
         var markerUuid = input.read("Marker", UUIDUtil.CODEC);
+        input.read("TargetPos", Vec3.CODEC).ifPresent(v -> this.targetPos = v);
         if(markerUuid.isPresent()){
             var entity = this.owner.level().getEntity(markerUuid.get());
             if(entity instanceof TargetMarker marker){
                 this.trackingMarker = marker;
             }
         }else{
-            input.read("MarkerArgs", TargetMarker.MarkerArgs.CODEC).ifPresent(args -> this.trackingMarker = new TargetMarker(this.owner.level(), this.owner, args));
+            input.read("MarkerArgs", TargetMarker.MarkerArgs.CODEC).ifPresent(args -> this.trackingMarker = new TargetMarker(this.owner.level(), this.targetPos, args));
         }
-        input.read("TargetPos", Vec3.CODEC).ifPresent(v -> this.targetPos = v);
     }
 }

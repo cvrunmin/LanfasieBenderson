@@ -153,6 +153,7 @@ public class TargetMarker extends Entity implements IEntityWithComplexSpawn, Own
         this(AllEntityTypes.TARGET_MARKER.get(), level);
         setTargetType(TargetType.ENTITY);
         this.targetEntity = target;
+        this.setPos(target.position());
         this.entityData.set(MARKER_ARGS_ACCESSOR, markerArgs);
         this.entityData.set(TARGET_ENTITY_SYNCER, Optional.of(EntityReference.of(target)));
     }
@@ -231,7 +232,7 @@ public class TargetMarker extends Entity implements IEntityWithComplexSpawn, Own
                     this.targetEntity = livingEntity;
                     this.entityData.set(TARGET_ENTITY_SYNCER, Optional.of(EntityReference.of(livingEntity)));
                     this.delayedTargetEntityUuid = null;
-                }else if(delayedTargetEntityGraceTick++ > 100){
+                }else if(!level().isClientSide() && delayedTargetEntityGraceTick++ > 100){
                     this.remove(RemovalReason.DISCARDED);
                 }
             }
