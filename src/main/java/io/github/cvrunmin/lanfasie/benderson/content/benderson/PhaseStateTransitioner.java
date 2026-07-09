@@ -127,9 +127,9 @@ public class PhaseStateTransitioner {
         return currentState;
     }
 
-    public IPhaseState getPhaseState(){
-        if(!possiblePhaseState.containsKey(currentState)) return null;
-        return possiblePhaseState.get(currentState);
+    public Optional<IPhaseState> getPhaseState(){
+        if(!possiblePhaseState.containsKey(currentState)) return Optional.empty();
+        return Optional.ofNullable(possiblePhaseState.get(currentState));
     }
 
     public void setOnChangePhaseListener(BiConsumer<String, IPhaseState> onChangePhaseListener) {

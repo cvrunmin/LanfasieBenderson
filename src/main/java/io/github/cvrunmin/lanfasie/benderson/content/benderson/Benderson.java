@@ -922,7 +922,7 @@ public class Benderson extends Monster implements GeoEntity, BendersonStatesGett
 
     @Override
     public void writeSpawnData(RegistryFriendlyByteBuf buffer) {
-        var optSec = transitioner.getPhaseState().syncSecondForClient();
+        var optSec = transitioner.getPhaseState().map(IPhaseState::syncSecondForClient).orElse(OptionalDouble.empty());
         buffer.writeBoolean(optSec.isPresent());
         if(optSec.isPresent()){
             buffer.writeDouble(optSec.getAsDouble());
@@ -1004,7 +1004,7 @@ public class Benderson extends Monster implements GeoEntity, BendersonStatesGett
     @Override
     public boolean isInvulnerable() {
         if(isTransitioning()) return true;
-        if(transitioner.getPhaseState() instanceof KnockbackFromCenterPhaseState) return true;
+        if(transitioner.getPhaseState().orElse(null) instanceof KnockbackFromCenterPhaseState) return true;
         return super.isInvulnerable();
     }
 
