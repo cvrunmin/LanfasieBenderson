@@ -8,6 +8,8 @@ import com.geckolib.animation.RawAnimation;
 import com.geckolib.animation.object.PlayState;
 import com.geckolib.constant.DefaultAnimations;
 import com.geckolib.util.GeckoLibUtil;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -26,6 +28,7 @@ import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 
 import java.util.List;
+import java.util.Optional;
 
 public class LanfasieEntity extends PathfinderMob implements GeoEntity {
     private static final EntityDataAccessor<String> ANIMATE_STATE = SynchedEntityData.defineId(LanfasieEntity.class, EntityDataSerializers.STRING);
@@ -145,8 +148,10 @@ public class LanfasieEntity extends PathfinderMob implements GeoEntity {
     }
 
     private void playNote(int note) {
-        if(level().isClientSide()){
-            level().playLocalSound(this, SoundEvents.NOTE_BLOCK_GUITAR.value(), SoundSource.NEUTRAL, 3.0f, NoteBlock.getPitchFromNote(note));
+        if(!this.isSilent() && level().isClientSide()){
+            if(Optional.ofNullable(Minecraft.getInstance().player).map(p -> p.distanceToSqr(this)).orElse(300.0) <= 256) {
+                level().playLocalSound(this, SoundEvents.NOTE_BLOCK_GUITAR.value(), SoundSource.NEUTRAL, 3.0f, NoteBlock.getPitchFromNote(note));
+            }
             var particlePos = position().add(getLookAngle().horizontal().scale(0.5)).add(0, getY(0.5) - getY(), 0);
             level().addParticle(ParticleTypes.NOTE, particlePos.x, particlePos.y, particlePos.z, note / 24.0, 0.0, 0.0);
         }

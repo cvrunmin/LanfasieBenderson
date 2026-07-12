@@ -17,11 +17,14 @@ import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.NoteBlock;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.phys.Vec3;
@@ -258,12 +261,14 @@ public class TargetMarker extends Entity implements IEntityWithComplexSpawn, Own
                 }
             }
         }
-        if(!isRemoved() && !level().isClientSide()){
-            if((this.tickCount % 20 == 1 && this.lifeTick < getMarkerArgs().expectedLife)){
-                switch (this.getMarkerArgs().markerType) {
-                    case LETHAL_ATTACK -> this.playSound(AllSoundEvents.LETHAL_ATTACK_SFX.get());
-                    case CIRCLE_STACK, LINEAR_STACK -> this.playSound(AllSoundEvents.STACK_ATTACK_SFX.get());
-                    case null, default -> {
+        if(!isRemoved() && !this.isSilent() && level().isClientSide()){
+            if(Optional.ofNullable(Minecraft.getInstance().player).map(p -> p.distanceToSqr(this)).orElse(300.0) <= 256) {
+                if((this.tickCount % 20 == 1 && this.lifeTick < getMarkerArgs().expectedLife)){
+                    switch (this.getMarkerArgs().markerType) {
+                        case LETHAL_ATTACK -> this.level().playLocalSound(this, AllSoundEvents.LETHAL_ATTACK_SFX.get(), this.getSoundSource(), 1.0f, 1.0f);
+                        case CIRCLE_STACK, LINEAR_STACK -> this.level().playLocalSound(this, AllSoundEvents.STACK_ATTACK_SFX.get(), this.getSoundSource(), 1.0f, 1.0f);
+                        case null, default -> {
+                        }
                     }
                 }
             }
