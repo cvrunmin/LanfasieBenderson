@@ -1,8 +1,13 @@
 package io.github.cvrunmin.lanfasie.benderson.content.marker;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.QuadInstance;
 import com.mojang.math.Axis;
+import io.github.cvrunmin.lanfasie.benderson.content.benderson.BendersonDataTickets;
+import io.github.cvrunmin.lanfasie.benderson.content.benderson.BendersonWeaponGeoLayer;
+import io.github.cvrunmin.lanfasie.benderson.content.benderson.phases.PartialArenaAoePhaseState;
 import io.github.cvrunmin.lanfasie.benderson.index.AllBlocks;
+import io.github.cvrunmin.lanfasie.benderson.index.AllItems;
 import net.minecraft.client.model.geom.ModelLayers;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.block.BlockModelResolver;
@@ -22,6 +27,9 @@ import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import org.joml.Quaternionf;
+import org.joml.Vector3f;
+
+import java.util.Optional;
 
 public class DelayedAttackMarkerRenderer extends EntityRenderer<DelayedAttackMarker, DelayedAttackMarkerRenderState> {
     public static final BlockDisplayContext BLOCK_DISPLAY_CONTEXT = BlockDisplayContext.create();
@@ -30,6 +38,7 @@ public class DelayedAttackMarkerRenderer extends EntityRenderer<DelayedAttackMar
 
     private final BlackCatSmashModel blackCatSmashModel;
     private static final Identifier BLACK_CAT_TEXTURE = Identifier.withDefaultNamespace("textures/entity/cat/cat_all_black.png");
+    private QuadInstance quadInstance = new QuadInstance();
 
     public DelayedAttackMarkerRenderer(EntityRendererProvider.Context context) {
         super(context);
@@ -52,6 +61,7 @@ public class DelayedAttackMarkerRenderer extends EntityRenderer<DelayedAttackMar
         state.attackType = entity.getAttackType();
         state.range = entity.getRange();
         state.range2 = entity.getRange2();
+        state.direction = entity.getDirectionData();
         if(entity.getAttackType() == DelayedAttackMarker.AttackType.FIREBALL_METEOR){
             this.itemModelResolver.updateForNonLiving(state.itemStackRenderState, new ItemStack(Items.FIRE_CHARGE), ItemDisplayContext.GROUND, entity);
         }else if(entity.getAttackType() == DelayedAttackMarker.AttackType.BLACK_CAT_SMASH){
@@ -59,6 +69,8 @@ public class DelayedAttackMarkerRenderer extends EntityRenderer<DelayedAttackMar
             state.catRenderState.partialTick = partialTicks;
         }else if(entity.getAttackType() == DelayedAttackMarker.AttackType.BENDERSON_REMOTE_STACKABLE_METEOR || entity.getAttackType() == DelayedAttackMarker.AttackType.BENDERSON_REMOTE_ECLIPTIC_METEOR){
             blockModelResolver.update(state.blockModelRenderState, AllBlocks.DEEP_LATENT_BLOCK.get().defaultBlockState(), BLOCK_DISPLAY_CONTEXT);
+        } else if (entity.getAttackType() == DelayedAttackMarker.AttackType.BENDERSON_REMOTE_SWEEP_PARTIAL_ARENA) {
+            this.itemModelResolver.updateForNonLiving(state.itemStackRenderState, new ItemStack(AllItems.CLAYMORE_OF_HEI_POWER.asItem()), ItemDisplayContext.FIXED, entity);
         }
     }
 
@@ -79,6 +91,7 @@ public class DelayedAttackMarkerRenderer extends EntityRenderer<DelayedAttackMar
             case FIREBALL_METEOR -> submitFireball(state, poseStack, submitNodeCollector, camera);
             case BENDERSON_REMOTE_STACKABLE_METEOR -> submitRemoteMeteor(state, poseStack, submitNodeCollector, camera, 3);
             case BENDERSON_REMOTE_ECLIPTIC_METEOR -> submitRemoteMeteor(state, poseStack, submitNodeCollector, camera, 10);
+            case BENDERSON_REMOTE_SWEEP_PARTIAL_ARENA -> submitSweepPartialArena(state, poseStack, submitNodeCollector, camera);
             case null, default -> {}
         }
         super.submit(state, poseStack, submitNodeCollector, camera);
@@ -163,5 +176,56 @@ public class DelayedAttackMarkerRenderer extends EntityRenderer<DelayedAttackMar
         state.blockModelRenderState.submit(poseStack, submitNodeCollector, state.lightCoords, OverlayTexture.NO_OVERLAY, state.outlineColor);
         poseStack.popPose();
         poseStack.popPose();
+    }
+
+    private void submitSweepPartialArena(DelayedAttackMarkerRenderState state, PoseStack poseStack, SubmitNodeCollector submitNodeCollector, CameraRenderState camera){
+        float alpha;
+        float remainingLifeTick = state.maxLifeTick - state.lifeTick;
+        if(state.lifeTick < 5){
+            alpha = (float) Mth.clamp(state.lifeTick / 5f, 0, 1);
+        } else if(remainingLifeTick >= 35 && remainingLifeTick <= 40){
+            alpha = (float) Mth.clamp(remainingLifeTick - 35 / 5f, 0, 1);
+        } else if(remainingLifeTick < 35){
+            alpha = 0;
+        } else{
+            alpha = 1;
+        }
+        if(alpha >= 0.1){
+            float arenaRadius = state.range;
+            poseStack.pushPose();
+            poseStack.mulPose(new Quaternionf().rotateTo(new Vector3f(0, 0, 1), state.direction));
+            Quaternionf rotationStart = new Quaternionf().rotationTo(new Vector3f(-1, 1, 0).normalize(), new Vector3f(0, 1, 0))
+                    .rotateLocalX((float) (-Math.PI * 0.5))
+                    .rotateLocalY((float) (-Math.PI * 1 / 3))
+                    .rotateY((float) (Math.PI * 1 / 6));
+            Quaternionf rotationMiddle = new Quaternionf().rotationTo(new Vector3f(-1, 1, 0).normalize(), new Vector3f(0, 1, 0))
+                    .rotateLocalX((float) (-Math.PI * 0.5))
+                    .rotateLocalY((float) (-Math.PI))
+                    .rotateLocalX((float) (Math.PI * 1 / 18));
+            Quaternionf rotationEnd = new Quaternionf().rotationTo(new Vector3f(-1, 1, 0).normalize(), new Vector3f(0, 1, 0))
+                    .rotateLocalX((float) (-Math.PI * 0.5))
+                    .rotateLocalY((float) (-Math.PI * 5 / 3))
+                    .rotateX((float) (Math.PI * 1 / 6))
+                    ;
+            Quaternionf rotation;
+            if(remainingLifeTick <= 50){
+                rotation = new Quaternionf();
+                var t1 = Math.clamp((50 - remainingLifeTick) / 10.0f, 0, 1);
+                var t2 = -(Math.cos(Math.PI * t1) - 1) / 2;
+                if(t2 < 0.5){
+                    rotationStart.slerp(rotationMiddle, (float) Mth.clamp(t2 / 0.5, 0, 1), rotation);
+                }else{
+                    rotationMiddle.slerp(rotationEnd, (float) Mth.clamp((t2 - 0.5) / 0.5, 0, 1), rotation);
+                }
+            }else{
+                rotation = rotationStart;
+            }
+            poseStack.rotateAround(rotation, 0, 5, -2);
+            poseStack.translate(0, 5, -2);
+            poseStack.scale(arenaRadius, arenaRadius, arenaRadius);
+            poseStack.translate(-0.5f, 0.5f, 0);
+            BendersonWeaponGeoLayer.customSubmitItemStackState(state.itemStackRenderState, poseStack, submitNodeCollector, quadInstance, state.getPackedLight(), OverlayTexture.NO_OVERLAY, alpha);
+            poseStack.popPose();
+        }
     }
 }

@@ -2,6 +2,7 @@ package io.github.cvrunmin.lanfasie.benderson.content.benderson.phases;
 
 import io.github.cvrunmin.lanfasie.benderson.content.benderson.Benderson;
 import io.github.cvrunmin.lanfasie.benderson.content.marker.TargetMarker;
+import io.github.cvrunmin.lanfasie.benderson.index.AllAttributes;
 import io.github.cvrunmin.lanfasie.benderson.index.AllDamageTypes;
 import io.github.cvrunmin.lanfasie.benderson.index.AllSoundEvents;
 import io.github.cvrunmin.lanfasie.benderson.utils.VulnerabilityHelper;
@@ -123,6 +124,7 @@ public class PartialArenaAoePhaseState implements IPhaseState{
 
     @Override
     public boolean canUse() {
+        if(this.owner.getAttributeValue(AllAttributes.EXTREME) != 0) return false;
         return cooldownTick <= 0 && this.owner.getTarget() != null && !this.owner.isInGlobalCooldown();
     }
 

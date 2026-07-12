@@ -21,6 +21,7 @@ public class PhaseStateTransitioner {
     private String fallbackStateKey;
     private String currentState;
     private boolean shouldChangePhase;
+    private int phaseChangedCount = 0;
     private BiConsumer<String, IPhaseState> onChangePhaseListener;
 
     public PhaseStateTransitioner(Benderson owner){
@@ -84,6 +85,10 @@ public class PhaseStateTransitioner {
             if(state != null) state.start();
             shouldChangePhase = false;
             if(onChangePhaseListener != null && state != null) onChangePhaseListener.accept(currentState, state);
+            if(phaseChangedCount <= Integer.MAX_VALUE - 1) {
+                // it shouldn't overflow, but just in case
+                phaseChangedCount++;
+            }
         }
         for (Map.Entry<String, IPhaseState> entry : possiblePhaseState.entrySet()) {
             if(!Objects.equals(entry.getKey(), currentState)){
@@ -158,6 +163,14 @@ public class PhaseStateTransitioner {
         return this;
     }
 
+    public int getPhaseChangedCount() {
+        return phaseChangedCount;
+    }
+
+    public void resetPhaseChangedCount(){
+        phaseChangedCount = 0;
+    }
+
     @Nullable
     public Benderson getOwner() {
         return owner;
@@ -172,6 +185,7 @@ public class PhaseStateTransitioner {
             var state = entry.getValue();
             if(state != null) state.addAdditionalSaveData(phasesObj.child(entry.getKey()));
         }
+        output.putInt("PhaseChangedCount", phaseChangedCount);
     }
 
     public void readAdditionalSaveData(ValueInput input){
@@ -181,6 +195,7 @@ public class PhaseStateTransitioner {
             var state = entry.getValue();
             if(state != null) state.readAdditionalSaveData(maybePhaseData.childOrEmpty(entry.getKey()));
         }
+        input.getInt("PhaseChangedCount").ifPresent(v -> phaseChangedCount = v);
     }
 
     private record DestRecord(int priority, int weight){}

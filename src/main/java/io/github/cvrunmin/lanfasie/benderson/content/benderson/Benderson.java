@@ -94,6 +94,7 @@ public class Benderson extends Monster implements GeoEntity, BendersonStatesGett
     private CircleAoeSelfPhaseState circleAoeSelfPhaseState;
     private CircleStackAttackPhaseState circleStackAttackPhaseState;
     private PartialArenaAoePhaseState threeforthAreanAoePhaseState;
+    private PartialArenaAoeComplexPhaseState threeforthAreanAoeComplexPhaseState;
     private SummonAnticalabrumPhaseState summonAnticalabrumPhaseState = new SummonAnticalabrumPhaseState(this);
     private ElevateToExtremeState elevateToExtremeState = new ElevateToExtremeState(this);
     private KnockbackFromCenterPhaseState knockbackFromCenterPhaseState;
@@ -146,6 +147,7 @@ public class Benderson extends Monster implements GeoEntity, BendersonStatesGett
         circleAoeSelfPhaseState = new CircleAoeSelfPhaseState(this, 10, circleAoeAttackDamage);
         circleStackAttackPhaseState = new CircleStackAttackPhaseState(this, circleStackAttackDamage);
         threeforthAreanAoePhaseState = new PartialArenaAoePhaseState(this, sweepPartialArenaDamage);
+        threeforthAreanAoeComplexPhaseState = new PartialArenaAoeComplexPhaseState(this, sweepPartialArenaDamage);
         knockbackFromCenterPhaseState = new KnockbackFromCenterPhaseState(this, 0.75, centerKnockbackDamage);
         summonBlockPilePhaseState = new PreEclipticMeteorState(this, preEclipticPileDamage);
         transitioner.addPhaseStateInstance("idle", idlePhaseState)
@@ -155,6 +157,7 @@ public class Benderson extends Monster implements GeoEntity, BendersonStatesGett
                 .addPhaseStateInstance("circle_aoe_self", circleAoeSelfPhaseState)
                 .addPhaseStateInstance("circle_stack", circleStackAttackPhaseState)
                 .addPhaseStateInstance("three-fourth_arena_aoe", threeforthAreanAoePhaseState)
+                .addPhaseStateInstance("three-fourth_arena_aoe_extreme", threeforthAreanAoeComplexPhaseState)
                 .addPhaseStateInstance("summon_anticalabrum", summonAnticalabrumPhaseState)
                 .addPhaseStateInstance("elevate_to_extreme", elevateToExtremeState)
                 .addPhaseStateInstance("knockback_from_center", knockbackFromCenterPhaseState)
@@ -172,7 +175,8 @@ public class Benderson extends Monster implements GeoEntity, BendersonStatesGett
                 .addTransition("attack", "circle_aoe_self")
                 .addTransition("attack", "circle_stack")
                 .addTransition("attack", "three-fourth_arena_aoe")
-                .addTransition("attack", "knockback_from_center")
+                .addTransition("attack", "three-fourth_arena_aoe_extreme")
+                .addTransition("attack", "knockback_from_center", 10)
                 .addTransition("lethal_attack", "idle", 0)
                 .addTransition("lethal_attack", "attack")
                 .addTransition("circle_aoe_self", "idle", 0)
@@ -181,6 +185,8 @@ public class Benderson extends Monster implements GeoEntity, BendersonStatesGett
                 .addTransition("circle_stack", "attack")
                 .addTransition("three-fourth_arena_aoe", "idle", 0)
                 .addTransition("three-fourth_arena_aoe", "attack")
+                .addTransition("three-fourth_arena_aoe_extreme", "idle", 0)
+                .addTransition("three-fourth_arena_aoe_extreme", "attack")
                 .addTransition("summon_anticalabrum", "idle", 0)
                 .addTransition("summon_anticalabrum", "attack")
                 .addTransition("elevate_to_extreme", "idle")
@@ -879,6 +885,10 @@ public class Benderson extends Monster implements GeoEntity, BendersonStatesGett
     @Override
     public boolean canAttack(LivingEntity target) {
         return target.canBeSeenAsEnemy() || (target instanceof Player player && player.canBeSeenByAnyone() && player.hasEffect(AllMobEffects.AGGRO_UP));
+    }
+
+    public PhaseStateTransitioner getTransitioner() {
+        return transitioner;
     }
 
     public Map<Player, Float> getActualEnmityMap(){

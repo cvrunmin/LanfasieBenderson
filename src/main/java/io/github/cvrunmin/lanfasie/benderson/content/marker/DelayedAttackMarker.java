@@ -4,6 +4,7 @@ import com.mojang.serialization.Codec;
 import io.github.cvrunmin.lanfasie.benderson.index.AllDamageTypes;
 import io.github.cvrunmin.lanfasie.benderson.index.AllEntityDataSerializers;
 import io.github.cvrunmin.lanfasie.benderson.index.AllEntityTypes;
+import io.github.cvrunmin.lanfasie.benderson.index.AllSoundEvents;
 import io.github.cvrunmin.lanfasie.benderson.utils.VulnerabilityHelper;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.core.particles.ParticleTypes;
@@ -21,13 +22,18 @@ import net.minecraft.util.StringRepresentable;
 import net.minecraft.util.Tuple;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.*;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.entity.EntityTypeTest;
+import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.entity.IEntityWithComplexSpawn;
+import org.joml.Vector3f;
+import org.joml.Vector3fc;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -46,7 +52,8 @@ public class DelayedAttackMarker extends Entity implements TraceableEntity, IEnt
         BLACK_CAT_SMASH("black_cat_smash"),
         FIREBALL_METEOR("fireball_meteor"),
         BENDERSON_REMOTE_STACKABLE_METEOR("benderson_remote_stackable_meteor"),
-        BENDERSON_REMOTE_ECLIPTIC_METEOR("benderson_remote_ecliptic_meteor");
+        BENDERSON_REMOTE_ECLIPTIC_METEOR("benderson_remote_ecliptic_meteor"),
+        BENDERSON_REMOTE_SWEEP_PARTIAL_ARENA("benderson_remote_sweep_partial_arena");
 
         public static final Codec<AttackType> CODEC = StringRepresentable.fromEnum(AttackType::values);
         public static final StreamCodec<ByteBuf, AttackType> STREAM_CODEC = ByteBufCodecs.fromCodec(CODEC);
@@ -68,6 +75,7 @@ public class DelayedAttackMarker extends Entity implements TraceableEntity, IEnt
     private static final EntityDataAccessor<Float> RANGE2_ACCESSOR = SynchedEntityData.defineId(DelayedAttackMarker.class, EntityDataSerializers.FLOAT);
     private static final EntityDataAccessor<Integer> LIFETICK_ACCESSOR = SynchedEntityData.defineId(DelayedAttackMarker.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Integer> LIFETICK2_ACCESSOR = SynchedEntityData.defineId(DelayedAttackMarker.class, EntityDataSerializers.INT);
+    private static final EntityDataAccessor<Vector3fc> DIRECTION_ACCESSOR = SynchedEntityData.defineId(DelayedAttackMarker.class, EntityDataSerializers.VECTOR3);
 
     private EntityReference<LivingEntity> owner;
     private float damage = 1;
@@ -127,6 +135,19 @@ public class DelayedAttackMarker extends Entity implements TraceableEntity, IEnt
         return instance;
     }
 
+    public static DelayedAttackMarker createRemoteSweepPartialArena(Level level, Vec3 location, @Nullable LivingEntity owner, float range1, float range2, Vector3fc dir, float damage, int castTick){
+        var instance = new DelayedAttackMarker(AllEntityTypes.DELAYED_ATTACK_MARKER.get(), level);
+        instance.setAttackType(AttackType.BENDERSON_REMOTE_SWEEP_PARTIAL_ARENA);
+        instance.owner = EntityReference.of(owner);
+        instance.setPos(location);
+        instance.setRange(range1);
+        instance.setRange2(range2);
+        instance.setMaxLifeTick(castTick + 50);
+        instance.setDirectionData(dir);
+        instance.damage = damage;
+        return instance;
+    }
+
     @Override
     protected void defineSynchedData(SynchedEntityData.Builder entityData) {
         entityData.define(ATTACK_TYPE_ACCESSOR, AttackType.FIREBALL_METEOR);
@@ -134,6 +155,7 @@ public class DelayedAttackMarker extends Entity implements TraceableEntity, IEnt
         entityData.define(RANGE2_ACCESSOR, 1f);
         entityData.define(LIFETICK_ACCESSOR, 0);
         entityData.define(LIFETICK2_ACCESSOR, 0);
+        entityData.define(DIRECTION_ACCESSOR, new Vector3f(0, 0, 1));
     }
 
     @Override
@@ -208,6 +230,59 @@ public class DelayedAttackMarker extends Entity implements TraceableEntity, IEnt
                         }
                     }
                 }
+                case BENDERSON_REMOTE_SWEEP_PARTIAL_ARENA -> {
+                    if(lifeTick == 1){
+                        associatedTargetMarker = new TargetMarker(this.level(), position(),
+                                TargetMarker.MarkerArgs.complexRangeWithDirection(TargetMarker.MarkerType.LINEAR_AOE, getRange() * 2, getRange2(), new Vec3(getDirectionData()), getMaxLifeTick() - 50));
+                        this.level().addFreshEntity(associatedTargetMarker);
+                    }
+                    if(remainingLife >= 40 && remainingLife <= 50){
+                        if(remainingLife % 2 == 0){
+                            this.level().playSound(null, this.getX(), this.getY(), this.getZ(), AllSoundEvents.BOSS_SWEEP_SFX.get(), SoundSource.HOSTILE, 1, 1);
+                            var zOffset = ((50 - remainingLife) / 2f - 1) * getRange2() / 5;
+                            var zOffsetVec = getDirectionData().mul(zOffset, new Vector3f());
+                            var xOffsetDir = new Vector3f(0, 1, 0).cross(getDirectionData()).normalize().mul(getRange() / 5);
+                            for (int i = -5; i <= 5; i++) {
+                                var xOffsetVec = xOffsetDir.mul(i, new Vector3f());
+                                ((ServerLevel) this.level()).sendParticles(ParticleTypes.SWEEP_ATTACK, this.getX() + zOffsetVec.x + xOffsetVec.x, this.getY() + 1, this.getZ() + zOffsetVec.z + xOffsetVec.z, 0, 0, 0.0, 0, 0.0);
+                            }
+                        }
+                    }
+                    if(remainingLife == 46 && getOwner() != null && getOwner().isAlive()){
+                        var horizonalDir = getDirectionData().mul(1, 0, 1, new Vector3f()).normalize();
+                        var leftDir = new Vector3f(0, 1, 0).cross(horizonalDir).normalize();
+                        var leftVec = leftDir.mul(getRange(), 1, getRange(), new Vector3f());
+                        var leftFar = position().toVector3f().add(leftVec);
+                        var rightFar = position().toVector3f().sub(leftVec);
+                        var frontFar = position().toVector3f().add(horizonalDir.mul(getRange2(), 1, getRange2(), new Vector3f()));
+                        var frontLeftFar = frontFar.add(leftVec, new Vector3f());
+                        var frontRightFar = frontFar.sub(leftVec, new Vector3f());
+                        var rightEdge = frontRightFar.sub(rightFar, new Vector3f());
+                        var leftEdge = leftFar.sub(frontLeftFar, new Vector3f());
+                        var frontEdge = frontLeftFar.sub(frontRightFar, new Vector3f());
+                        var rearEdge = rightFar.sub(leftFar, new Vector3f());
+                        AABB.Builder builder = new AABB.Builder();
+                        builder.include(leftFar);
+                        builder.include(rightFar);
+                        builder.include(frontLeftFar);
+                        builder.include(frontRightFar);
+                        var aabb = builder.build().expandTowards(0, 10, 0);
+                        List<LivingEntity> acceptingCandidates = level().getEntitiesOfClass(LivingEntity.class, aabb, LivingEntity::canBeSeenByAnyone);
+                        for (LivingEntity candidate : acceptingCandidates) {
+                            var candPos = candidate.position().toVector3f();
+                            if(candPos.sub(rightFar, new Vector3f()).dot(rightEdge) < 0) continue;
+                            if(candPos.sub(leftFar, new Vector3f()).dot(rearEdge) < 0) continue;
+                            if(candPos.sub(frontRightFar, new Vector3f()).dot(frontEdge) < 0) continue;
+                            if(candPos.sub(frontLeftFar, new Vector3f()).dot(leftEdge) < 0) continue;
+                            candidate.hurtServer(((ServerLevel) level()),
+                                    this.damageSources().source(AllDamageTypes.BOSS_ABILITY_ATTACK, this, this.getOwner()),
+                                    candidate instanceof Player ? damage : damage * Math.min(1.0f, candidate.getMaxHealth() / 20f));
+                            if(candidate instanceof Player player) {
+                                VulnerabilityHelper.addVulnerabilityUp(player);
+                            }
+                        }
+                    }
+                }
                 case null, default -> {}
             }
             if(lifeTick > getMaxLifeTick()){
@@ -277,6 +352,14 @@ public class DelayedAttackMarker extends Entity implements TraceableEntity, IEnt
 
     private void setKeypointLifeTick(int v){
         entityData.set(LIFETICK2_ACCESSOR, v);
+    }
+
+    public void setDirectionData(Vector3fc dir){
+        entityData.set(DIRECTION_ACCESSOR, dir.normalize(new Vector3f()));
+    }
+
+    public Vector3fc getDirectionData(){
+        return entityData.get(DIRECTION_ACCESSOR);
     }
 
     @Override

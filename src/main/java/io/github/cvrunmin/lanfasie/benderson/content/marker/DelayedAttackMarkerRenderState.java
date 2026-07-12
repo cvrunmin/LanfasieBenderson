@@ -4,6 +4,8 @@ import net.minecraft.client.renderer.block.BlockModelRenderState;
 import net.minecraft.client.renderer.entity.state.CatRenderState;
 import net.minecraft.client.renderer.entity.state.EntityRenderState;
 import net.minecraft.client.renderer.item.ItemStackRenderState;
+import org.joml.Vector3f;
+import org.joml.Vector3fc;
 
 public class DelayedAttackMarkerRenderState extends EntityRenderState {
     public float lifeTick;
@@ -12,6 +14,7 @@ public class DelayedAttackMarkerRenderState extends EntityRenderState {
     public DelayedAttackMarker.AttackType attackType;
     public float range;
     public float range2;
+    public Vector3fc direction = new Vector3f(0, 0, 1);
     public ItemStackRenderState itemStackRenderState = new ItemStackRenderState();
     public CatRenderState catRenderState = new CatRenderState();
     public BlockModelRenderState blockModelRenderState = new BlockModelRenderState();

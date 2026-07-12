@@ -116,7 +116,12 @@ public class KnockbackFromCenterPhaseState implements IPhaseState{
 
     @Override
     public boolean canUse() {
-        return cooldownTick <= 0 && (this.owner.getBodyState() == Benderson.BodyState.UNFORGIVEN || this.owner.getBodyState() == Benderson.BodyState.UNVEILED) && !this.owner.isInGlobalCooldown();
+        if(cooldownTick > 0) return false;
+        if(this.owner.isInGlobalCooldown()) return false;
+        if(this.owner.getBodyState() == Benderson.BodyState.UNFORGIVEN){
+            return this.owner.getTransitioner().getPhaseChangedCount() > 15;
+        }
+        return this.owner.getBodyState() == Benderson.BodyState.UNVEILED && this.owner.getHealth() / this.owner.getMaxHealth() <= 0.5;
     }
 
     @Override

@@ -32,6 +32,7 @@ public class IdlePhaseState implements IPhaseState{
     @Override
     public void end() {
         this.currentTick = 0;
+        this.owner.getTransitioner().resetPhaseChangedCount();
     }
 
     @Override
