@@ -104,6 +104,7 @@ public class MyModelProvider extends ModelProvider {
                         itemModels.modelOutput
                         ), Optional.empty(), List.of())
         ));
+        itemModels.generateFlatItem(AllItems.PROVOKING_CLOTH.get(), ModelTemplates.FLAT_HANDHELD_ITEM);
         itemModels.generateFlatItem(AllItems.SHALLOWAY_SWORD.get(), ModelTemplates.FLAT_HANDHELD_ITEM);
         {
             var item = AllItems.SHALLOWAY_SHIELD.get();

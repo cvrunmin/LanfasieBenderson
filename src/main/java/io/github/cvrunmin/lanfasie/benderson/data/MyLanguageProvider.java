@@ -18,6 +18,7 @@ public class MyLanguageProvider extends LanguageProvider {
         this.addItem(AllItems.DAWNWAITER_TOTEM, "Dawnwaiter Totem");
         this.addItem(AllItems.OMINOUS_ORB, "Ominous Orb of Latent");
         this.addItem(AllItems.PROVOKING_STICK, "Provoking Stick");
+        this.addItem(AllItems.PROVOKING_CLOTH, "Provoking Cloth");
         this.addItem(AllItems.UNFORGIVEN_COWARDICE_SPAWN_EGG, "Unforgiven Cowardice Spawn Egg");
         this.addItem(AllItems.UNFORGIVEN_INDISCRETION_SPAWN_EGG, "Unforgiven Indiscretion Spawn Egg");
         this.addItem(AllItems.UNFORGIVEN_PERFIDY_SPAWN_EGG, "Unforgiven Perfidy Spawn Egg");

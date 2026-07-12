@@ -2,14 +2,19 @@ package io.github.cvrunmin.lanfasie.benderson.index;
 
 import io.github.cvrunmin.lanfasie.benderson.LanfasieBenderson;
 import io.github.cvrunmin.lanfasie.benderson.content.OminousOrbItem;
+import io.github.cvrunmin.lanfasie.benderson.content.ProvokingClothItem;
 import io.github.cvrunmin.lanfasie.benderson.content.ProvokingStickItem;
 import net.minecraft.advancements.criterion.BlockPredicate;
 import net.minecraft.advancements.criterion.DataComponentMatchers;
 import net.minecraft.core.HolderSet;
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.EquipmentSlotGroup;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.item.*;
 import net.minecraft.world.item.component.*;
 import net.neoforged.bus.api.IEventBus;
@@ -32,7 +37,8 @@ public class AllItems {
     public static final DeferredItem<OminousOrbItem> OMINOUS_ORB = ITEMS.registerItem("ominous_orb", OminousOrbItem::new, properties ->
             properties.useCooldown(5)
                     .component(AllDataComponents.ARENA_RADIUS.get(), 24));
-    public static final DeferredItem<ProvokingStickItem> PROVOKING_STICK = ITEMS.registerItem("provoking_stick", properties -> new ProvokingStickItem(properties.useCooldown(2)));
+    public static final DeferredItem<ProvokingStickItem> PROVOKING_STICK = ITEMS.registerItem("provoking_stick", ProvokingStickItem::new, properties -> properties.useCooldown(2).stacksTo(1));
+    public static final DeferredItem<ProvokingClothItem> PROVOKING_CLOTH = ITEMS.registerItem("provoking_cloth", ProvokingClothItem::new, properties -> properties.stacksTo(1));
 
     public static final DeferredItem<Item> DAWNWAITER_TOTEM = ITEMS.registerSimpleItem("dawnwaiter_totem");
 

@@ -19,6 +19,7 @@ public class AllCreativeModeTabs {
             output.accept(AllItems.DEEP_LATENT_CALLER);
             output.accept(AllItems.OMINOUS_ORB);
             output.accept(AllItems.PROVOKING_STICK);
+            output.accept(AllItems.PROVOKING_CLOTH);
             output.accept(AllItems.SWORD_OF_DAWNWAITER);
             output.accept(AllItems.SHALLOWAY_SWORD);
             output.accept(AllItems.SHALLOWAY_SHIELD);

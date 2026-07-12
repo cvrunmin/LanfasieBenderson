@@ -1,6 +1,5 @@
 package io.github.cvrunmin.lanfasie.benderson.content.benderson;
 
-import com.geckolib.animatable.GeoAnimatable;
 import com.geckolib.animatable.GeoEntity;
 import com.geckolib.animatable.instance.AnimatableInstanceCache;
 import com.geckolib.animatable.manager.AnimatableManager;
@@ -17,6 +16,7 @@ import io.github.cvrunmin.lanfasie.benderson.ServerConfig;
 import io.github.cvrunmin.lanfasie.benderson.compat.projectme.ProjectMeCompat;
 import io.github.cvrunmin.lanfasie.benderson.content.benderson.phases.*;
 import io.github.cvrunmin.lanfasie.benderson.content.marker.TargetMarker;
+import io.github.cvrunmin.lanfasie.benderson.foundation.IHasEnmity;
 import io.github.cvrunmin.lanfasie.benderson.index.*;
 import io.github.cvrunmin.lanfasie.benderson.mixin.LivingEntityAccessor;
 import io.netty.buffer.ByteBuf;
@@ -64,12 +64,13 @@ import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.common.CommonHooks;
 import net.neoforged.neoforge.common.damagesource.DamageContainer;
 import net.neoforged.neoforge.entity.IEntityWithComplexSpawn;
+import net.neoforged.neoforge.event.EventHooks;
 
 import javax.annotation.Nullable;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class Benderson extends Monster implements GeoEntity, BendersonStatesGetter, IEntityWithComplexSpawn {
+public class Benderson extends Monster implements GeoEntity, BendersonStatesGetter, IEntityWithComplexSpawn, IHasEnmity {
     private static final EntityDataAccessor<String> ANIMATE_STATE = SynchedEntityData.defineId(Benderson.class, EntityDataSerializers.STRING);
     private static final EntityDataAccessor<Optional<HashMap<UUID, Float>>> ENMITY_SYNCER = SynchedEntityData.defineId(Benderson.class, AllEntityDataSerializers.OPTIONAL_UUID_FLOAT_MAP.get());
     private static final EntityDataAccessor<Optional<EntityReference<LivingEntity>>> TARGET_SYNCER = SynchedEntityData.defineId(Benderson.class, EntityDataSerializers.OPTIONAL_LIVING_ENTITY_REFERENCE);
@@ -702,9 +703,8 @@ public class Benderson extends Monster implements GeoEntity, BendersonStatesGett
         if (sourcePlayer != null) {
             // since void damage and /kill damage can hurt this entity, sourcePlayer can be null
             CriteriaTriggers.PLAYER_HURT_ENTITY.trigger(sourcePlayer, this, source, damage, damage, false);
-            this.enmityList.putIfAbsent(sourcePlayer.getUUID(), 0f);
             var enmity = inputDamage * sourcePlayer.getAttributeValue(AllAttributes.ENMITY_MULTIPLIER);
-            this.enmityList.merge(sourcePlayer.getUUID(), (float) enmity, Float::sum);
+            this.addEnmity(sourcePlayer.getUUID(), ((float) enmity));
         }
 
         this.damageContainers.pop();
@@ -787,7 +787,7 @@ public class Benderson extends Monster implements GeoEntity, BendersonStatesGett
                 this.isAlwaysExperienceDropper()
                         || this.lastHurtByPlayerMemoryTime > 0 && this.shouldDropExperience(source) && level.getGameRules().get(GameRules.MOB_DROPS)
         )) {
-            int reward = net.neoforged.neoforge.event.EventHooks.getExperienceDrop(this, this.getLastHurtByPlayer(), this.getExperienceReward(level, killer));
+            int reward = EventHooks.getExperienceDrop(this, this.getLastHurtByPlayer(), this.getExperienceReward(level, killer));
             ExperienceOrb.award((ServerLevel) this.level(), this.position(), reward);
         }
     }
@@ -937,16 +937,31 @@ public class Benderson extends Monster implements GeoEntity, BendersonStatesGett
         }
     }
 
-    public record EnmityBarInfo(int rank, float barPercentage){}
+    @Override
+    public Map<UUID, Float> getEnmityMap() {
+        return enmityList;
+    }
 
-    public EnmityBarInfo getEnmityBarInfo(UUID player){
-        if(!enmityList.containsKey(player)) return new EnmityBarInfo(-1, 1);
-        var sortedPlayerList = enmityList.entrySet().stream().sorted(Map.Entry.<UUID, Float>comparingByValue().reversed()).map(Map.Entry::getKey).toList();
-        var i = sortedPlayerList.indexOf(player);
-        if(i == -1) return new EnmityBarInfo(-1, 1);
-        var enmity = enmityList.get(player);
-        var maxEnmity = enmityList.get(sortedPlayerList.getFirst());
-        return new EnmityBarInfo(i + 1, Mth.clamp(enmity / Math.max(0.0001f, maxEnmity), 0, 1));
+    @Override
+    public float getMaxEnmity() {
+        return enmityList.values().stream().max(Float::compareTo).orElse(0f);
+    }
+
+    @Override
+    public OptionalDouble getEnmityOf(UUID uuid) {
+        if(enmityList.containsKey(uuid)) return OptionalDouble.of(enmityList.get(uuid));
+        return OptionalDouble.empty();
+    }
+
+    @Override
+    public void addEnmity(UUID uuid, float amount) {
+        this.enmityList.putIfAbsent(uuid, 0f);
+        this.enmityList.merge(uuid, amount, Float::sum);
+    }
+
+    @Override
+    public void setEnmity(UUID uuid, float enmity) {
+        this.enmityList.put(uuid, enmity);
     }
 
     public AABB getCombatArena() {
@@ -1180,8 +1195,8 @@ public class Benderson extends Monster implements GeoEntity, BendersonStatesGett
 
         @Override
         public void tick() {
-            if (this.operation == MoveControl.Operation.MOVE_TO) {
-                this.operation = MoveControl.Operation.WAIT;
+            if (this.operation == Operation.MOVE_TO) {
+                this.operation = Operation.WAIT;
                 this.mob.setNoGravity(true);
                 double xd = this.wantedX - this.mob.getX();
                 double yd = this.wantedY - this.mob.getY();
