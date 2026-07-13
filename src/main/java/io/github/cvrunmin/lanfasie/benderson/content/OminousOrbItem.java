@@ -30,10 +30,11 @@ public class OminousOrbItem extends Item {
         BlockState blockState = level.getBlockState(pos);
         if(!blockState.is(AllBlocks.DEEP_LATENT_CALLER)) return InteractionResult.FAIL;
         BlockPos above = pos.above();
-        if (!level.isEmptyBlock(above)) {
+        BlockState aboveState = level.getBlockState(above);
+        if (!aboveState.getCollisionShape(level, above).isEmpty()) {
             return InteractionResult.FAIL;
         }
-        List<Benderson> entities = level.getEntitiesOfClass(Benderson.class, AABB.ofSize(Vec3.atLowerCornerOf(above), 48, 18, 48));
+        List<Benderson> entities = level.getEntitiesOfClass(Benderson.class, AABB.ofSize(Vec3.atLowerCornerOf(above), 48, 18, 48), candidate -> !candidate.isNoAi());
         if(!entities.isEmpty()) return InteractionResult.FAIL;
         if (level instanceof ServerLevel) {
             var un1 = new UnforgivenIndiscretion(level, above.getX(), above.getY(), above.getZ());
