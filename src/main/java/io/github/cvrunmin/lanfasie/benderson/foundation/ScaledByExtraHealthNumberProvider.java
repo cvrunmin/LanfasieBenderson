@@ -42,7 +42,7 @@ public record ScaledByExtraHealthNumberProvider(NumberProvider base, MultiplierT
     @Override
     public float getFloat(LootContext context) {
         var baseValue = base.getFloat(context);
-        var param = context.getParameter(LootContextParams.THIS_ENTITY);
+        var param = context.getOptionalParameter(LootContextParams.THIS_ENTITY);
         if(param instanceof LivingEntity livingEntity){
             var multiplier = livingEntity.getAttributeValue(Attributes.MAX_HEALTH) / livingEntity.getAttributeBaseValue(Attributes.MAX_HEALTH);
             switch (multiplierType) {
