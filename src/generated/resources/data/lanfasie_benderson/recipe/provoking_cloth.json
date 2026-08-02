@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "R": "minecraft:red_wool",
+    "S": "minecraft:stick"
+  },
+  "pattern": [
+    "SSS",
+    " RR",
+    " RR"
+  ],
+  "result": {
+    "id": "lanfasie_benderson:provoking_cloth"
+  }
+}

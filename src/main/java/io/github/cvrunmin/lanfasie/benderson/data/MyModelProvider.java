@@ -69,6 +69,86 @@ public class MyModelProvider extends ModelProvider {
             );
             blockModels.registerSimpleFlatItemModel(AllBlocks.END_GUARDIAN_STATUE.asItem());
         }
+        {
+            MultiVariant lower = BlockModelGenerators.plainVariant(ModelTemplates.PARTICLE_ONLY.extend().customLoader(CompositeModelBuilder::new, loader ->
+                    loader.child("base_statue", Identifier.fromNamespaceAndPath(LanfasieBenderson.MODID, "block/statue/felis_invisibilis_statue_base"))).build()
+                    .create(Identifier.fromNamespaceAndPath(LanfasieBenderson.MODID, "block/statue/felis_invisibilis_statue"), TextureMapping.particle(Blocks.POLISHED_ANDESITE), blockModels.modelOutput));
+            MultiVariant upper = BlockModelGenerators.plainVariant(ModelTemplates.PARTICLE_ONLY.create(AllBlocks.FELIS_INVISIBILIS_STATUE.getId().withPath(path -> "block/statue/" + path + "_upper"), TextureMapping.particle(Blocks.POLISHED_ANDESITE), blockModels.modelOutput));
+            blockModels.blockStateOutput.accept(MultiVariantGenerator
+                    .dispatch(AllBlocks.FELIS_INVISIBILIS_STATUE.get())
+                    .with(PropertyDispatch.initial(BlockStateProperties.HORIZONTAL_FACING, BlockStateProperties.DOUBLE_BLOCK_HALF)
+                            .select(Direction.NORTH, DoubleBlockHalf.LOWER, lower)
+                            .select(Direction.EAST, DoubleBlockHalf.LOWER, lower.with(BlockModelGenerators.Y_ROT_90))
+                            .select(Direction.SOUTH, DoubleBlockHalf.LOWER, lower.with(BlockModelGenerators.Y_ROT_180))
+                            .select(Direction.WEST, DoubleBlockHalf.LOWER, lower.with(BlockModelGenerators.Y_ROT_270))
+                            .select(Direction.NORTH, DoubleBlockHalf.UPPER, upper)
+                            .select(Direction.EAST, DoubleBlockHalf.UPPER, upper.with(BlockModelGenerators.Y_ROT_90))
+                            .select(Direction.SOUTH, DoubleBlockHalf.UPPER, upper.with(BlockModelGenerators.Y_ROT_180))
+                            .select(Direction.WEST, DoubleBlockHalf.UPPER, upper.with(BlockModelGenerators.Y_ROT_270))
+                    )
+            );
+            blockModels.itemModelOutput.accept(AllBlocks.FELIS_INVISIBILIS_STATUE.asItem(), ItemModelUtils.plainModel(ModelLocationUtils.getModelLocation(AllBlocks.FELIS_INVISIBILIS_STATUE.asItem())));
+        }
+        {
+            MultiVariant lower = BlockModelGenerators.plainVariant(ModelTemplates.PARTICLE_ONLY.extend().customLoader(CompositeModelBuilder::new, loader ->
+                    loader.child("base_statue", Identifier.fromNamespaceAndPath(LanfasieBenderson.MODID, "block/statue/nether_dog_statue_base"))).build()
+                    .create(Identifier.fromNamespaceAndPath(LanfasieBenderson.MODID, "block/statue/nether_dog_statue"), TextureMapping.particle(Blocks.POLISHED_ANDESITE), blockModels.modelOutput));
+            MultiVariant upper = BlockModelGenerators.plainVariant(ModelTemplates.PARTICLE_ONLY.create(AllBlocks.NETHER_DOG_STATUE.getId().withPath(path -> "block/statue/" + path + "_upper"), TextureMapping.particle(Blocks.POLISHED_ANDESITE), blockModels.modelOutput));
+            blockModels.blockStateOutput.accept(MultiVariantGenerator
+                    .dispatch(AllBlocks.NETHER_DOG_STATUE.get())
+                    .with(PropertyDispatch.initial(BlockStateProperties.HORIZONTAL_FACING, BlockStateProperties.DOUBLE_BLOCK_HALF)
+                            .select(Direction.NORTH, DoubleBlockHalf.LOWER, lower)
+                            .select(Direction.EAST, DoubleBlockHalf.LOWER, lower.with(BlockModelGenerators.Y_ROT_90))
+                            .select(Direction.SOUTH, DoubleBlockHalf.LOWER, lower.with(BlockModelGenerators.Y_ROT_180))
+                            .select(Direction.WEST, DoubleBlockHalf.LOWER, lower.with(BlockModelGenerators.Y_ROT_270))
+                            .select(Direction.NORTH, DoubleBlockHalf.UPPER, upper)
+                            .select(Direction.EAST, DoubleBlockHalf.UPPER, upper.with(BlockModelGenerators.Y_ROT_90))
+                            .select(Direction.SOUTH, DoubleBlockHalf.UPPER, upper.with(BlockModelGenerators.Y_ROT_180))
+                            .select(Direction.WEST, DoubleBlockHalf.UPPER, upper.with(BlockModelGenerators.Y_ROT_270))
+                    )
+            );
+            blockModels.itemModelOutput.accept(AllBlocks.NETHER_DOG_STATUE.asItem(), ItemModelUtils.plainModel(ModelLocationUtils.getModelLocation(AllBlocks.NETHER_DOG_STATUE.asItem())));
+        }
+        {
+            MultiVariant lower = BlockModelGenerators.plainVariant(ModelTemplates.PARTICLE_ONLY.extend().customLoader(CompositeModelBuilder::new, loader ->
+                    loader.child("base_statue", Identifier.fromNamespaceAndPath(LanfasieBenderson.MODID, "block/statue/hydro_dreamer_statue_base"))).build()
+                    .create(Identifier.fromNamespaceAndPath(LanfasieBenderson.MODID, "block/statue/hydro_dreamer_statue"), TextureMapping.particle(Blocks.POLISHED_ANDESITE), blockModels.modelOutput));
+            MultiVariant upper = BlockModelGenerators.plainVariant(ModelTemplates.PARTICLE_ONLY.create(AllBlocks.HYDRO_DREAMER_STATUE.getId().withPath(path -> "block/statue/" + path + "_upper"), TextureMapping.particle(Blocks.POLISHED_ANDESITE), blockModels.modelOutput));
+            blockModels.blockStateOutput.accept(MultiVariantGenerator
+                    .dispatch(AllBlocks.HYDRO_DREAMER_STATUE.get())
+                    .with(PropertyDispatch.initial(BlockStateProperties.HORIZONTAL_FACING, BlockStateProperties.DOUBLE_BLOCK_HALF)
+                            .select(Direction.NORTH, DoubleBlockHalf.LOWER, lower)
+                            .select(Direction.EAST, DoubleBlockHalf.LOWER, lower.with(BlockModelGenerators.Y_ROT_90))
+                            .select(Direction.SOUTH, DoubleBlockHalf.LOWER, lower.with(BlockModelGenerators.Y_ROT_180))
+                            .select(Direction.WEST, DoubleBlockHalf.LOWER, lower.with(BlockModelGenerators.Y_ROT_270))
+                            .select(Direction.NORTH, DoubleBlockHalf.UPPER, upper)
+                            .select(Direction.EAST, DoubleBlockHalf.UPPER, upper.with(BlockModelGenerators.Y_ROT_90))
+                            .select(Direction.SOUTH, DoubleBlockHalf.UPPER, upper.with(BlockModelGenerators.Y_ROT_180))
+                            .select(Direction.WEST, DoubleBlockHalf.UPPER, upper.with(BlockModelGenerators.Y_ROT_270))
+                    )
+            );
+            blockModels.itemModelOutput.accept(AllBlocks.HYDRO_DREAMER_STATUE.asItem(), ItemModelUtils.plainModel(ModelLocationUtils.getModelLocation(AllBlocks.HYDRO_DREAMER_STATUE.asItem())));
+        }
+        {
+            MultiVariant lower = BlockModelGenerators.plainVariant(ModelTemplates.PARTICLE_ONLY.extend().customLoader(CompositeModelBuilder::new, loader ->
+                    loader.child("base_statue", Identifier.fromNamespaceAndPath(LanfasieBenderson.MODID, "block/statue/void_hare_statue_base"))).build()
+                    .create(Identifier.fromNamespaceAndPath(LanfasieBenderson.MODID, "block/statue/void_hare_statue"), TextureMapping.particle(Blocks.POLISHED_ANDESITE), blockModels.modelOutput));
+            MultiVariant upper = BlockModelGenerators.plainVariant(ModelTemplates.PARTICLE_ONLY.create(AllBlocks.VOID_HARE_STATUE.getId().withPath(path -> "block/statue/" + path + "_upper"), TextureMapping.particle(Blocks.POLISHED_ANDESITE), blockModels.modelOutput));
+            blockModels.blockStateOutput.accept(MultiVariantGenerator
+                    .dispatch(AllBlocks.VOID_HARE_STATUE.get())
+                    .with(PropertyDispatch.initial(BlockStateProperties.HORIZONTAL_FACING, BlockStateProperties.DOUBLE_BLOCK_HALF)
+                            .select(Direction.NORTH, DoubleBlockHalf.LOWER, lower)
+                            .select(Direction.EAST, DoubleBlockHalf.LOWER, lower.with(BlockModelGenerators.Y_ROT_90))
+                            .select(Direction.SOUTH, DoubleBlockHalf.LOWER, lower.with(BlockModelGenerators.Y_ROT_180))
+                            .select(Direction.WEST, DoubleBlockHalf.LOWER, lower.with(BlockModelGenerators.Y_ROT_270))
+                            .select(Direction.NORTH, DoubleBlockHalf.UPPER, upper)
+                            .select(Direction.EAST, DoubleBlockHalf.UPPER, upper.with(BlockModelGenerators.Y_ROT_90))
+                            .select(Direction.SOUTH, DoubleBlockHalf.UPPER, upper.with(BlockModelGenerators.Y_ROT_180))
+                            .select(Direction.WEST, DoubleBlockHalf.UPPER, upper.with(BlockModelGenerators.Y_ROT_270))
+                    )
+            );
+            blockModels.itemModelOutput.accept(AllBlocks.VOID_HARE_STATUE.asItem(), ItemModelUtils.plainModel(ModelLocationUtils.getModelLocation(AllBlocks.VOID_HARE_STATUE.asItem())));
+        }
 
         itemModels.generateFlatItem(AllItems.BARDS_LUTE.get(), ModelTemplates.FLAT_ITEM);
         itemModels.generateFlatItem(AllItems.AGGRO_UP_ICON.get(), ModelTemplates.FLAT_ITEM);
@@ -85,6 +165,11 @@ public class MyModelProvider extends ModelProvider {
             itemModels.generateFlatItem(AllItems.CLAYMORE_OF_HEI_POWER.get(), template);
         }
         itemModels.generateFlatItem(AllItems.OMINOUS_ORB.get(), ModelTemplates.FLAT_ITEM);
+        itemModels.declareCustomModelItem(AllItems.ECHO_OF_ENDER.get());
+        itemModels.declareCustomModelItem(AllItems.ECHO_OF_METHYL_ORANGE.get());
+        itemModels.declareCustomModelItem(AllItems.ECHO_OF_VOID_HARE.get());
+        itemModels.itemModelOutput.accept(AllItems.ECHO_OF_HYDROUS.get(), ItemModelUtils.tintedModel(ModelLocationUtils.getModelLocation(AllItems.ECHO_OF_HYDROUS.get()), ItemModelUtils.constantTint(0x3f76e4)));
+        itemModels.declareCustomModelItem(AllItems.ECHO_OF_FELIS.get());
         itemModels.generateFlatItem(AllItems.UNFORGIVEN_COWARDICE_SPAWN_EGG.get(), ModelTemplates.FLAT_ITEM);
         itemModels.generateFlatItem(AllItems.UNFORGIVEN_SPOILING_SPAWN_EGG.get(), ModelTemplates.FLAT_ITEM);
         itemModels.generateFlatItem(AllItems.UNFORGIVEN_INDISCRETION_SPAWN_EGG.get(), ModelTemplates.FLAT_ITEM);

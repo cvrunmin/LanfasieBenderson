@@ -33,6 +33,15 @@ public class MyLanguageProvider extends LanguageProvider {
         this.addBlock(AllBlocks.DEEP_LATENT_BLOCK, "Deep Latent Block");
         this.addBlock(AllBlocks.DEEP_LATENT_CALLER, "Deep Latent Caller");
         this.addBlock(AllBlocks.END_GUARDIAN_STATUE, "End Guardian Statue");
+        this.addBlock(AllBlocks.FELIS_INVISIBILIS_STATUE, "Felis Invisibilis Statue");
+        this.addBlock(AllBlocks.NETHER_DOG_STATUE, "Nether Cerberus Statue");
+        this.addBlock(AllBlocks.HYDRO_DREAMER_STATUE, "Hydrous Dreamer Statue");
+        this.addBlock(AllBlocks.VOID_HARE_STATUE, "Void Hare Statue");
+        this.addItem(AllItems.ECHO_OF_ENDER, "Echo of Ender");
+        this.addItem(AllItems.ECHO_OF_HYDROUS, "Echo of Hydrous");
+        this.addItem(AllItems.ECHO_OF_FELIS, "Echo of Felis");
+        this.addItem(AllItems.ECHO_OF_METHYL_ORANGE, "Echo of Methyl Orange");
+        this.addItem(AllItems.ECHO_OF_VOID_HARE, "Echo of Void Hare");
         this.add("itemGroup.lanfasie_benderson", "Lanfasie: Benderson");
         this.addEntityType(AllEntityTypes.LANFASIE, "Phantom Lanfasie");
         this.addEntityType(AllEntityTypes.BENDERSON, "Benderson the Abyss-sunken Dawnwaiter");

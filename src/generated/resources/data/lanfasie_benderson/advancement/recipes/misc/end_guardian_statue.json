@@ -1,0 +1,32 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_echo_of_ender": {
+      "conditions": {
+        "items": [
+          {
+            "items": "lanfasie_benderson:echo_of_ender"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "has_the_recipe": {
+      "conditions": {
+        "recipe": "lanfasie_benderson:end_guardian_statue"
+      },
+      "trigger": "minecraft:recipe_unlocked"
+    }
+  },
+  "requirements": [
+    [
+      "has_the_recipe",
+      "has_echo_of_ender"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "lanfasie_benderson:end_guardian_statue"
+    ]
+  }
+}

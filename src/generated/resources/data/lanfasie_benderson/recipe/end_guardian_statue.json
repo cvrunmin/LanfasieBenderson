@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "O": "lanfasie_benderson:echo_of_ender",
+    "X": "minecraft:stone_bricks",
+    "Z": "minecraft:polished_andesite_slab"
+  },
+  "pattern": [
+    " X ",
+    " O ",
+    "ZZZ"
+  ],
+  "result": {
+    "id": "lanfasie_benderson:end_guardian_statue"
+  }
+}

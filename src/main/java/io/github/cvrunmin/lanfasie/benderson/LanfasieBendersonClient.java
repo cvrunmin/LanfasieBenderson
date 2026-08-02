@@ -146,8 +146,10 @@ public class LanfasieBendersonClient {
                 new LootTableProvider(output,
                         Set.of(),
                         List.of(new LootTableProvider.SubProviderEntry(MyBlockLootTableSubProvider::new, LootContextParamSets.BLOCK),
+                                new LootTableProvider.SubProviderEntry(MyEntityLootTableSubProvider::new, LootContextParamSets.ENTITY),
                                 new LootTableProvider.SubProviderEntry(MyCustomLootTableSubProvider::new, LootContextParamSets.ENTITY)),
                         lookupProvider));
+        event.createProvider(MyRecipeProvider.RecipeProviderRunner::new);
         // client side
         event.createProvider(MyModelProvider::new);
         event.createProvider(MyBlockTagsProvider::new);

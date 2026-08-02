@@ -1,0 +1,9 @@
+{
+  "sources":[
+    {
+      "type": "single",
+      "resource": "minecraft:block/water_still",
+      "sprite": "lanfasie_benderson:item/vanilla_water_still"
+    }
+  ]
+}

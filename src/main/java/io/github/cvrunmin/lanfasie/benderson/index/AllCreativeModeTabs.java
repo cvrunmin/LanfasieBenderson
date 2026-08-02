@@ -28,7 +28,16 @@ public class AllCreativeModeTabs {
             output.accept(AllItems.MUNDANE_PRAISER_RAPIER);
             output.accept(AllItems.MUNDANE_PRAISER_MANA_FOCI);
             output.accept(AllItems.DAWNWAITER_TOTEM);
+            output.accept(AllItems.NETHER_DOG_STATUE);
+            output.accept(AllItems.FELIS_INVISIBILIS_STATUE);
             output.accept(AllItems.END_GUARDIAN_STATUE);
+            output.accept(AllItems.HYDRO_DREAMER_STATUE);
+            output.accept(AllItems.VOID_HARE_STATUE);
+            output.accept(AllItems.ECHO_OF_METHYL_ORANGE);
+            output.accept(AllItems.ECHO_OF_FELIS);
+            output.accept(AllItems.ECHO_OF_ENDER);
+            output.accept(AllItems.ECHO_OF_HYDROUS);
+            output.accept(AllItems.ECHO_OF_VOID_HARE);
             output.accept(AllItems.UNFORGIVEN_PERFIDY_SPAWN_EGG);
             output.accept(AllItems.UNFORGIVEN_RIDICULE_SPAWN_EGG);
             output.accept(AllItems.UNFORGIVEN_INDISCRETION_SPAWN_EGG);

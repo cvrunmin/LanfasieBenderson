@@ -29,8 +29,17 @@ public class AllItems {
 
     public static final DeferredItem<Item> AGGRO_UP_ICON = ITEMS.registerSimpleItem("aggro_up_icon");
     public static final DeferredItem<Item> BARDS_LUTE = ITEMS.registerSimpleItem("bards_lute");
+    public static final DeferredItem<Item> ECHO_OF_ENDER = ITEMS.registerSimpleItem("echo_of_ender");
+    public static final DeferredItem<Item> ECHO_OF_METHYL_ORANGE = ITEMS.registerSimpleItem("echo_of_methyl_orange");
+    public static final DeferredItem<Item> ECHO_OF_HYDROUS = ITEMS.registerSimpleItem("echo_of_hydrous");
+    public static final DeferredItem<Item> ECHO_OF_VOID_HARE = ITEMS.registerSimpleItem("echo_of_void_hare");
+    public static final DeferredItem<Item> ECHO_OF_FELIS = ITEMS.registerSimpleItem("echo_of_felis");
     public static final DeferredItem<BlockItem> DEEP_LATENT_CALLER = ITEMS.registerSimpleBlockItem(AllBlocks.DEEP_LATENT_CALLER);
     public static final DeferredItem<BlockItem> END_GUARDIAN_STATUE = ITEMS.registerItem(AllBlocks.END_GUARDIAN_STATUE.getId().getPath(), prop -> new DoubleHighBlockItem(AllBlocks.END_GUARDIAN_STATUE.get(), prop), () -> new Item.Properties().useBlockDescriptionPrefix() );
+    public static final DeferredItem<BlockItem> FELIS_INVISIBILIS_STATUE = ITEMS.registerItem(AllBlocks.FELIS_INVISIBILIS_STATUE.getId().getPath(), prop -> new DoubleHighBlockItem(AllBlocks.FELIS_INVISIBILIS_STATUE.get(), prop), () -> new Item.Properties().useBlockDescriptionPrefix() );
+    public static final DeferredItem<BlockItem> NETHER_DOG_STATUE = ITEMS.registerItem(AllBlocks.NETHER_DOG_STATUE.getId().getPath(), prop -> new DoubleHighBlockItem(AllBlocks.NETHER_DOG_STATUE.get(), prop), () -> new Item.Properties().useBlockDescriptionPrefix() );
+    public static final DeferredItem<BlockItem> HYDRO_DREAMER_STATUE = ITEMS.registerItem(AllBlocks.HYDRO_DREAMER_STATUE.getId().getPath(), prop -> new DoubleHighBlockItem(AllBlocks.HYDRO_DREAMER_STATUE.get(), prop), () -> new Item.Properties().useBlockDescriptionPrefix() );
+    public static final DeferredItem<BlockItem> VOID_HARE_STATUE = ITEMS.registerItem(AllBlocks.VOID_HARE_STATUE.getId().getPath(), prop -> new DoubleHighBlockItem(AllBlocks.VOID_HARE_STATUE.get(), prop), () -> new Item.Properties().useBlockDescriptionPrefix() );
     public static final DeferredItem<Item> SWORD_OF_DAWNWAITER = ITEMS.registerItem("sword_of_dawnwaiter", properties -> new Item(properties.sword(ToolMaterial.DIAMOND, 4.5f, -2.8f)));
     public static final DeferredItem<Item> SWORD_OF_DAWNWAITER_TAINTED = ITEMS.registerItem("sword_of_dawnwaiter_tainted", properties -> new Item(properties.sword(ToolMaterial.DIAMOND, 4.5f, -2.8f)));
     public static final DeferredItem<Item> CLAYMORE_OF_HEI_POWER = ITEMS.registerItem("claymore_of_hei_power", properties -> new Item(properties.sword(ToolMaterial.NETHERITE, 8.5f, -3.2f)));

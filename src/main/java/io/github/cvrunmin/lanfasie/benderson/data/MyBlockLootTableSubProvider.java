@@ -1,6 +1,7 @@
 package io.github.cvrunmin.lanfasie.benderson.data;
 
 import io.github.cvrunmin.lanfasie.benderson.content.statue.EndGuardianStatueBlock;
+import io.github.cvrunmin.lanfasie.benderson.content.statue.FiveGuysStatueBlock;
 import io.github.cvrunmin.lanfasie.benderson.index.AllBlocks;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.loot.BlockLootSubProvider;
@@ -23,6 +24,10 @@ public class MyBlockLootTableSubProvider extends BlockLootSubProvider {
     @Override
     protected void generate() {
         this.dropSelf(AllBlocks.DEEP_LATENT_CALLER.get());
-        this.add(AllBlocks.END_GUARDIAN_STATUE.get(), this.createSinglePropConditionTable(AllBlocks.END_GUARDIAN_STATUE.get(), EndGuardianStatueBlock.HALF, DoubleBlockHalf.LOWER));
+        this.add(AllBlocks.END_GUARDIAN_STATUE.get(), this.createSinglePropConditionTable(AllBlocks.END_GUARDIAN_STATUE.get(), FiveGuysStatueBlock.HALF, DoubleBlockHalf.LOWER));
+        this.add(AllBlocks.FELIS_INVISIBILIS_STATUE.get(), this.createSinglePropConditionTable(AllBlocks.FELIS_INVISIBILIS_STATUE.get(), FiveGuysStatueBlock.HALF, DoubleBlockHalf.LOWER));
+        this.add(AllBlocks.NETHER_DOG_STATUE.get(), this.createSinglePropConditionTable(AllBlocks.NETHER_DOG_STATUE.get(), FiveGuysStatueBlock.HALF, DoubleBlockHalf.LOWER));
+        this.add(AllBlocks.HYDRO_DREAMER_STATUE.get(), this.createSinglePropConditionTable(AllBlocks.HYDRO_DREAMER_STATUE.get(), FiveGuysStatueBlock.HALF, DoubleBlockHalf.LOWER));
+        this.add(AllBlocks.VOID_HARE_STATUE.get(), this.createSinglePropConditionTable(AllBlocks.VOID_HARE_STATUE.get(), FiveGuysStatueBlock.HALF, DoubleBlockHalf.LOWER));
     }
 }

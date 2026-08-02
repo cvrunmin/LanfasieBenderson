@@ -1,35 +1,28 @@
 package io.github.cvrunmin.lanfasie.benderson.content.statue;
 
+import io.github.cvrunmin.lanfasie.benderson.content.benderson.Benderson;
+import io.github.cvrunmin.lanfasie.benderson.content.unforgiven.*;
+import io.github.cvrunmin.lanfasie.benderson.index.AllBlocks;
+import net.minecraft.commands.arguments.EntityAnchorArgument;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.util.Mth;
-import net.minecraft.util.RandomSource;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LevelReader;
-import net.minecraft.world.level.ScheduledTickAccess;
-import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.block.state.StateDefinition;
-import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
-import net.minecraft.world.level.block.state.properties.EnumProperty;
-import net.minecraft.world.level.material.Fluids;
+import net.minecraft.world.level.gameevent.GameEvent;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
-import org.jspecify.annotations.Nullable;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.IntStream;
 
-public class EndGuardianStatueBlock extends Block {
-    public static final EnumProperty<Direction> FACING = HorizontalDirectionalBlock.FACING;
-    public static final EnumProperty<DoubleBlockHalf> HALF = BlockStateProperties.DOUBLE_BLOCK_HALF;
-
+public class EndGuardianStatueBlock extends FiveGuysStatueBlock {
     private static final VoxelShape LOWER_SHAPE = Shapes.or(
             box(0, 0, 0, 16, 2, 16),
             box(4.5, 2, 8.25, 11.5, 16, 15.25));
@@ -47,107 +40,123 @@ public class EndGuardianStatueBlock extends Block {
 
     public EndGuardianStatueBlock(Properties properties) {
         super(properties);
-        this.registerDefaultState(this.stateDefinition.any()
-                .setValue(FACING, Direction.NORTH)
-                .setValue(HALF, DoubleBlockHalf.LOWER));
     }
 
     @Override
-    protected VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
-        Direction direction = state.getValue(FACING);
-        DoubleBlockHalf half = state.getValue(HALF);
-        if(half == DoubleBlockHalf.UPPER) return UPPER_SHAPES.get(direction);
-        return LOWER_SHAPES.get(direction);
+    protected VoxelShape getUpperShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context, Direction facing) {
+        return UPPER_SHAPES.get(facing);
     }
 
     @Override
-    protected VoxelShape getInteractionShape(BlockState state, BlockGetter level, BlockPos pos) {
-        return super.getInteractionShape(state, level, pos);
+    protected VoxelShape getLowerShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context, Direction facing) {
+        return LOWER_SHAPES.get(facing);
     }
 
     @Override
-    protected BlockState updateShape(
-            BlockState state,
-            LevelReader level,
-            ScheduledTickAccess ticks,
-            BlockPos pos,
-            Direction directionToNeighbour,
-            BlockPos neighbourPos,
-            BlockState neighbourState,
-            RandomSource random
-    ) {
-        DoubleBlockHalf half = state.getValue(HALF);
-        if (directionToNeighbour.getAxis() != Direction.Axis.Y || half == DoubleBlockHalf.LOWER != (directionToNeighbour == Direction.UP)) {
-            return half == DoubleBlockHalf.LOWER && directionToNeighbour == Direction.DOWN && !state.canSurvive(level, pos)
-                    ? Blocks.AIR.defaultBlockState()
-                    : super.updateShape(state, level, ticks, pos, directionToNeighbour, neighbourPos, neighbourState, random);
-        } else {
-            return neighbourState.getBlock() instanceof EndGuardianStatueBlock && neighbourState.getValue(HALF) != half
-                    ? neighbourState.setValue(HALF, half)
-                    : Blocks.AIR.defaultBlockState();
-        }
-    }
-
-    @Override
-    public BlockState playerWillDestroy(Level level, BlockPos pos, BlockState state, Player player) {
-        if (!level.isClientSide() && (player.isCreative() || !player.hasCorrectToolForDrops(state, level, pos))) {
-            DoubleBlockHalf part = state.getValue(HALF);
-            if (part == DoubleBlockHalf.UPPER) {
-                BlockPos bottomPos = pos.below();
-                BlockState bottomState = level.getBlockState(bottomPos);
-                if (bottomState.is(state.getBlock()) && bottomState.getValue(HALF) == DoubleBlockHalf.LOWER) {
-                    BlockState blockState = bottomState.getFluidState().is(Fluids.WATER) ? Blocks.WATER.defaultBlockState() : Blocks.AIR.defaultBlockState();
-                    level.setBlock(bottomPos, blockState, 35);
-                    level.levelEvent(player, 2001, bottomPos, Block.getId(bottomState));
+    protected void onPlace(BlockState state, Level level, BlockPos pos, BlockState oldState, boolean movedByPiston) {
+        if(!movedByPiston && !level.isClientSide() && state.getValue(FiveGuysStatueBlock.HALF) == DoubleBlockHalf.LOWER){
+            List<Benderson> entities = level.getEntitiesOfClass(Benderson.class, AABB.ofSize(Vec3.atLowerCornerOf(pos), 48, 18, 48), candidate -> !candidate.isNoAi());
+            if(!entities.isEmpty()) return;
+            boolean[] hasOtherStatue = new boolean[4];
+            BlockPos[] otherStatuePos = new BlockPos[4];
+            Arrays.fill(otherStatuePos, new BlockPos(pos));
+            for (Direction direction : Direction.Plane.HORIZONTAL) {
+                for (int i = 1; i <= 2; i++) {
+                    var offsetPos = pos.relative(direction, i);
+                    var offsetState = level.getBlockState(offsetPos);
+                    if (offsetState.getOptionalValue(FiveGuysStatueBlock.HALF).map(v -> v != DoubleBlockHalf.LOWER).orElse(false)) {
+                        continue;
+                    }
+                    if(offsetState.is(AllBlocks.FELIS_INVISIBILIS_STATUE)) {
+                        hasOtherStatue[0] = true;
+                        otherStatuePos[0] = offsetPos;
+                        break;
+                    }
+                    if(offsetState.is(AllBlocks.NETHER_DOG_STATUE)) {
+                        hasOtherStatue[1] = true;
+                        otherStatuePos[1] = offsetPos;
+                        break;
+                    }
+                    if(offsetState.is(AllBlocks.HYDRO_DREAMER_STATUE)) {
+                        hasOtherStatue[2] = true;
+                        otherStatuePos[2] = offsetPos;
+                        break;
+                    }
+                    if(offsetState.is(AllBlocks.VOID_HARE_STATUE)) {
+                        hasOtherStatue[3] = true;
+                        otherStatuePos[3] = offsetPos;
+                        break;
+                    }
                 }
             }
+            if (!IntStream.range(0, 4).allMatch(i -> hasOtherStatue[i])) {
+                boolean[] quadrantHasStatue = new boolean[4];
+                for (int i = -2; i <= 2; i++) {
+                    for (int j = -2; j <= 2; j++) {
+                        if(i == 0 || j == 0) continue;
+                        int quadrant = i < 0 ? (j < 0 ? 1 : 2) : (j < 0 ? 0 : 3);
+                        if(quadrantHasStatue[quadrant]) continue;
+                        var offsetPos = pos.offset(i, 0, j);
+                        var offsetState = level.getBlockState(offsetPos);
+                        if (offsetState.getOptionalValue(FiveGuysStatueBlock.HALF).map(v -> v != DoubleBlockHalf.LOWER).orElse(false)) {
+                            continue;
+                        }
+                        if(offsetState.is(AllBlocks.FELIS_INVISIBILIS_STATUE)) {
+                            hasOtherStatue[0] = true;
+                            otherStatuePos[0] = offsetPos;
+                            quadrantHasStatue[quadrant] = true;
+                        }
+                        if(offsetState.is(AllBlocks.NETHER_DOG_STATUE)) {
+                            hasOtherStatue[1] = true;
+                            otherStatuePos[1] = offsetPos;
+                            quadrantHasStatue[quadrant] = true;
+                        }
+                        if(offsetState.is(AllBlocks.HYDRO_DREAMER_STATUE)) {
+                            hasOtherStatue[2] = true;
+                            otherStatuePos[2] = offsetPos;
+                            quadrantHasStatue[quadrant] = true;
+                        }
+                        if(offsetState.is(AllBlocks.VOID_HARE_STATUE)) {
+                            hasOtherStatue[3] = true;
+                            otherStatuePos[3] = offsetPos;
+                            quadrantHasStatue[quadrant] = true;
+                        }
+                    }
+                }
+            }
+            if (IntStream.range(0, 4).allMatch(i -> hasOtherStatue[i])) {
+                for (BlockPos pos1 : otherStatuePos) {
+                    level.destroyBlock(pos1, false);
+                }
+                level.destroyBlock(pos, false);
+                var un1 = new UnforgivenIndiscretion(level, pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5);
+                var un2 = new UnforgivenSpoiling(level, otherStatuePos[3].getX() + 0.5, otherStatuePos[3].getY(), otherStatuePos[3].getZ() + 0.5);
+                var un3 = new UnforgivenCowardice(level, otherStatuePos[2].getX() + 0.5, otherStatuePos[2].getY(), otherStatuePos[2].getZ() + 0.5);
+                var un4 = new UnforgivenRidicule(level, otherStatuePos[1].getX() + 0.5, otherStatuePos[1].getY(), otherStatuePos[1].getZ() + 0.5);
+                var un5 = new UnforgivenPerfidy(level, otherStatuePos[0].getX() + 0.5, otherStatuePos[0].getY(), otherStatuePos[0].getZ() + 0.5);
+                un1.lookAt(EntityAnchorArgument.Anchor.FEET, new Vec3(0, 0, -1).add(Vec3.atBottomCenterOf(pos)));
+                un2.lookAt(EntityAnchorArgument.Anchor.FEET, Vec3.atBottomCenterOf(pos));
+                un3.lookAt(EntityAnchorArgument.Anchor.FEET, Vec3.atBottomCenterOf(pos));
+                un4.lookAt(EntityAnchorArgument.Anchor.FEET, Vec3.atBottomCenterOf(pos));
+                un5.lookAt(EntityAnchorArgument.Anchor.FEET, Vec3.atBottomCenterOf(pos));
+                un1.setNoAi(true);
+                un2.setNoAi(true);
+                un3.setNoAi(true);
+                un4.setNoAi(true);
+                un5.setNoAi(true);
+                level.addFreshEntity(un1);
+                level.addFreshEntity(un2);
+                level.addFreshEntity(un3);
+                level.addFreshEntity(un4);
+                level.addFreshEntity(un5);
+                Benderson benderson = new Benderson(level, pos.getX(), pos.getY(), pos.getZ());
+                benderson.setBodyState(Benderson.BodyState.ENTRANCE);
+                benderson.setPhaseState("arena_entering");
+                level.addFreshEntity(benderson);
+                level.gameEvent(GameEvent.ENTITY_PLACE, pos, GameEvent.Context.of(state));
+            } else {
+                return;
+            }
         }
-
-        return super.playerWillDestroy(level, pos, state, player);
-    }
-
-    @Override
-    public @Nullable BlockState getStateForPlacement(BlockPlaceContext context) {
-        BlockPos pos = context.getClickedPos();
-        Level level = context.getLevel();
-        if (pos.getY() < level.getMaxY() && level.getBlockState(pos.above()).canBeReplaced(context)) {
-            return this.defaultBlockState()
-                    .setValue(FACING, context.getHorizontalDirection().getOpposite())
-                    .setValue(HALF, DoubleBlockHalf.LOWER);
-        } else {
-            return null;
-        }
-    }
-
-    @Override
-    public void setPlacedBy(Level level, BlockPos pos, BlockState state, @Nullable LivingEntity by, ItemStack itemStack) {
-        level.setBlock(pos.above(), state.setValue(HALF, DoubleBlockHalf.UPPER), 3);
-    }
-
-    @Override
-    protected boolean canSurvive(BlockState state, LevelReader level, BlockPos pos) {
-        BlockPos below = pos.below();
-        BlockState belowState = level.getBlockState(below);
-        return state.getValue(HALF) == DoubleBlockHalf.LOWER ? belowState.isFaceSturdy(level, below, Direction.UP) : belowState.is(this);
-    }
-
-    @Override
-    protected BlockState rotate(BlockState state, Rotation rotation) {
-        return state.setValue(FACING, rotation.rotate(state.getValue(FACING)));
-    }
-
-    @Override
-    protected BlockState mirror(BlockState state, Mirror mirror) {
-        return mirror == Mirror.NONE ? state : state.rotate(mirror.getRotation(state.getValue(FACING)));
-    }
-
-    @Override
-    protected long getSeed(BlockState state, BlockPos pos) {
-        return Mth.getSeed(pos.getX(), pos.below(state.getValue(HALF) == DoubleBlockHalf.LOWER ? 0 : 1).getY(), pos.getZ());
-    }
-
-    @Override
-    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
-        builder.add(HALF, FACING);
     }
 }

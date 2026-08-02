@@ -1,0 +1,12 @@
+{
+  "children": {
+    "base_statue": "lanfasie_benderson:block/statue/void_hare_statue_base"
+  },
+  "item_render_order": [
+    "base_statue"
+  ],
+  "loader": "neoforge:composite",
+  "textures": {
+    "particle": "minecraft:block/polished_andesite"
+  }
+}
