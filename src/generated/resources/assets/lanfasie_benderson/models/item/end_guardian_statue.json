@@ -1,6 +1,0 @@
-{
-  "parent": "minecraft:item/generated",
-  "textures": {
-    "layer0": "lanfasie_benderson:item/end_guardian_statue"
-  }
-}

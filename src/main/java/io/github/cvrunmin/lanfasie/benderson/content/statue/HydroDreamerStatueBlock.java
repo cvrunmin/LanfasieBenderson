@@ -8,18 +8,31 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
+import java.util.Map;
+
 public class HydroDreamerStatueBlock extends FiveGuysStatueBlock{
+    private static final VoxelShape LOWER_SHAPE = Shapes.or(
+            box(0, 0, 0, 16, 2, 16),
+            box(0.5, 2, 4, 12, 16, 15.5));
+
+    private static final VoxelShape UPPER_SHAPE = Shapes.or(
+            box(0.5, 0, 4, 12, 4, 15.5),
+            box(11, 2, 1, 15, 6, 5));
+
+    private static final Map<Direction, VoxelShape> LOWER_SHAPES = Shapes.rotateHorizontal(LOWER_SHAPE);
+    private static final Map<Direction, VoxelShape> UPPER_SHAPES = Shapes.rotateHorizontal(UPPER_SHAPE);
+
     public HydroDreamerStatueBlock(Properties properties) {
         super(properties);
     }
 
     @Override
     protected VoxelShape getUpperShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context, Direction facing) {
-        return Shapes.block();
+        return UPPER_SHAPES.get(facing);
     }
 
     @Override
     protected VoxelShape getLowerShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context, Direction facing) {
-        return Shapes.block();
+        return LOWER_SHAPES.get(facing);
     }
 }

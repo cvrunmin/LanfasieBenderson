@@ -51,7 +51,16 @@ public class MyModelProvider extends ModelProvider {
                             .inlineChild("sword", ModelTemplates.create(TextureSlot.LAYER0).extend()
                                     .rootTransforms(transform -> transform.translation(-0.5f, -1.0f, -0.25f).rotation(0, 0, -135, true).scale(1.1f, 1.1f, 1.0f))
                                     .customLoader(ItemBlockModelLoader.Builder::new, _ -> {})
-                                    .build(), TextureMapping.layer0(Items.DIAMOND_SWORD))).build()
+                                    .build(), TextureMapping.layer0(Items.DIAMOND_SWORD)))
+                            .transform(ItemDisplayContext.THIRD_PERSON_RIGHT_HAND, tb -> tb.scale(0.375f, 0.375f, 0.375f).rotation(75, 45, 0).translation(0, 2.5f, 0))
+                            .transform(ItemDisplayContext.THIRD_PERSON_LEFT_HAND, tb -> tb.scale(0.375f, 0.375f, 0.375f).rotation(75, 45, 0).translation(0, 2.5f, 0))
+                            .transform(ItemDisplayContext.FIRST_PERSON_RIGHT_HAND, tb -> tb.scale(0.4f, 0.4f, 0.4f).rotation(0, 135, 0))
+                            .transform(ItemDisplayContext.FIRST_PERSON_LEFT_HAND, tb -> tb.scale(0.4f, 0.4f, 0.4f).rotation(0, 135, 0))
+                            .transform(ItemDisplayContext.GROUND, tb -> tb.scale(0.25f, 0.25f, 0.25f).translation(0, 3, 0))
+                            .transform(ItemDisplayContext.GUI, tb -> tb.scale(0.5f, 0.5f, 0.5f).rotation(30, -135, 0).translation(0, -2.5f, 0))
+                            .transform(ItemDisplayContext.FIXED, tb -> tb.scale(0.5f, 0.5f, 0.5f).translation(0, 0, -0.75f))
+                            .transform(ItemDisplayContext.ON_SHELF, tb -> tb.rotation(0, 180, 0))
+                    .build()
                     .create(Identifier.fromNamespaceAndPath(LanfasieBenderson.MODID, "block/statue/end_guardian_statue"), TextureMapping.particle(Blocks.POLISHED_ANDESITE), blockModels.modelOutput));
             MultiVariant upper = BlockModelGenerators.plainVariant(ModelTemplates.PARTICLE_ONLY.create(AllBlocks.END_GUARDIAN_STATUE.getId().withPath(path -> "block/statue/" + path + "_upper"), TextureMapping.particle(Blocks.POLISHED_ANDESITE), blockModels.modelOutput));
             blockModels.blockStateOutput.accept(MultiVariantGenerator
@@ -67,7 +76,7 @@ public class MyModelProvider extends ModelProvider {
                             .select(Direction.WEST, DoubleBlockHalf.UPPER, upper.with(BlockModelGenerators.Y_ROT_270))
                     )
             );
-            blockModels.registerSimpleFlatItemModel(AllBlocks.END_GUARDIAN_STATUE.asItem());
+            blockModels.itemModelOutput.accept(AllBlocks.END_GUARDIAN_STATUE.asItem(), ItemModelUtils.plainModel(Identifier.fromNamespaceAndPath(LanfasieBenderson.MODID, "block/statue/end_guardian_statue")));
         }
         {
             MultiVariant lower = BlockModelGenerators.plainVariant(ModelTemplates.PARTICLE_ONLY.extend().customLoader(CompositeModelBuilder::new, loader ->
@@ -87,7 +96,7 @@ public class MyModelProvider extends ModelProvider {
                             .select(Direction.WEST, DoubleBlockHalf.UPPER, upper.with(BlockModelGenerators.Y_ROT_270))
                     )
             );
-            blockModels.itemModelOutput.accept(AllBlocks.FELIS_INVISIBILIS_STATUE.asItem(), ItemModelUtils.plainModel(ModelLocationUtils.getModelLocation(AllBlocks.FELIS_INVISIBILIS_STATUE.asItem())));
+            blockModels.itemModelOutput.accept(AllBlocks.FELIS_INVISIBILIS_STATUE.asItem(), ItemModelUtils.plainModel(Identifier.fromNamespaceAndPath(LanfasieBenderson.MODID, "block/statue/felis_invisibilis_statue_base")));
         }
         {
             MultiVariant lower = BlockModelGenerators.plainVariant(ModelTemplates.PARTICLE_ONLY.extend().customLoader(CompositeModelBuilder::new, loader ->
@@ -107,7 +116,7 @@ public class MyModelProvider extends ModelProvider {
                             .select(Direction.WEST, DoubleBlockHalf.UPPER, upper.with(BlockModelGenerators.Y_ROT_270))
                     )
             );
-            blockModels.itemModelOutput.accept(AllBlocks.NETHER_DOG_STATUE.asItem(), ItemModelUtils.plainModel(ModelLocationUtils.getModelLocation(AllBlocks.NETHER_DOG_STATUE.asItem())));
+            blockModels.itemModelOutput.accept(AllBlocks.NETHER_DOG_STATUE.asItem(), ItemModelUtils.plainModel(Identifier.fromNamespaceAndPath(LanfasieBenderson.MODID, "block/statue/nether_dog_statue_base")));
         }
         {
             MultiVariant lower = BlockModelGenerators.plainVariant(ModelTemplates.PARTICLE_ONLY.extend().customLoader(CompositeModelBuilder::new, loader ->
@@ -127,7 +136,7 @@ public class MyModelProvider extends ModelProvider {
                             .select(Direction.WEST, DoubleBlockHalf.UPPER, upper.with(BlockModelGenerators.Y_ROT_270))
                     )
             );
-            blockModels.itemModelOutput.accept(AllBlocks.HYDRO_DREAMER_STATUE.asItem(), ItemModelUtils.plainModel(ModelLocationUtils.getModelLocation(AllBlocks.HYDRO_DREAMER_STATUE.asItem())));
+            blockModels.itemModelOutput.accept(AllBlocks.HYDRO_DREAMER_STATUE.asItem(), ItemModelUtils.plainModel(Identifier.fromNamespaceAndPath(LanfasieBenderson.MODID, "block/statue/hydro_dreamer_statue_base")));
         }
         {
             MultiVariant lower = BlockModelGenerators.plainVariant(ModelTemplates.PARTICLE_ONLY.extend().customLoader(CompositeModelBuilder::new, loader ->
@@ -147,7 +156,7 @@ public class MyModelProvider extends ModelProvider {
                             .select(Direction.WEST, DoubleBlockHalf.UPPER, upper.with(BlockModelGenerators.Y_ROT_270))
                     )
             );
-            blockModels.itemModelOutput.accept(AllBlocks.VOID_HARE_STATUE.asItem(), ItemModelUtils.plainModel(ModelLocationUtils.getModelLocation(AllBlocks.VOID_HARE_STATUE.asItem())));
+            blockModels.itemModelOutput.accept(AllBlocks.VOID_HARE_STATUE.asItem(), ItemModelUtils.plainModel(Identifier.fromNamespaceAndPath(LanfasieBenderson.MODID, "block/statue/void_hare_statue_base")));
         }
 
         itemModels.generateFlatItem(AllItems.BARDS_LUTE.get(), ModelTemplates.FLAT_ITEM);

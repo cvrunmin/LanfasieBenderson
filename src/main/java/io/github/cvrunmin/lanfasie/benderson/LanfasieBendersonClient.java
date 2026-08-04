@@ -20,11 +20,9 @@ import io.github.cvrunmin.lanfasie.benderson.data.*;
 import io.github.cvrunmin.lanfasie.benderson.foundation.HeiTideSkyboxRenderer;
 import io.github.cvrunmin.lanfasie.benderson.foundation.ItemBlockModelLoader;
 import io.github.cvrunmin.lanfasie.benderson.foundation.MyGlobalRenderPipelines;
-import io.github.cvrunmin.lanfasie.benderson.index.AllDamageTypes;
-import io.github.cvrunmin.lanfasie.benderson.index.AllEntityTypes;
-import io.github.cvrunmin.lanfasie.benderson.index.AllItems;
-import io.github.cvrunmin.lanfasie.benderson.index.AllParticleTypes;
+import io.github.cvrunmin.lanfasie.benderson.index.*;
 import io.github.cvrunmin.lanfasie.benderson.utils.ArmPoseEnumProxy;
+import net.minecraft.client.color.block.BlockTintSources;
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.core.RegistrySetBuilder;
 import net.minecraft.core.registries.Registries;
@@ -96,6 +94,11 @@ public class LanfasieBendersonClient {
                 return ArmPoseEnumProxy.MANA_FOCI_POSE_PROXY.getValue();
             }
         }, AllItems.MUNDANE_PRAISER_MANA_FOCI);
+    }
+
+    @SubscribeEvent
+    public static void registerBlockColor(RegisterColorHandlersEvent.BlockTintSources event){
+        event.register(List.of(BlockTintSources.water()), AllBlocks.HYDRO_DREAMER_STATUE.get());
     }
 
     @SubscribeEvent

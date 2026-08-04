@@ -90,36 +90,41 @@ public class EndGuardianStatueBlock extends FiveGuysStatueBlock {
                 }
             }
             if (!IntStream.range(0, 4).allMatch(i -> hasOtherStatue[i])) {
+                Arrays.fill(hasOtherStatue, false);
+                Arrays.fill(otherStatuePos, new BlockPos(pos));
                 boolean[] quadrantHasStatue = new boolean[4];
-                for (int i = -2; i <= 2; i++) {
-                    for (int j = -2; j <= 2; j++) {
-                        if(i == 0 || j == 0) continue;
-                        int quadrant = i < 0 ? (j < 0 ? 1 : 2) : (j < 0 ? 0 : 3);
-                        if(quadrantHasStatue[quadrant]) continue;
-                        var offsetPos = pos.offset(i, 0, j);
-                        var offsetState = level.getBlockState(offsetPos);
-                        if (offsetState.getOptionalValue(FiveGuysStatueBlock.HALF).map(v -> v != DoubleBlockHalf.LOWER).orElse(false)) {
-                            continue;
-                        }
-                        if(offsetState.is(AllBlocks.FELIS_INVISIBILIS_STATUE)) {
-                            hasOtherStatue[0] = true;
-                            otherStatuePos[0] = offsetPos;
-                            quadrantHasStatue[quadrant] = true;
-                        }
-                        if(offsetState.is(AllBlocks.NETHER_DOG_STATUE)) {
-                            hasOtherStatue[1] = true;
-                            otherStatuePos[1] = offsetPos;
-                            quadrantHasStatue[quadrant] = true;
-                        }
-                        if(offsetState.is(AllBlocks.HYDRO_DREAMER_STATUE)) {
-                            hasOtherStatue[2] = true;
-                            otherStatuePos[2] = offsetPos;
-                            quadrantHasStatue[quadrant] = true;
-                        }
-                        if(offsetState.is(AllBlocks.VOID_HARE_STATUE)) {
-                            hasOtherStatue[3] = true;
-                            otherStatuePos[3] = offsetPos;
-                            quadrantHasStatue[quadrant] = true;
+                for (int quadrant = 0; quadrant < 4; quadrant++) {
+                    statueSearch:
+                    for (int i1 = 1; i1 <= 2; i1++) {
+                        for (int j1 = 1; j1 <= 2; j1++) {
+                            if(quadrantHasStatue[quadrant]) break statueSearch;
+                            int i = quadrant == 1 || quadrant == 2 ? -i1 : i1;
+                            int j = quadrant < 2 ? -j1 : j1;
+                            var offsetPos = pos.offset(i, 0, j);
+                            var offsetState = level.getBlockState(offsetPos);
+                            if (offsetState.getOptionalValue(FiveGuysStatueBlock.HALF).map(v -> v != DoubleBlockHalf.LOWER).orElse(false)) {
+                                continue;
+                            }
+                            if(offsetState.is(AllBlocks.FELIS_INVISIBILIS_STATUE)) {
+                                hasOtherStatue[0] = true;
+                                otherStatuePos[0] = offsetPos;
+                                quadrantHasStatue[quadrant] = true;
+                            }
+                            if(offsetState.is(AllBlocks.NETHER_DOG_STATUE)) {
+                                hasOtherStatue[1] = true;
+                                otherStatuePos[1] = offsetPos;
+                                quadrantHasStatue[quadrant] = true;
+                            }
+                            if(offsetState.is(AllBlocks.HYDRO_DREAMER_STATUE)) {
+                                hasOtherStatue[2] = true;
+                                otherStatuePos[2] = offsetPos;
+                                quadrantHasStatue[quadrant] = true;
+                            }
+                            if(offsetState.is(AllBlocks.VOID_HARE_STATUE)) {
+                                hasOtherStatue[3] = true;
+                                otherStatuePos[3] = offsetPos;
+                                quadrantHasStatue[quadrant] = true;
+                            }
                         }
                     }
                 }
