@@ -70,6 +70,21 @@ public class UnforgivenPerfidyModel extends EntityModel<UnforgivenPerfidyRenderS
         }
         this.head.xRot = state.xRot * (float) (Math.PI / 180.0);
         this.head.yRot = state.yRot * (float) (Math.PI / 180.0);
+        if(state.isSwelled){
+            this.body.skipDraw = true;
+            this.leftFrontLeg.visible = false;
+            this.leftHindLeg.visible = false;
+            this.rightFrontLeg.visible = false;
+            this.rightHindLeg.visible = false;
+            this.head.y += 18;
+        }
+        else{
+            this.body.skipDraw = false;
+            this.leftFrontLeg.visible = true;
+            this.leftHindLeg.visible = true;
+            this.rightFrontLeg.visible = true;
+            this.rightHindLeg.visible = true;
+        }
         float animationSpeed = state.walkAnimationSpeed;
         float animationPos = state.walkAnimationPos;
         if (state.isSprinting) {

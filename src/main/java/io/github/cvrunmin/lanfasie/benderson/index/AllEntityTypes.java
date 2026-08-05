@@ -12,11 +12,17 @@ import io.github.cvrunmin.lanfasie.benderson.content.mundane_praisers.MundanePra
 import io.github.cvrunmin.lanfasie.benderson.content.mundane_praisers.MundanePraiserRedMage;
 import io.github.cvrunmin.lanfasie.benderson.content.mundane_praisers.MundanePraiserWhiteMage;
 import io.github.cvrunmin.lanfasie.benderson.content.unforgiven.*;
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.MobCategory;
+import net.minecraft.core.BlockPos;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.Difficulty;
+import net.minecraft.world.entity.*;
+import net.minecraft.world.entity.monster.Monster;
+import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.levelgen.Heightmap;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.event.entity.EntityAttributeCreationEvent;
+import net.neoforged.neoforge.event.entity.RegisterSpawnPlacementsEvent;
 import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
@@ -67,6 +73,7 @@ public class AllEntityTypes {
     public static void register(IEventBus modBus){
         ENTITY_TYPES.register(modBus);
         modBus.addListener(AllEntityTypes::createDefaultAttributes);
+        modBus.addListener(AllEntityTypes::registerSpawnPlacements);
     }
 
     public static void createDefaultAttributes(EntityAttributeCreationEvent event){
@@ -82,5 +89,31 @@ public class AllEntityTypes {
         event.put(UNFORGIVEN_PERFIDY.get(), UnforgivenPerfidy.createAttributes());
         event.put(UNFORGIVEN_COWARDICE.get(), UnforgivenCowardice.createAttributes());
         event.put(UNFORGIVEN_INDISCRETION.get(), UnforgivenIndiscretion.createAttributes());
+    }
+
+    public static void registerSpawnPlacements(RegisterSpawnPlacementsEvent event){
+        event.register(UNFORGIVEN_COWARDICE.get(), SpawnPlacementTypes.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, AllEntityTypes::checkUnforgivenMonsterSpawnRule, RegisterSpawnPlacementsEvent.Operation.OR);
+        event.register(UNFORGIVEN_SPOILING.get(), SpawnPlacementTypes.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, AllEntityTypes::checkUnforgivenMonsterSpawnRule, RegisterSpawnPlacementsEvent.Operation.OR);
+        event.register(UNFORGIVEN_PERFIDY.get(), SpawnPlacementTypes.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, AllEntityTypes::checkUnforgivenMonsterSpawnRule, RegisterSpawnPlacementsEvent.Operation.OR);
+        event.register(UNFORGIVEN_INDISCRETION.get(), SpawnPlacementTypes.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, AllEntityTypes::checkUnforgivenMonsterSpawnRule, RegisterSpawnPlacementsEvent.Operation.OR);
+        event.register(UNFORGIVEN_RIDICULE.get(), SpawnPlacementTypes.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, AllEntityTypes::checkUnforgivenMonsterSpawnRule, RegisterSpawnPlacementsEvent.Operation.OR);
+    }
+
+    private static boolean checkUnforgivenMonsterSpawnRule(EntityType<? extends Monster> type, ServerLevelAccessor level, EntitySpawnReason spawnReason, BlockPos pos, RandomSource random){
+        if (level.getDifficulty() != Difficulty.PEACEFUL) {
+            if (EntitySpawnReason.isSpawner(spawnReason)) {
+                return Mob.checkMobSpawnRules(type, level, spawnReason, pos, random);
+            }
+            if(level.getBiome(pos).is(AllTags.PREFERRED_PLACE_TO_SPAWN_UNFORGIVEN_MONSTER)){
+                return Mob.checkMobSpawnRules(type, level, spawnReason, pos, random);
+            }
+            var yFromMin = Math.max(1, pos.getY() - level.getMinY());
+            if(yFromMin <= 32 && random.nextInt(yFromMin) < 16) {
+                if((EntitySpawnReason.ignoresLightRequirements(spawnReason) || Monster.isDarkEnoughToSpawn(level, pos, random))) {
+                    return Mob.checkMobSpawnRules(type, level, spawnReason, pos, random);
+                }
+            }
+        }
+        return false;
     }
 }

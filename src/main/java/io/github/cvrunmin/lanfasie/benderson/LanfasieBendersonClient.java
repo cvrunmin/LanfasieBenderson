@@ -1,7 +1,6 @@
 package io.github.cvrunmin.lanfasie.benderson;
 
 import io.github.cvrunmin.lanfasie.benderson.compat.iris.IrisCompatEntry;
-import io.github.cvrunmin.lanfasie.benderson.content.anticalabrum.Anticalabrum;
 import io.github.cvrunmin.lanfasie.benderson.content.anticalabrum.AnticalabrumModel;
 import io.github.cvrunmin.lanfasie.benderson.content.anticalabrum.AnticalabrumRenderer;
 import io.github.cvrunmin.lanfasie.benderson.content.benderson.BendersonRenderer;
@@ -44,6 +43,7 @@ import net.neoforged.neoforge.client.extensions.common.RegisterClientExtensionsE
 import net.neoforged.neoforge.client.gui.ConfigurationScreen;
 import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
 import net.neoforged.neoforge.data.event.GatherDataEvent;
+import net.neoforged.neoforge.registries.NeoForgeRegistries;
 import org.jspecify.annotations.Nullable;
 
 import java.util.List;
@@ -144,7 +144,7 @@ public class LanfasieBendersonClient {
     @SubscribeEvent
     public static void gatherData(GatherDataEvent.Client event){
         // from server side
-        event.createDatapackRegistryObjects(new RegistrySetBuilder().add(Registries.DAMAGE_TYPE, AllDamageTypes::bootstrap));
+        event.createDatapackRegistryObjects(new RegistrySetBuilder().add(Registries.DAMAGE_TYPE, AllDamageTypes::bootstrap).add(NeoForgeRegistries.Keys.BIOME_MODIFIERS, AllBiomeModifiers::bootstrap));
         event.createProvider((output, lookupProvider) ->
                 new LootTableProvider(output,
                         Set.of(),
@@ -155,10 +155,11 @@ public class LanfasieBendersonClient {
         event.createProvider(MyRecipeProvider.RecipeProviderRunner::new);
         // client side
         event.createProvider(MyModelProvider::new);
-        event.createProvider(MyBlockTagsProvider::new);
-        event.createProvider(MyItemTagsProvider::new);
-        event.createProvider(MyEntityTypeTagsProvider::new);
-        event.createProvider(MyDamageTypeTagsProvider::new);
+        event.createProvider(MyTagsProviders.MyBlockTagsProvider::new);
+        event.createProvider(MyTagsProviders.MyItemTagsProvider::new);
+        event.createProvider(MyTagsProviders.MyEntityTypeTagsProvider::new);
+        event.createProvider(MyTagsProviders.MyDamageTypeTagsProvider::new);
+        event.createProvider(MyTagsProviders.MyBiomeTagsProvider::new);
         event.createProvider(MyLanguageProvider::new);
         event.createProvider(MySoundDefinitionsProvider::new);
     }
