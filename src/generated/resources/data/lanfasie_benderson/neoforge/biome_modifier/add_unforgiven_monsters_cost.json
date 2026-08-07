@@ -1,0 +1,15 @@
+{
+  "type": "neoforge:add_spawn_costs",
+  "biomes": "minecraft:deep_dark",
+  "entity_types": [
+    "lanfasie_benderson:unforgiven_cowardice",
+    "lanfasie_benderson:unforgiven_perfidy",
+    "lanfasie_benderson:unforgiven_indiscretion",
+    "lanfasie_benderson:unforgiven_ridicule",
+    "lanfasie_benderson:unforgiven_spoiling"
+  ],
+  "spawn_cost": {
+    "charge": 1.0,
+    "energy_budget": 0.0625
+  }
+}
