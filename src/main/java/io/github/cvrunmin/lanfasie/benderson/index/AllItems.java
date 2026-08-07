@@ -4,6 +4,7 @@ import io.github.cvrunmin.lanfasie.benderson.LanfasieBenderson;
 import io.github.cvrunmin.lanfasie.benderson.content.OminousOrbItem;
 import io.github.cvrunmin.lanfasie.benderson.content.ProvokingClothItem;
 import io.github.cvrunmin.lanfasie.benderson.content.ProvokingStickItem;
+import io.github.cvrunmin.lanfasie.benderson.foundation.BossSummonInfo;
 import net.minecraft.advancements.criterion.BlockPredicate;
 import net.minecraft.advancements.criterion.DataComponentMatchers;
 import net.minecraft.core.HolderSet;
@@ -45,7 +46,7 @@ public class AllItems {
     public static final DeferredItem<Item> CLAYMORE_OF_HEI_POWER = ITEMS.registerItem("claymore_of_hei_power", properties -> new Item(properties.sword(ToolMaterial.NETHERITE, 8.5f, -3.2f)));
     public static final DeferredItem<OminousOrbItem> OMINOUS_ORB = ITEMS.registerItem("ominous_orb", OminousOrbItem::new, properties ->
             properties.useCooldown(5)
-                    .component(AllDataComponents.ARENA_RADIUS.get(), 24));
+                    .component(AllDataComponents.BOSS_SUMMON_INFO.get(), BossSummonInfo.DEFAULT));
     public static final DeferredItem<ProvokingStickItem> PROVOKING_STICK = ITEMS.registerItem("provoking_stick", ProvokingStickItem::new, properties -> properties.useCooldown(2).stacksTo(1));
     public static final DeferredItem<ProvokingClothItem> PROVOKING_CLOTH = ITEMS.registerItem("provoking_cloth", ProvokingClothItem::new, properties -> properties.stacksTo(1));
 

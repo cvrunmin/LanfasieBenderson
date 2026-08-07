@@ -2,10 +2,16 @@ package io.github.cvrunmin.lanfasie.benderson.content.statue;
 
 import io.github.cvrunmin.lanfasie.benderson.content.benderson.Benderson;
 import io.github.cvrunmin.lanfasie.benderson.content.unforgiven.*;
+import io.github.cvrunmin.lanfasie.benderson.foundation.BossSummonInfo;
+import io.github.cvrunmin.lanfasie.benderson.index.AllAttributes;
 import io.github.cvrunmin.lanfasie.benderson.index.AllBlocks;
+import io.github.cvrunmin.lanfasie.benderson.index.AllDataComponents;
 import net.minecraft.commands.arguments.EntityAnchorArgument;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.attributes.AttributeInstance;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
@@ -16,6 +22,7 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Arrays;
 import java.util.List;
@@ -53,8 +60,9 @@ public class EndGuardianStatueBlock extends FiveGuysStatueBlock {
     }
 
     @Override
-    protected void onPlace(BlockState state, Level level, BlockPos pos, BlockState oldState, boolean movedByPiston) {
-        if(!movedByPiston && !level.isClientSide() && state.getValue(FiveGuysStatueBlock.HALF) == DoubleBlockHalf.LOWER){
+    public void setPlacedBy(Level level, BlockPos pos, BlockState state, @Nullable LivingEntity by, ItemStack itemStack) {
+        super.setPlacedBy(level, pos, state, by, itemStack);
+        if(!level.isClientSide() && state.getValue(FiveGuysStatueBlock.HALF) == DoubleBlockHalf.LOWER){
             List<Benderson> entities = level.getEntitiesOfClass(Benderson.class, AABB.ofSize(Vec3.atLowerCornerOf(pos), 48, 18, 48), candidate -> !candidate.isNoAi());
             if(!entities.isEmpty()) return;
             boolean[] hasOtherStatue = new boolean[4];
@@ -154,7 +162,12 @@ public class EndGuardianStatueBlock extends FiveGuysStatueBlock {
                 level.addFreshEntity(un3);
                 level.addFreshEntity(un4);
                 level.addFreshEntity(un5);
-                Benderson benderson = new Benderson(level, pos.getX(), pos.getY(), pos.getZ());
+                var summonInfo = itemStack.getOrDefault(AllDataComponents.BOSS_SUMMON_INFO, BossSummonInfo.DEFAULT);
+                Benderson benderson = new Benderson(level, pos.getX(), pos.getY(), pos.getZ(), summonInfo.arenaRadius());
+                AttributeInstance damageGateAttr = benderson.getAttribute(AllAttributes.DAMAGE_GATE_PERCENTAGE);
+                if(damageGateAttr != null) {
+                    damageGateAttr.setBaseValue(summonInfo.damageGate());
+                }
                 benderson.setBodyState(Benderson.BodyState.ENTRANCE);
                 benderson.setPhaseState("arena_entering");
                 level.addFreshEntity(benderson);

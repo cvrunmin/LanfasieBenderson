@@ -2,12 +2,15 @@ package io.github.cvrunmin.lanfasie.benderson.content;
 
 import io.github.cvrunmin.lanfasie.benderson.content.benderson.Benderson;
 import io.github.cvrunmin.lanfasie.benderson.content.unforgiven.*;
+import io.github.cvrunmin.lanfasie.benderson.foundation.BossSummonInfo;
+import io.github.cvrunmin.lanfasie.benderson.index.AllAttributes;
 import io.github.cvrunmin.lanfasie.benderson.index.AllBlocks;
 import io.github.cvrunmin.lanfasie.benderson.index.AllDataComponents;
 import net.minecraft.commands.arguments.EntityAnchorArgument;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
@@ -17,6 +20,7 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
 import java.util.List;
+import java.util.Optional;
 
 public class OminousOrbItem extends Item {
     public OminousOrbItem(Properties properties) {
@@ -57,8 +61,13 @@ public class OminousOrbItem extends Item {
             level.addFreshEntity(un3);
             level.addFreshEntity(un4);
             level.addFreshEntity(un5);
-            var radius = context.getItemInHand().getComponents().getOrDefault(AllDataComponents.ARENA_RADIUS.get(), 24);
-            Benderson benderson = new Benderson(level, above.getX(), above.getY(), above.getZ(), radius);
+            var bossSummonInfo = Optional.ofNullable(context.getItemInHand().getComponents().get(AllDataComponents.BOSS_SUMMON_INFO.get()))
+                    .orElseGet(() -> BossSummonInfo.builder().setArenaRadius(context.getItemInHand().getComponents().getOrDefault(AllDataComponents.ARENA_RADIUS.get(), 24)).build());
+            Benderson benderson = new Benderson(level, above.getX(), above.getY(), above.getZ(), bossSummonInfo.arenaRadius());
+            AttributeInstance damageGateAttr = benderson.getAttribute(AllAttributes.DAMAGE_GATE_PERCENTAGE);
+            if(damageGateAttr != null) {
+                damageGateAttr.setBaseValue(bossSummonInfo.damageGate());
+            }
             benderson.setBodyState(Benderson.BodyState.ENTRANCE);
             benderson.setPhaseState("arena_entering");
             level.addFreshEntity(benderson);
