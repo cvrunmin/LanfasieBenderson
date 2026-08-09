@@ -897,6 +897,7 @@ public class Benderson extends Monster implements GeoEntity, BendersonStatesGett
             var entity = this.level().getEntity(entry.getKey());
             if(!(entity instanceof Player player)) return null;
             if(!player.canBeSeenByAnyone()) return null;
+            if(!this.canAttack(player)) return null;
             if(arena.contains(player.position())) return Map.entry(player, entry.getValue());
             return null;
         }).filter(Objects::nonNull).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));

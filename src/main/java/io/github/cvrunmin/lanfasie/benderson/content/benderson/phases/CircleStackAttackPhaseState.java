@@ -80,7 +80,7 @@ public class CircleStackAttackPhaseState implements IPhaseState{
                 if(!acceptingTargets.isEmpty()){
                     float damage = this.damageMultiplier;
                     if(this.requiredPlayerToStack < 4){
-                        damage = this.damageMultiplier * (this.requiredPlayerToStack / 4f + 0.5f);
+                        damage = this.damageMultiplier * ((this.requiredPlayerToStack - 1) / 6f + 0.5f);
                     }
                     damage *= (float) this.owner.getAttributeValue(Attributes.ATTACK_DAMAGE);
                     damage = damage / acceptingTargets.size();
