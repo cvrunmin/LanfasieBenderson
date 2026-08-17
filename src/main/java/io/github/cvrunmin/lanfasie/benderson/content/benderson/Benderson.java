@@ -48,7 +48,6 @@ import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.control.FlyingMoveControl;
-import net.minecraft.world.entity.ai.control.MoveControl;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.ai.navigation.FlyingPathNavigation;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
@@ -643,7 +642,7 @@ public class Benderson extends Monster implements GeoEntity, BendersonStatesGett
             return false;
         }
         if(isTransitioning()) return false;
-        var sourcePlayer = ((ServerPlayer) resolveDamageSourcePlayer(source));
+        @Nullable var sourcePlayer = ((ServerPlayer) resolveDamageSourcePlayer(source));
         if(!source.is(DamageTypeTags.BYPASSES_INVULNERABILITY)
                 && (sourcePlayer == null || source.getEntity() instanceof OwnableEntity && !canAttack(sourcePlayer))) return false;
         this.damageContainers.push(new DamageContainer(source, damage));
@@ -670,7 +669,7 @@ public class Benderson extends Monster implements GeoEntity, BendersonStatesGett
                 this.getAttribute(AllAttributes.EXTREME).addPermanentModifier(new AttributeModifier(Identifier.fromNamespaceAndPath(LanfasieBenderson.MODID, "extreme"), 1, AttributeModifier.Operation.ADD_VALUE));
                 damage = 0.01f;
             }
-            var totalDamageInGate = damageGate.getTotalDamage();
+            var totalDamageInGate = damageGate.getTotalDamage(Optional.ofNullable(sourcePlayer).map(Entity::getUUID).orElse(null));
             var timegatedDamage = (float)(this.getMaxHealth() * this.getAttributeValue(AllAttributes.DAMAGE_GATE_PERCENTAGE));
             if(totalDamageInGate + damage > timegatedDamage){
                 damage = Math.max(0, timegatedDamage - totalDamageInGate);
@@ -681,7 +680,7 @@ public class Benderson extends Monster implements GeoEntity, BendersonStatesGett
             this.actuallyHurt(level, source, damage);
             damage = damageContainers.peek().getNewDamage();
             this.lastHurt = damage;
-            this.damageGate.addRecord(damage);
+            this.damageGate.addRecord(damage, Optional.ofNullable(sourcePlayer).map(Entity::getUUID).orElse(null));
         }
         this.resolveMobResponsibleForDamage(source);
         this.resolvePlayerResponsibleForDamage(source);
@@ -762,7 +761,7 @@ public class Benderson extends Monster implements GeoEntity, BendersonStatesGett
 
     @Override
     protected void dropFromLootTable(ServerLevel level, DamageSource source, boolean playerKilled) {
-        if(!source.is(DamageTypeTags.BYPASSES_INVULNERABILITY) && lastDeltaHealth <= damageGate.getLastDamage()){
+        if(!source.is(DamageTypeTags.BYPASSES_INVULNERABILITY) && lastDeltaHealth <= damageGate.getLastDamageFromAnySource()){
             if(this.getBodyState() == BodyState.UNFORGIVEN){
                 this.dropFromLootTable(level, source, playerKilled, AllCustomLootTables.BENDERSON_EXTREME_NON_UNRESTRICTED);
             }else if(this.getBodyState() == BodyState.DEEP_LATENT || this.getBodyState() == BodyState.UNVEILED){
@@ -822,7 +821,7 @@ public class Benderson extends Monster implements GeoEntity, BendersonStatesGett
 
     public boolean shouldDropExperience(DamageSource source) {
         if(source.is(DamageTypeTags.BYPASSES_INVULNERABILITY)) return false;
-        if(lastDeltaHealth > damageGate.getLastDamage()) return false;
+        if(lastDeltaHealth > damageGate.getLastDamageFromAnySource()) return false;
         return super.shouldDropExperience();
     }
 
@@ -1104,10 +1103,18 @@ public class Benderson extends Monster implements GeoEntity, BendersonStatesGett
     public static class DamageGateRecord{
         public final float damage;
         private int life;
+        private final @Nullable UUID entityId;
 
         public DamageGateRecord(float damage, int life){
             this.damage = damage;
             this.life = life;
+            this.entityId = null;
+        }
+
+        public DamageGateRecord(float damage, int life, @Nullable UUID entityId){
+            this.damage = damage;
+            this.life = life;
+            this.entityId = entityId;
         }
 
         public void decay(){
@@ -1120,6 +1127,11 @@ public class Benderson extends Monster implements GeoEntity, BendersonStatesGett
 
         public float damage(){
             return damage;
+        }
+
+        @Nullable
+        public UUID entityId(){
+            return entityId;
         }
     }
 
@@ -1148,16 +1160,29 @@ public class Benderson extends Monster implements GeoEntity, BendersonStatesGett
         }
 
         public void addRecord(float damage){
+            addRecord(damage, null);
+        }
+
+        public void addRecord(float damage, @Nullable UUID entityId){
             clearOutdatedRecord();
-            records.add(new DamageGateRecord(damage, this.maxRecordingDeltaTime));
+            records.add(new DamageGateRecord(damage, this.maxRecordingDeltaTime, entityId));
         }
 
         public float getTotalDamage(){
+            return getTotalDamage(null);
+        }
+
+        public float getTotalDamage(@Nullable UUID entityId){
+            clearOutdatedRecord();
+            return (float) records.stream().filter(record -> entityId == record.entityId).mapToDouble(DamageGateRecord::damage).sum();
+        }
+
+        public float getTotalDamageFromAnySource(){
             clearOutdatedRecord();
             return (float) records.stream().mapToDouble(DamageGateRecord::damage).sum();
         }
 
-        public float getLastDamage(){
+        public float getLastDamageFromAnySource(){
             clearOutdatedRecord();
             return records.getLast().damage;
         }
