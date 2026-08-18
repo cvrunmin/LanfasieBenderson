@@ -645,6 +645,7 @@ public class Benderson extends Monster implements GeoEntity, BendersonStatesGett
         @Nullable var sourcePlayer = ((ServerPlayer) resolveDamageSourcePlayer(source));
         if(!source.is(DamageTypeTags.BYPASSES_INVULNERABILITY)
                 && (sourcePlayer == null || source.getEntity() instanceof OwnableEntity && !canAttack(sourcePlayer))) return false;
+        if (sourcePlayer != null && !getCombatArena().contains(sourcePlayer.position())) return false;
         this.damageContainers.push(new DamageContainer(source, damage));
         if (CommonHooks.onEntityIncomingDamage(this, this.damageContainers.peek())) return false;
         if (this.isSleeping()) {
