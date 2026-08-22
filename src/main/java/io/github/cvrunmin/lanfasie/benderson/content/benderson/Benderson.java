@@ -22,6 +22,7 @@ import io.github.cvrunmin.lanfasie.benderson.mixin.LivingEntityAccessor;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.UUIDUtil;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
@@ -101,6 +102,11 @@ public class Benderson extends Monster implements GeoEntity, BendersonStatesGett
     private EclipticMeteorState eclipticMeteorState = new EclipticMeteorState(this);
     private int globalCooldown;
     private PhaseStateTransitioner transitioner;
+
+    private TopEnmityTargetGoal topEnmityTargetGoal;
+    private NearestTargetGoal nearestTargetGoal;
+
+    private Vec3 lastKnownPosition;
 
     private boolean shouldChangePhase = false;
     private ServerBossEvent bossEvent = Util.make(
@@ -359,8 +365,10 @@ public class Benderson extends Monster implements GeoEntity, BendersonStatesGett
 
     @Override
     protected void registerGoals() {
-        this.targetSelector.addGoal(1, new TopEnmityTargetGoal(this));
-        this.targetSelector.addGoal(2, new NearestTargetGoal(this, 6));
+        topEnmityTargetGoal = new TopEnmityTargetGoal(this);
+        nearestTargetGoal = new NearestTargetGoal(this, 6);
+        this.targetSelector.addGoal(1, topEnmityTargetGoal);
+        this.targetSelector.addGoal(2, nearestTargetGoal);
     }
 
     @Override
@@ -398,6 +406,12 @@ public class Benderson extends Monster implements GeoEntity, BendersonStatesGett
             }
         }
         super.tick();
+        if (!getCombatArena().contains(position())){
+            Vec3 recallPos = lastKnownPosition != null ? lastKnownPosition : getCombatArenaCenterVec3();
+            setPos(recallPos);
+            setDeltaMovement(0, 0, 0);
+        }
+        lastKnownPosition = position().with(Direction.Axis.Y, getArenaCenter().getY());
     }
 
     protected void progressPhaseState(){
@@ -522,6 +536,11 @@ public class Benderson extends Monster implements GeoEntity, BendersonStatesGett
     @Override
     protected double getDefaultGravity() {
         return 0;
+    }
+
+    @Override
+    protected float getFlyingSpeed() {
+        return getSpeed() * 0.02F;
     }
 
     @Override
@@ -903,6 +922,10 @@ public class Benderson extends Monster implements GeoEntity, BendersonStatesGett
         }).filter(Objects::nonNull).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
+    public Optional<Player> requestTargetPlayer(){
+        return topEnmityTargetGoal.requestTarget().or(nearestTargetGoal::requestTarget);
+    }
+
     public Optional<Player> getNonAggressiveRandomPlayer(){
         var arena = getCombatArena();
         var sortedPlayerArray = enmityList.entrySet().stream().map(entry -> {
@@ -914,7 +937,7 @@ public class Benderson extends Monster implements GeoEntity, BendersonStatesGett
         if(sortedPlayerArray.length == 0) {
             // fallback to target
             LivingEntity vanillaTarget = getTarget();
-            if(vanillaTarget instanceof Player player) return Optional.of(player);
+            if(vanillaTarget instanceof Player player && arena.contains(player.position())) return Optional.of(player);
             return Optional.empty();
         }
         if(sortedPlayerArray.length == 1) return Optional.of(sortedPlayerArray[0]);
@@ -1001,9 +1024,13 @@ public class Benderson extends Monster implements GeoEntity, BendersonStatesGett
             return this.target != null;
         }
 
-        protected void findTarget(){
+        public Optional<Player> requestTarget(){
             var enmityMap = this.owner.getActualEnmityMap();
-            this.target = enmityMap.entrySet().stream().max(Map.Entry.comparingByValue()).map(Map.Entry::getKey).orElse(null);
+            return enmityMap.entrySet().stream().max(Map.Entry.comparingByValue()).map(Map.Entry::getKey);
+        }
+
+        protected void findTarget(){
+            this.target = this.requestTarget().orElse(null);
         }
 
         @Override
@@ -1052,11 +1079,11 @@ public class Benderson extends Monster implements GeoEntity, BendersonStatesGett
         @Override
         public boolean canUse() {
             if(!this.owner.shouldChangePhase) return false;
-            findTarget();
+            this.target = requestTarget().orElse(null);
             return this.target != null;
         }
 
-        protected void findTarget() {
+        public Optional<Player> requestTarget() {
             ServerLevel level = getServerLevel(this.owner);
             Player candidate = null, candidateAllowCreative = null;
             double minDist = Double.MAX_VALUE, minDistAllowCreative = Double.MAX_VALUE;
@@ -1076,10 +1103,10 @@ public class Benderson extends Monster implements GeoEntity, BendersonStatesGett
                 }
             }
             if(candidate == null && candidateAllowCreative != null){
-                this.target = candidateAllowCreative;
+                return Optional.of(candidateAllowCreative);
             }
             else{
-                this.target = candidate;
+                return Optional.ofNullable(candidate);
             }
         }
 

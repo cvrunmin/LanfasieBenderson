@@ -42,7 +42,8 @@ public class PartialArenaAoePhaseState implements IPhaseState{
     public void start() {
         if(this.owner.level().isClientSide()) return;
         targetPos = this.owner.getCombatArenaCenterVec3().subtract(0, 0, owner.getArenaRadius() * 0.5f);
-        this.owner.getMoveControl().setWantedPosition(targetPos.x, targetPos.y, targetPos.z, 1.0f);
+        var distToTgtPos = targetPos.distanceTo(this.owner.position());
+        this.owner.getMoveControl().setWantedPosition(targetPos.x, targetPos.y, targetPos.z, Math.max(Math.sqrt(distToTgtPos - 1), 1));
         var marker = new TargetMarker(this.owner.level(), targetPos,
                 TargetMarker.MarkerArgs.complexRange(TargetMarker.MarkerType.LINEAR_AOE, this.owner.getArenaRadius() * 2, this.owner.getArenaRadius() * 1.5f, 130));
         this.trackingMarker = marker;
@@ -63,7 +64,7 @@ public class PartialArenaAoePhaseState implements IPhaseState{
                 this.currentTick = this.maxTicks - 1;
             }else{
                 currentTick--;
-                this.owner.getMoveControl().setWantedPosition(targetPos.x, targetPos.y, targetPos.z, 1.0f);
+                this.owner.getMoveControl().setWantedPosition(targetPos.x, targetPos.y, targetPos.z, Math.max(Math.sqrt(distToTgtPos - 1), 1));
             }
             return true;
         }

@@ -53,6 +53,16 @@ public class LethalAttackPhaseState implements IPhaseState{
     public boolean tick() {
         if(this.currentTarget == null) return false;
         if(!this.currentTarget.isAlive()) return false;
+        if(!this.owner.getCombatArena().contains(this.currentTarget.position())){
+            var nextPlayer = this.owner.requestTargetPlayer();
+            if(nextPlayer.isPresent()){
+                currentTarget = nextPlayer.get();
+                this.trackingMarker.setTargetEntity(currentTarget);
+            }else{
+                return false;
+            }
+        }
+
         currentTick--;
         if(maxTicks - currentTick == 5){
             this.owner.setAnimateState(ANIMATE_STATE_LETHAL_ATTACK_LOOP);
