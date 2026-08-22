@@ -374,6 +374,12 @@ public class TargetMarker extends Entity implements IEntityWithComplexSpawn, Own
         this.setPos(targetPos);
     }
 
+    public void setTargetEntity(LivingEntity targetEntity) {
+        this.targetEntity = targetEntity;
+        this.setPos(targetEntity.position());
+        this.entityData.set(TARGET_ENTITY_SYNCER, Optional.of(EntityReference.of(targetEntity)));
+    }
+
     public void setPersistent(boolean persistent) {
         this.entityData.set(PERSISTENT_ACCESSOR, persistent);
     }

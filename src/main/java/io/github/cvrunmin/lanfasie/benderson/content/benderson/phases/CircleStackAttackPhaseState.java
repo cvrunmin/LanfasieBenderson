@@ -62,6 +62,15 @@ public class CircleStackAttackPhaseState implements IPhaseState{
     @Override
     public boolean tick() {
         if(this.currentTarget == null || this.currentTarget.isDeadOrDying()) return false;
+        if(!this.owner.getCombatArena().contains(this.currentTarget.position())){
+            var nextPlayer = this.owner.getNonAggressiveRandomPlayer();
+            if(nextPlayer.isPresent()){
+                currentTarget = nextPlayer.get();
+                this.trackingMarker.setTargetEntity(currentTarget);
+            }else{
+                return false;
+            }
+        }
         currentTick--;
         if(maxTicks - currentTick == 5){
             this.owner.setAnimateState(ANIMATE_STATE_CIRCLE_STACK_ATTACK_LOOP);
