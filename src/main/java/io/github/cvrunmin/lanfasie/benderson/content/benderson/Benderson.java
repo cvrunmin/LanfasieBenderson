@@ -406,6 +406,7 @@ public class Benderson extends Monster implements GeoEntity, BendersonStatesGett
             }
         }
         super.tick();
+        if(!isEffectiveAi()) return;
         if (!getCombatArena().contains(position())){
             Vec3 recallPos = lastKnownPosition != null ? lastKnownPosition : getCombatArenaCenterVec3();
             setPos(recallPos);
