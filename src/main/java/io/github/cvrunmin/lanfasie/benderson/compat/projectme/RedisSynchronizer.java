@@ -79,8 +79,8 @@ public class RedisSynchronizer extends AbstractSynchronizer {
         close();
         var redisUrl = configItemAccessor.getValue();
         if(redisUrl != null){
-            this.redisClient = RedisClient.create(redisUrl);
             try {
+                this.redisClient = RedisClient.create(redisUrl);
                 this.redisConnection = this.redisClient.connect(RedisByteBufCodec.INSTANCE);
                 this.redisSubscriber = this.redisClient.connectPubSub(RedisByteBufCodec.INSTANCE);
                 this.redisSubscriber.addListener(new RedisPubSubListener<>() {

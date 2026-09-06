@@ -21,10 +21,16 @@ public class ProjectMeCompat {
                 var config = configField.get(null);
                 var configClass = config.getClass();
                 var redisUrlField = configClass.getDeclaredField("redisUrl");
-                var redisUrlConfig = redisUrlField.get(config);
-                synchronizerBackend = new RedisSynchronizer(new ReflectiveConfigItemAccessor<>(redisUrlConfig, String.class));
+                synchronizerBackend = new RedisSynchronizer(new ReflectiveConfigItemAccessor<>(() -> {
+                    try {
+                        return redisUrlField.get(config);
+                    } catch (NoClassDefFoundError | IllegalAccessException e) {
+                        LanfasieBenderson.LOGGER.warn("Project Me is loaded, but cannot access to its redis url config", e);
+                        return null;
+                    }
+                }, String.class));
                 LanfasieBenderson.LOGGER.info("Created Redis Synchronizer using Project Me's config");
-            } catch (ClassNotFoundException | NoSuchFieldException | IllegalAccessException e) {
+            } catch (NoClassDefFoundError | ClassNotFoundException | NoSuchFieldException | IllegalAccessException e) {
                 LanfasieBenderson.LOGGER.warn("Project Me is loaded, but cannot find its main class, or cannot access to its redis url config", e);
                 synchronizerBackend = new DummySynchronizer();
             }

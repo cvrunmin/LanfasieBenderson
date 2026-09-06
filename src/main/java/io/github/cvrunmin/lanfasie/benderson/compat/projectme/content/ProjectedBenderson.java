@@ -41,6 +41,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.phys.Vec3;
+import org.joml.Vector3f;
 
 import java.util.HashMap;
 import java.util.Objects;
@@ -148,6 +149,8 @@ public class ProjectedBenderson extends LivingEntity implements GeoEntity, Bende
                 break;
             case "three-fourth_arena_aoe":
                 break;
+            case "three-fourth_arena_aoe_extreme":
+                break;
             case "summon_anticalabrum":
                 this.setAnimateState(SummonAnticalabrumPhaseState.ANIMATE_STATE_START);
                 this.anticalabrumNextType = extraData.getInt("NextType").map(i -> Anticalabrum.AnticalabrumType.values()[i]).orElse(Anticalabrum.AnticalabrumType.EMPTY);
@@ -249,6 +252,43 @@ public class ProjectedBenderson extends LivingEntity implements GeoEntity, Bende
                     }
                 } else if(phaseStateTick == 240){
                     this.setAnimateState("idle");
+                }
+                break;
+            case "three-fourth_arena_aoe_extreme":
+                if(phaseStateTick <= 60){
+                    var targetPos = this.getCombatArenaCenterVec3().subtract(0, 0, getArenaRadius() * 0.5f);
+                    if(targetPos.distanceTo(position()) < 0.708 || phaseStateTick == 60){
+                        phaseStateTick = 60;
+                        this.teleportTo(targetPos.x, targetPos.y, targetPos.z);
+                        this.setAnimateState(PartialArenaAoePhaseState.ANIMATE_STATE_HALF_ARENA_AOE_SELF_START);
+                        var delayAttacker = DelayedAttackMarker.createRemoteSweepPartialArena(this.level(), targetPos, null, this.getArenaRadius(), this.getArenaRadius() * 1.5f, new Vector3f(0, 0, 1), 0, 130);
+                        level().addFreshEntity(delayAttacker);
+                    }
+                } else if(phaseStateTick == 65){
+                    this.setAnimateState(PartialArenaAoePhaseState.ANIMATE_STATE_HALF_ARENA_AOE_SELF_LOOP);
+                } else if(phaseStateTick == 130){
+                    var targetPos = this.getCombatArenaCenterVec3().add(getArenaRadius() * 0.5f, 0, 0);
+                    var delayAttacker = DelayedAttackMarker.createRemoteSweepPartialArena(this.level(), targetPos, null, this.getArenaRadius(), this.getArenaRadius() * 1.5f, new Vector3f(-1, 0, 0), 0, 130);
+                    level().addFreshEntity(delayAttacker);
+                }else if(phaseStateTick == 190){
+                    this.setAnimateState(PartialArenaAoePhaseState.ANIMATE_STATE_HALF_ARENA_AOE_SELF_END);
+                } else if(phaseStateTick > 190 && phaseStateTick <= 200){
+                    if((phaseStateTick - 60) % 2 == 0){
+                        this.level().playSound(null, this.getX(), this.getY(), this.getZ(), AllSoundEvents.BOSS_SWEEP_SFX.get(), SoundSource.HOSTILE, 1, 1);
+                        var zOffset = ((phaseStateTick - 60 - 130) / 2f - 1) * this.getArenaRadius() * 1.5f / 5;
+                        ((ServerLevel) this.level()).sendParticles(ParticleTypes.SWEEP_ATTACK, this.getX(), this.getY(0.5), this.getZ() + zOffset, 10, this.getArenaRadius(), 0.0, 0, 0.0);
+                    }
+                    if(phaseStateTick == 200){
+                        var targetPos = this.getCombatArenaCenterVec3().add(0, 0, getArenaRadius() * 0.5f);
+                        var delayAttacker = DelayedAttackMarker.createRemoteSweepPartialArena(this.level(), targetPos, null, this.getArenaRadius(), this.getArenaRadius() * 1.5f, new Vector3f(0, 0, -1), 0, 130);
+                        level().addFreshEntity(delayAttacker);
+                    }
+                } else if(phaseStateTick == 240){
+                    this.setAnimateState("idle");
+                }else if(phaseStateTick == 270){
+                    var targetPos = this.getCombatArenaCenterVec3().subtract(getArenaRadius() * 0.5f, 0, 0);
+                    var delayAttacker = DelayedAttackMarker.createRemoteSweepPartialArena(this.level(), targetPos, null, this.getArenaRadius(), this.getArenaRadius() * 1.5f, new Vector3f(1, 0, 0), 0, 130);
+                    level().addFreshEntity(delayAttacker);
                 }
                 break;
             case "summon_anticalabrum":
