@@ -76,7 +76,7 @@ public class LanfasieBenderson {
         // Register our mod's ModConfigSpec so that FML can create and load the config file for us
         modContainer.registerConfig(ModConfig.Type.SERVER, ServerConfig.SPEC);
 
-        ProjectMeCompat.activate();
+//        ProjectMeCompat.activate();
     }
 
     private void commonSetup(FMLCommonSetupEvent event) {
