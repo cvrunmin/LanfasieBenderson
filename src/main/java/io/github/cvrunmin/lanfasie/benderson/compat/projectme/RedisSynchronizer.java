@@ -125,7 +125,7 @@ public class RedisSynchronizer extends AbstractSynchronizer {
                     }
                 });
                 redisSubscriber.sync().subscribe(RedisMessage.CHANNEL);
-            }catch (RuntimeException e){
+            }catch (Exception e){
                 LanfasieBenderson.LOGGER.warn("cannot connect to redis server", e);
                 this.redisConnection = null;
                 this.redisSubscriber = null;
@@ -147,12 +147,16 @@ public class RedisSynchronizer extends AbstractSynchronizer {
             }
             return;
         }
-        var buf = new FriendlyByteBuf(Unpooled.buffer());
-        buf.writeVarInt(id);
-        buf.writeLong(INSTANCE_ID);
-        message.putAdditionalData(buf);
-        if(redisConnection == null || !redisConnection.isOpen()) return;
-        redisConnection.async().publish(RedisMessage.CHANNEL, buf);
+        try {
+            var buf = new FriendlyByteBuf(Unpooled.buffer());
+            buf.writeVarInt(id);
+            buf.writeLong(INSTANCE_ID);
+            message.putAdditionalData(buf);
+            if(redisConnection == null || !redisConnection.isOpen()) return;
+            redisConnection.async().publish(RedisMessage.CHANNEL, buf);
+        }catch (Exception e){
+
+        }
     }
 
     public boolean hasRealEntityNearby(ServerLevel level, Vec3 pos){

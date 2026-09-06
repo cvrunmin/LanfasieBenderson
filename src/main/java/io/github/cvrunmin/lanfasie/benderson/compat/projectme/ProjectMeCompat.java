@@ -24,13 +24,13 @@ public class ProjectMeCompat {
                 synchronizerBackend = new RedisSynchronizer(new ReflectiveConfigItemAccessor<>(() -> {
                     try {
                         return redisUrlField.get(config);
-                    } catch (NoClassDefFoundError | IllegalAccessException e) {
+                    } catch (Exception e) {
                         LanfasieBenderson.LOGGER.warn("Project Me is loaded, but cannot access to its redis url config", e);
                         return null;
                     }
                 }, String.class));
                 LanfasieBenderson.LOGGER.info("Created Redis Synchronizer using Project Me's config");
-            } catch (NoClassDefFoundError | ClassNotFoundException | NoSuchFieldException | IllegalAccessException e) {
+            } catch (Exception e) {
                 LanfasieBenderson.LOGGER.warn("Project Me is loaded, but cannot find its main class, or cannot access to its redis url config", e);
                 synchronizerBackend = new DummySynchronizer();
             }

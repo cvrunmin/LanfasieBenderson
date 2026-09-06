@@ -50,7 +50,7 @@ public class ReflectiveConfigItemAccessor<T> implements ConfigItemAccessor<T>{
             LanfasieBenderson.LOGGER.warn("Cannot get config item with suitable type", e);
             field = null;
             return null;
-        }catch (IllegalAccessException | NoClassDefFoundError e) {
+        }catch (Exception e) {
             return null;
         }
     }
