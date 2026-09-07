@@ -60,7 +60,6 @@ public class MyEntityTypeTagsProvider extends EntityTypeTagsProvider {
                         AllEntityTypes.MUNDANE_PRAISER_BARD.get(),
                         AllEntityTypes.MUNDANE_PRAISER_WHITE_MAGE.get(),
                         AllEntityTypes.MUNDANE_PRAISER_RED_MAGE.get(),
-                        AllEntityTypes.PROJECTED_BENDERSON.get(),
                         AllEntityTypes.LANFASIE.get()
                 );
         tag(AllTags.CAN_GET_PROVOKED)

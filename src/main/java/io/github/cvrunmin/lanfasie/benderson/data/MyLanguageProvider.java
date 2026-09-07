@@ -36,7 +36,6 @@ public class MyLanguageProvider extends LanguageProvider {
         this.add("itemGroup.lanfasie_benderson", "Lanfasie: Benderson");
         this.addEntityType(AllEntityTypes.LANFASIE, "Phantom Lanfasie");
         this.addEntityType(AllEntityTypes.BENDERSON, "Benderson the Abyss-sunken Dawnwaiter");
-        this.addEntityType(AllEntityTypes.PROJECTED_BENDERSON, "Benderson the Abyss-sunken Dawnwaiter (Projected)");
         this.add("entity.lanfasie_benderson.benderson.name.deep_latent", "Team Soul of Deep Latent");
         this.add("entity.lanfasie_benderson.benderson.name.unforgiven", "Unforgiven Team Soul");
         this.add("entity.lanfasie_benderson.benderson.name.forgiven", "Forgiven Team Soul");

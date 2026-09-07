@@ -13,7 +13,6 @@ import com.mojang.serialization.Codec;
 import io.github.cvrunmin.lanfasie.benderson.LanfasieBenderson;
 import io.github.cvrunmin.lanfasie.benderson.MobEffectRemovalProtector;
 import io.github.cvrunmin.lanfasie.benderson.ServerConfig;
-import io.github.cvrunmin.lanfasie.benderson.compat.projectme.ProjectMeCompat;
 import io.github.cvrunmin.lanfasie.benderson.content.benderson.phases.*;
 import io.github.cvrunmin.lanfasie.benderson.content.marker.TargetMarker;
 import io.github.cvrunmin.lanfasie.benderson.foundation.IHasEnmity;
@@ -465,7 +464,7 @@ public class Benderson extends Monster implements GeoEntity, BendersonStatesGett
     }
 
     private void onPhaseStateChanged(String phaseId, IPhaseState phaseState){
-        ProjectMeCompat.getSynchronizerBackend().entityPhaseStateChanged(this, phaseId, phaseState);
+
     }
 
     public void setGlobalCooldown(int value){
